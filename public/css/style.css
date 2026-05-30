@@ -724,8 +724,9 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
 @media (max-width: 768px) {
   body::before, body::after { background-size: 30px 30px, 25px 25px, 20px 20px, 25px 25px, 20px 20px, 30px 30px, 25px 25px, 20px 20px, 20px 20px, 15px 15px; }
   .navbar .container { flex-direction: column; gap: 8px; }
-  .nav-links { flex-wrap: wrap; justify-content: center; gap: 4px 8px; }
-  .nav-links li a { font-size: 13px; padding: 6px 10px; }
+  .nav-links { flex-wrap: nowrap; justify-content: flex-start; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links li a { font-size: 13px; padding: 6px 10px; white-space: nowrap; }
   .hero { padding: 40px 0 30px; }
   .hero h1 { font-size: 26px; }
   .hero p { font-size: 15px; }
@@ -749,7 +750,7 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
   .product-card .name { font-size: 12px; }
   .product-card .price { font-size: 13px; }
   .product-card .btn, .btn-primary { font-size: 12px; padding: 10px 16px; }
-  .nav-links li a { font-size: 12px; padding: 5px 8px; }
+  .nav-links li a { font-size: 12px; padding: 5px 8px; white-space: nowrap; }
   .upcoming-banner .upcoming-grid { grid-template-columns: 1fr; }
   .offer-popup { width: 260px; right: 6px; bottom: 6px; font-size: 12px; padding: 14px; }
   .hero-btns { flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
