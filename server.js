@@ -60,8 +60,8 @@ async function notifyNewOrder(order) {
   const topic = await getSetting('ntfy_topic');
   if (topic) {
     try {
-      const body = JSON.stringify({ title: '🛵 New Order!', message: `${order.customer_name} ordered ${order.product_name} — ₹${order.total}`, priority: 4, tags: ['shopping_cart'] });
-      const req = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const body = '🛵 You have received an order. Please verify it.';
+      const req = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'text/plain' } });
       req.write(body);
       req.end();
     } catch {}
@@ -362,8 +362,8 @@ app.put('/api/orders/:id/pay', async (req, res) => {
   const topic = await getSetting('ntfy_topic');
   if (topic) {
     try {
-      const body = JSON.stringify({ title: '💰 Payment Marked!', message: `${order.customer_name} says they paid for Order #${order.id} — ₹${order.total}`, priority: 5, tags: ['moneybag'] });
-      const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const body = '💰 A customer has marked payment. Please verify it.';
+      const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'text/plain' } });
       req2.write(body);
       req2.end();
     } catch {}
@@ -384,8 +384,8 @@ app.post('/api/orders/:id/upload-proof', async (req, res) => {
   const topic = await getSetting('ntfy_topic');
   if (topic) {
     try {
-      const body = JSON.stringify({ title: '📸 Payment Proof Uploaded!', message: `${order.customer_name} uploaded payment screenshot for Order #${order.id} — ₹${order.total}`, priority: 5, tags: ['camera'] });
-      const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const body = '📸 A customer has uploaded a payment screenshot. Please verify it.';
+      const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'text/plain' } });
       req2.write(body);
       req2.end();
     } catch {}
