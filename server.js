@@ -54,10 +54,10 @@ app.get('/api/admin/events', (req, res) => {
   res.on('close', () => { const idx = sseClients.indexOf(res); if (idx > -1) sseClients.splice(idx, 1); });
 });
 
-function notifyNewOrder(order) {
+async function notifyNewOrder(order) {
   const data = JSON.stringify({ type: 'new_order', order: { id: order.id, customer_name: order.customer_name, product_name: order.product_name, total: order.total, phone: order.phone } });
   sseClients.forEach(c => c.write('data: ' + data + '\n\n'));
-  const topic = process.env.NTFY_TOPIC;
+  const topic = await getSetting('ntfy_topic');
   if (topic) {
     try {
       const body = JSON.stringify({ title: '🛵 New Order!', message: `${order.customer_name} ordered ${order.product_name} — ₹${order.total}`, priority: 4, tags: ['shopping_cart'] });
@@ -261,7 +261,7 @@ app.post('/api/orders', async (req, res) => {
     const firstOrderId = result.lastInsertRowid;
 
     const newCartOrder = await queryOne('SELECT * FROM orders WHERE id = $1', [firstOrderId]);
-    if (newCartOrder) notifyNewOrder(newCartOrder);
+    if (newCartOrder) await notifyNewOrder(newCartOrder);
 
     const upiId = await getSetting('upi_id');
     const upiName = await getSetting('upi_name');
@@ -312,7 +312,7 @@ app.post('/api/orders', async (req, res) => {
   );
 
   const newOrder = await queryOne('SELECT * FROM orders WHERE id = $1', [result.lastInsertRowid]);
-  if (newOrder) notifyNewOrder(newOrder);
+  if (newOrder) await notifyNewOrder(newOrder);
 
   const upiId = await getSetting('upi_id');
   const upiName = await getSetting('upi_name');
@@ -359,6 +359,15 @@ app.put('/api/orders/:id/pay', async (req, res) => {
   if (!order) return res.status(404).json({ error: 'Order not found' });
   if (order.payment_status !== 'unpaid') return res.status(400).json({ error: 'Payment already marked' });
   await execute("UPDATE orders SET payment_status = 'paid' WHERE id = $1", [req.params.id]);
+  const topic = await getSetting('ntfy_topic');
+  if (topic) {
+    try {
+      const body = JSON.stringify({ title: '💰 Payment Marked!', message: `${order.customer_name} says they paid for Order #${order.id} — ₹${order.total}`, priority: 5, tags: ['moneybag'] });
+      const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      req2.write(body);
+      req2.end();
+    } catch {}
+  }
   res.json({ success: true });
 });
 
