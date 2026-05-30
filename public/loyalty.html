@@ -39,6 +39,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/public/thrift.html">Thrift Store</a></li>
@@ -48,6 +49,7 @@
         <li><a href="/public/loyalty.html" class="active">⭐ Loyalty</a></li>
       </ul>
     </div>
+    <div id="nav-overlay" onclick="toggleNav()"></div>
   </nav>
 
   <section class="loyalty-section">
@@ -118,5 +120,6 @@
 
     document.getElementById('loyalty-phone').addEventListener('keydown', e => { if (e.key === 'Enter') checkLoyalty(); });
   </script>
+<script>function toggleNav(){document.querySelector('.navbar').classList.toggle('active')}</script>
 </body>
 </html>

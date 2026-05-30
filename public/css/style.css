@@ -160,6 +160,10 @@ a { text-decoration: none; color: inherit; }
   color: #d4808a;
   padding-left: 20px;
 }
+.hamburger { display: none; align-items: center; justify-content: center; background: none; border: none; font-size: 28px; color: #c98a9a; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; z-index: 101; }
+.hamburger:hover { background: #fce4ec; }
+.hamburger:focus { outline: none; }
+#nav-overlay { display: none; }
 
 /* Hero */
 .hero {
@@ -723,9 +727,16 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
 /* Mobile */
 @media (max-width: 768px) {
   body::before, body::after { background-size: 30px 30px, 25px 25px, 20px 20px, 25px 25px, 20px 20px, 30px 30px, 25px 25px, 20px 20px, 20px 20px, 15px 15px; }
-  .navbar .container { flex-direction: column; gap: 6px; }
-  .nav-links { flex-wrap: wrap; justify-content: center; gap: 3px; padding: 0; }
-  .nav-links li a { font-size: 11px; padding: 4px 8px; white-space: nowrap; }
+  .navbar .container { flex-direction: row; gap: 0; }
+  .navbar .logo { flex: 1; }
+  .hamburger { display: flex !important; }
+  .nav-links { display: none; position: absolute; top: 100%; left: 0; width: 100%; flex-direction: column; background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 99; padding: 10px 0; border-radius: 0 0 16px 16px; gap: 0; }
+  .nav-links li { width: 100%; text-align: center; }
+  .nav-links li a { display: block; font-size: 14px; padding: 12px 16px; border-bottom: 1px solid #fce4ec; }
+  .nav-links li:last-child a { border-bottom: none; }
+  .navbar.active .nav-links { display: flex; }
+  #nav-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 98; }
+  .navbar.active #nav-overlay { display: block; }
   .hero { padding: 40px 0 30px; }
   .hero h1 { font-size: 26px; }
   .hero p { font-size: 15px; }
@@ -749,7 +760,7 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
   .product-card .name { font-size: 12px; }
   .product-card .price { font-size: 13px; }
   .product-card .btn, .btn-primary { font-size: 12px; padding: 10px 16px; }
-  .nav-links li a { font-size: 10px; padding: 3px 5px; }
+
   .upcoming-banner .upcoming-grid { grid-template-columns: 1fr; }
   .offer-popup { width: 260px; right: 6px; bottom: 6px; font-size: 12px; padding: 14px; }
   .hero-btns { flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
@@ -761,7 +772,7 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
   .products-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: 20px; }
   .navbar .logo { font-size: 16px; }
-  .nav-links li a { font-size: 9px; padding: 2px 3px; gap: 2px; }
+
 }
 
 }
