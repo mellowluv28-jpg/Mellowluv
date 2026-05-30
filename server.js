@@ -380,7 +380,7 @@ app.post('/api/orders/:id/upload-proof', async (req, res) => {
   if (!matches) return res.status(400).json({ error: 'Invalid image format' });
   const buffer = Buffer.from(matches[2], 'base64');
   const result = await cloudinary.uploadBuffer(buffer, 'payment_proofs');
-  await execute("UPDATE orders SET payment_screenshot = $1, payment_status = 'paid' WHERE id = $2", [result.url, req.params.id]);
+  await execute("UPDATE orders SET payment_screenshot = $1, payment_status = 'paid', screenshot_uploaded_at = NOW() WHERE id = $2", [result.url, req.params.id]);
   const topic = await getSetting('ntfy_topic');
   if (topic) {
     try {
@@ -391,6 +391,19 @@ app.post('/api/orders/:id/upload-proof', async (req, res) => {
     } catch {}
   }
   res.json({ success: true });
+});
+
+app.post('/api/orders/:id/reject-proof', async (req, res) => {
+  const order = await queryOne('SELECT * FROM orders WHERE id = $1', [req.params.id]);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (order.payment_screenshot) {
+    try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+  }
+  if (order.product_id && order.quantity) {
+    await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [order.quantity, order.product_id]);
+  }
+  await execute("UPDATE orders SET payment_screenshot = '', screenshot_uploaded_at = NULL, payment_status = 'unpaid' WHERE id = $1", [req.params.id]);
+  res.json({ success: true, message: 'Screenshot rejected, order reverted to unpaid' });
 });
 
 // --- Admin ---

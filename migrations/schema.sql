@@ -14,8 +14,9 @@ CREATE TABLE IF NOT EXISTS products (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Run this separately on existing databases:
+-- Run these separately on existing databases:
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_screenshot TEXT DEFAULT '';
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS screenshot_uploaded_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
