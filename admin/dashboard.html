@@ -177,58 +177,56 @@
 
     async function loadData() {
       try {
-        const [statsRes, dailyRes, soldRes, dashRes] = await Promise.all([
-          fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } }),
-          fetch('/api/admin/stats/daily-revenue', { headers: { 'Authorization': 'Bearer ' + token } }),
-          fetch('/api/admin/stats/most-sold', { headers: { 'Authorization': 'Bearer ' + token } }),
-          fetch('/api/admin/dashboard', { headers: { 'Authorization': 'Bearer ' + token } })
-        ]);
-        const stats = await statsRes.json();
-        const daily = await dailyRes.json();
-        const mostSold = await soldRes.json();
-        const dash = await dashRes.json();
-        const recentOrders = dash.recent_orders || [];
+        const dashRes = await fetch('/api/admin/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (dashRes.ok) {
+          const dash = await dashRes.json();
+          const s = dash.stats || {};
+          document.getElementById('net-revenue').textContent = '₹' + (s.netRevenue || 0);
+          document.getElementById('total-shipping').textContent = '₹' + (s.totalShipping || 0);
+          document.getElementById('paid-orders').textContent = s.paidOrders || 0;
+          document.getElementById('unpaid-orders').textContent = s.unpaidOrders || 0;
+          document.getElementById('urgent-orders').textContent = s.urgentOrders || 0;
+          document.getElementById('profit').textContent = '₹' + (s.profit || 0);
+          document.getElementById('total-orders').textContent = s.totalOrders || 0;
+          document.getElementById('total-products').textContent = s.totalProducts || 0;
 
-        document.getElementById('net-revenue').textContent = '₹' + (stats.netRevenue || 0);
-        document.getElementById('total-shipping').textContent = '₹' + (stats.totalShipping || 0);
-        document.getElementById('paid-orders').textContent = stats.paidOrders || 0;
-        document.getElementById('unpaid-orders').textContent = stats.unpaidOrders || 0;
-        document.getElementById('urgent-orders').textContent = stats.urgentOrders || 0;
-        document.getElementById('profit').textContent = '₹' + (stats.profit || 0);
-        document.getElementById('total-orders').textContent = stats.totalOrders || 0;
-        document.getElementById('total-products').textContent = stats.totalProducts || 0;
-
-        const list = document.getElementById('most-sold-list');
-        if (mostSold.length === 0) {
-          list.innerHTML = '<li style="color:#b5838d; text-align:center; padding:20px;">No sales yet 🌸</li>';
-        } else {
-          list.innerHTML = mostSold.map(p =>
-            `<li><span class="name">${p.product_name || 'Unknown'}</span><span class="count">${p.times_sold} sold</span></li>`
-          ).join('');
+          const recentOrders = dash.recent_orders || [];
+          const tbody = document.getElementById('recent-orders-body');
+          if (recentOrders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#b0878f;padding:20px;">No orders yet</td></tr>';
+          } else {
+            tbody.innerHTML = recentOrders.map(o => {
+              const badge = o.payment_status === 'verified' ? '<span style="color:#2e7d32;">✅ Verified</span>' : (o.payment_status === 'paid' ? '<span style="color:#f57f17;">⏳ Paid</span>' : '<span style="color:#d84315;">❌ Unpaid</span>');
+              return '<tr style="border-bottom:1px solid #ffe8e4;">' +
+                '<td style="padding:8px;">#' + o.id + '</td>' +
+                '<td style="padding:8px;">' + o.customer_name + '</td>' +
+                '<td style="padding:8px;">' + (o.instagram || '-') + '</td>' +
+                '<td style="padding:8px;">' + o.product_name + '</td>' +
+                '<td style="padding:8px;">' + (o.quantity || 1) + '</td>' +
+                '<td style="padding:8px;">₹' + o.total + '</td>' +
+                '<td style="padding:8px;">' + badge + '</td>' +
+              '</tr>';
+            }).join('');
+          }
         }
+      } catch (err) { console.error('Dashboard data error:', err); }
 
-        const tbody = document.getElementById('recent-orders-body');
-        if (recentOrders.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#b0878f;padding:20px;">No orders yet</td></tr>';
-        } else {
-          tbody.innerHTML = recentOrders.map(o => {
-            const badge = o.payment_status === 'verified' ? '<span style="color:#2e7d32;">✅ Verified</span>' : (o.payment_status === 'paid' ? '<span style="color:#f57f17;">⏳ Paid</span>' : '<span style="color:#d84315;">❌ Unpaid</span>');
-            return '<tr style="border-bottom:1px solid #ffe8e4;">' +
-              '<td style="padding:8px;">#' + o.id + '</td>' +
-              '<td style="padding:8px;">' + o.customer_name + '</td>' +
-              '<td style="padding:8px;">' + (o.instagram || '-') + '</td>' +
-              '<td style="padding:8px;">' + o.product_name + '</td>' +
-              '<td style="padding:8px;">' + (o.quantity || 1) + '</td>' +
-              '<td style="padding:8px;">₹' + o.total + '</td>' +
-              '<td style="padding:8px;">' + badge + '</td>' +
-            '</tr>';
-          }).join('');
+      try {
+        const soldRes = await fetch('/api/admin/stats/most-sold', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (soldRes.ok) {
+          const mostSold = await soldRes.json();
+          const list = document.getElementById('most-sold-list');
+          if (mostSold.length === 0) {
+            list.innerHTML = '<li style="color:#b5838d; text-align:center; padding:20px;">No sales yet 🌸</li>';
+          } else {
+            list.innerHTML = mostSold.map(p =>
+              `<li><span class="name">${p.product_name || 'Unknown'}</span><span class="count">${p.times_sold} sold</span></li>`
+            ).join('');
+          }
         }
+      } catch (err) { console.error('Most sold error:', err); }
 
-        drawChart(daily);
-      } catch (err) {
-        console.error(err);
-      }
+      loadAndDraw();
     }
 
     function drawChart(data) {
