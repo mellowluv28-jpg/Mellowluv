@@ -40,6 +40,19 @@
         <div class="upi-details">
           Pay to UPI ID: <strong id="display-upi"></strong>
         </div>
+        <div style="background:#d4808a;color:white;border-radius:14px;padding:16px 18px;margin:16px 0;text-align:center;border:3px solid #bf6d7a;box-shadow:0 4px 15px rgba(212,128,138,0.3);">
+          <div style="font-size:18px;font-weight:900;letter-spacing:0.5px;margin-bottom:6px;">⚠️ VERY IMPORTANT — DO THIS FOR FAST VERIFICATION</div>
+          <div style="font-size:14px;line-height:1.6;">
+            Open <strong>Google Pay / PhonePe / Paytm</strong> → you will see a box called 
+            <strong style="background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:6px;">"Note"</strong>, 
+            <strong style="background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:6px;">"Description"</strong>, or 
+            <strong style="background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:6px;">"Add a note"</strong> before making payment.
+            <br><br>
+            <span style="font-size:20px;font-weight:900;">👉 TYPE THIS ORDER NUMBER IN THAT NOTE BOX: <span style="background:white;color:#bf6d7a;padding:4px 16px;border-radius:10px;font-size:22px;" id="note-order-id"></span> 👈</span>
+            <br><br>
+            <span style="font-size:16px;font-weight:900;">✅ We will verify your payment in minutes instead of hours!</span>
+          </div>
+        </div>
         <div id="loyalty-success" style="display:none;margin-bottom:14px;background:#fff8e1;border:2px solid #ffe082;border-radius:12px;padding:12px;font-size:13px;color:#5a4a4a;"></div>
         <p class="note" style="margin-top:20px;">📸 After paying, upload your payment screenshot below for verification:</p>
         <div style="background:#fff8e1;border:2px solid #ffe082;border-radius:14px;padding:18px;margin:14px 0;">
@@ -86,6 +99,7 @@
     document.getElementById('display-upi').textContent = decodeURIComponent(params.get('upi') || '');
     document.getElementById('display-amount').textContent = '₹' + (params.get('amount') || '0');
     document.getElementById('display-order-id').textContent = params.get('order') || 'N/A';
+    document.getElementById('note-order-id').textContent = '#' + (params.get('order') || 'N/A');
 
     const loyaltyPts = parseInt(params.get('lp') || '0');
     const loyaltyWillEarn = parseInt(params.get('lw') || '0');
