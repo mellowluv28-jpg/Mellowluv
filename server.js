@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 const sseClients = [];
 const adminSessions = new Map();
 const loginAttempts = new Map();
-const SESSION_DURATION = 2 * 60 * 60 * 1000;
+const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_MINUTES = 15;
 

@@ -19,6 +19,7 @@
         <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
         <li><a href="/public/tracking.html">📦 Track</a></li>
         <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -26,7 +27,8 @@
 
   <section class="hero">
     <div class="container">
-      <div class="subtitle animate-fade-up">Curated Finds & Handcrafted Elegance</div>
+      <div class="top-banner">📸 DM us on Instagram <strong>@mellowluvv_</strong> for custom orders! <a href="https://instagram.com/mellowluvv_" target="_blank" class="banner-btn">Message Now</a></div>
+    <div class="subtitle animate-fade-up">Curated Finds & Handcrafted Elegance</div>
       <h1 class="animate-pop">Welcome to <span>Mellowluv</span> 🐱</h1>
       <div class="deco">🌸✨🐱✨🌸</div>
       <p class="animate-fade-up">Update your style with our curated thrift pieces and handmade jewellery made by love.</p>
@@ -64,6 +66,31 @@
         <a href="/public/loyalty.html" class="btn" style="margin-right:10px;">⭐ Check Loyalty</a>
         <a href="/public/thrift.html" class="btn">📅 Pre-Book Drops</a>
       </div>
+
+      <div id="guide-popup-overlay" class="guide-overlay" onclick="dismissGuide()"></div>
+  <div id="guide-popup" class="guide-popup">
+    <button class="guide-close" onclick="dismissGuide()">✕</button>
+    <h2>📖 How to Shop on Mellowluv</h2>
+    <p class="guide-sub">Follow these steps for a smooth purchase 💕</p>
+    <div class="guide-steps">
+      <div class="guide-step"><div class="g-num">1</div><div class="g-body"><strong>Browse & Select</strong> — Pick your favourite thrift pieces or handmade jewellery.</div></div>
+      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> rush — check size, description and price carefully before adding to cart.</div></div>
+      <div class="guide-step"><div class="g-num">2</div><div class="g-body"><strong>Add to Cart</strong> — Click "Add to Cart" or pre-book upcoming drops.</div></div>
+      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> add duplicate items — check your cart before checkout.</div></div>
+      <div class="guide-step"><div class="g-num">3</div><div class="g-body"><strong>Checkout</strong> — Fill in your name, phone, Instagram ID and delivery address correctly.</div></div>
+      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> enter wrong Instagram ID — we may need to contact you about shipping charges.</div></div>
+      <div class="guide-step"><div class="g-num">4</div><div class="g-body"><strong>Pay via UPI</strong> — Scan the QR code or pay to the UPI ID shown. Include your order number in the note.</div></div>
+      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> pay to a different UPI ID or send incomplete amount — it will delay verification.</div></div>
+      <div class="guide-step"><div class="g-num">5</div><div class="g-body"><strong>Upload Screenshot</strong> — On the order success page, upload your payment screenshot. We will verify it shortly.</div></div>
+      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> upload a fake or edited screenshot — your order will be rejected.</div></div>
+      <div class="guide-step"><div class="g-num">6</div><div class="g-body"><strong>Wait for Verification</strong> — Once verified, we will ship your order. You'll get a notification.</div></div>
+      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> message repeatedly for status — check tracking page or wait for our confirmation.</div></div>
+      <div class="guide-step"><div class="g-num">7</div><div class="g-body"><strong>Track Your Order</strong> — Use the Track page with your order number to see real-time updates.</div></div>
+      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> forget to save your order ID — you'll need it for tracking and support.</div></div>
+    </div>
+    <p class="guide-footer">For custom orders, DM us on <strong>Instagram @mellowluvv_</strong> 🌸</p>
+    <button class="guide-gotit" onclick="dismissGuide()">✅ Got it!</button>
+  </div>
 
       <div id="offer-popup" class="offer-popup">
     <div class="offer-popup-header">🔥 OFFER ALERT!</div>
@@ -141,6 +168,17 @@
 
     loadUpcomingDrops();
     loadOfferPopup();
+    if (!sessionStorage.getItem('guide_seen')) {
+      setTimeout(() => {
+        document.getElementById('guide-popup').classList.add('show');
+        document.getElementById('guide-popup-overlay').classList.add('show');
+      }, 1500);
+    }
+    function dismissGuide() {
+      sessionStorage.setItem('guide_seen', '1');
+      document.getElementById('guide-popup').classList.remove('show');
+      document.getElementById('guide-popup-overlay').classList.remove('show');
+    }
   </script>
 <script>function toggleNav(){document.querySelector('.navbar').classList.toggle('active')}</script>
 </body>
