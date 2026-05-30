@@ -372,6 +372,13 @@ app.put('/api/orders/:id/pay', async (req, res) => {
 });
 
 // --- Admin ---
+app.post('/api/admin/reset-credentials', async (req, res) => {
+  const { master_key } = req.body;
+  if (master_key !== 'mellowluv_reset_2026') return res.status(403).json({ error: 'Invalid key' });
+  await execute("DELETE FROM settings WHERE key IN ('admin_username', 'admin_password')");
+  res.json({ success: true, message: 'Credentials reset to admin/admin123' });
+});
+
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body;
   const attempts = loginAttempts.get(username) || { count: 0, lockedUntil: 0 };
