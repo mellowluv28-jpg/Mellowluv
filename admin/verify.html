@@ -112,45 +112,107 @@
           headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
-        const orders = data.pending || [];
+        const pending = data.pending || [];
+        const verified = data.verified || [];
+        let html = '';
 
-        if (orders.length === 0) {
-          grid.innerHTML = '<div class="empty-state"><div class="big">✅</div>All payments verified! Nothing pending 🌸</div>';
+        if (pending.length > 0) {
+          html += '<div style="grid-column:1/-1;margin-bottom:6px;"><h3 style="color:#5a4a4a;font-size:16px;">📋 Pending Verification</h3></div>';
+          html += pending.map((o, i) => {
+            const d = new Date(o.created_at);
+            const catIcon = o.product_category === 'mellowluv' ? '💎' : '🛍️';
+            const isPaid = o.payment_status === 'paid';
+            const badgeClass = isPaid ? 'badge-paid' : 'badge-unpaid';
+            const badgeLabel = isPaid ? 'Paid' : 'Unpaid';
+            const verifyBtn = isPaid
+              ? `<button class="btn-verify" onclick="verifyPayment(${o.id}, this)">✅ Verify Payment</button>`
+              : `<div style="display:flex;gap:8px;margin-top:12px;">
+                  <p style="flex:1;text-align:center; color:#b5838d; font-size:13px;">⏳ Awaiting customer payment...</p>
+                  <button onclick="removeOrder(${o.id}, this)" style="padding:8px 14px;background:#fbe9e7;color:#bf360c;border:2px solid #ffab91;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">🗑️ Remove</button>
+                </div>`;
+            const cb = isPaid ? `<div class="cb-wrap"><input type="checkbox" class="verify-cb" value="${o.id}" onchange="updateBulkBar()"> <span style="font-size:12px;color:#b0878f;">Select</span></div>` : '';
+            return `
+              <div class="verify-card" style="animation-delay:${i * 0.05}s" data-order-id="${o.id}">
+                ${cb}
+                <div class="card-header">
+                  <h3>${o.customer_name}</h3>
+                  <span class="${badgeClass}">${badgeLabel}</span>
+                </div>
+                <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'}</span></div>
+                <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram || '-'}</span></div>
+                <div class="detail-row"><span class="label">🛒 Product</span><span class="value">${catIcon} ${o.product_name}</span></div>
+                <div class="detail-row"><span class="label">🔢 Quantity</span><span class="value">${o.quantity || 1}</span></div>
+                <div class="detail-row"><span class="label">💰 Amount</span><span class="value">₹${o.total}</span></div>
+                ${o.payment_screenshot ? `<div class="detail-row" style="flex-direction:column;align-items:stretch;gap:4px;"><span class="label">📸 Payment Screenshot</span><a href="${o.payment_screenshot}" target="_blank" style="display:block;"><img src="${o.payment_screenshot}" alt="Screenshot" style="width:100%;max-height:140px;object-fit:contain;border-radius:10px;border:2px solid #f5d6de;background:#fff;"></a></div>` : ''}
+                <div class="detail-row"><span class="label">📅 Ordered</span><span class="value">${d.toLocaleDateString('en-IN')}</span></div>
+                ${verifyBtn}
+              </div>
+            `;
+          }).join('');
+        }
+
+        if (verified.length > 0) {
+          html += '<div style="grid-column:1/-1;margin:20px 0 6px;"><h3 style="color:#5a4a4a;font-size:16px;">✅ Verified Orders</h3></div>';
+          html += verified.map((o, i) => {
+            const d = new Date(o.created_at);
+            const catIcon = o.product_category === 'mellowluv' ? '💎' : '🛍️';
+            return `
+              <div class="verify-card" style="animation-delay:${i * 0.05}s;border-color:#c8e6c9;" data-order-id="${o.id}">
+                <div class="card-header">
+                  <h3>${o.customer_name}</h3>
+                  <span style="background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;">✅ Verified</span>
+                </div>
+                <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'}</span></div>
+                <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram || '-'}</span></div>
+                <div class="detail-row"><span class="label">🛒 Product</span><span class="value">${catIcon} ${o.product_name}</span></div>
+                <div class="detail-row"><span class="label">🔢 Quantity</span><span class="value">${o.quantity || 1}</span></div>
+                <div class="detail-row"><span class="label">💰 Amount</span><span class="value">₹${o.total}</span></div>
+                <div class="detail-row"><span class="label">📅 Ordered</span><span class="value">${d.toLocaleDateString('en-IN')}</span></div>
+                <button class="btn-verify" style="background:linear-gradient(135deg,#ffccbc,#ffe0b2);color:#bf360c;border-color:#ffab91;" onclick="unverifyPayment(${o.id}, this)">↩️ Unverify</button>
+              </div>
+            `;
+          }).join('');
+        }
+
+        if (!html) {
+          grid.innerHTML = '<div class="empty-state"><div class="big">✅</div>No orders found 🌸</div>';
           return;
         }
-        grid.innerHTML = orders.map((o, i) => {
-          const d = new Date(o.created_at);
-          const catIcon = o.product_category === 'mellowluv' ? '💎' : '🛍️';
-          const isPaid = o.payment_status === 'paid';
-          const badgeClass = isPaid ? 'badge-paid' : 'badge-unpaid';
-          const badgeLabel = isPaid ? 'Paid' : 'Unpaid';
-          const verifyBtn = isPaid
-            ? `<button class="btn-verify" onclick="verifyPayment(${o.id}, this)">✅ Verify Payment</button>`
-            : `<div style="display:flex;gap:8px;margin-top:12px;">
-                <p style="flex:1;text-align:center; color:#b5838d; font-size:13px;">⏳ Awaiting customer payment...</p>
-                <button onclick="removeOrder(${o.id}, this)" style="padding:8px 14px;background:#fbe9e7;color:#bf360c;border:2px solid #ffab91;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">🗑️ Remove</button>
-              </div>`;
-          const cb = isPaid ? `<div class="cb-wrap"><input type="checkbox" class="verify-cb" value="${o.id}" onchange="updateBulkBar()"> <span style="font-size:12px;color:#b0878f;">Select</span></div>` : '';
-          return `
-            <div class="verify-card" style="animation-delay:${i * 0.05}s" data-order-id="${o.id}">
-              ${cb}
-              <div class="card-header">
-                <h3>${o.customer_name}</h3>
-                <span class="${badgeClass}">${badgeLabel}</span>
-              </div>
-              <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'}</span></div>
-              <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram || '-'}</span></div>
-              <div class="detail-row"><span class="label">🛒 Product</span><span class="value">${catIcon} ${o.product_name}</span></div>
-              <div class="detail-row"><span class="label">🔢 Quantity</span><span class="value">${o.quantity || 1}</span></div>
-              <div class="detail-row"><span class="label">💰 Amount</span><span class="value">₹${o.total}</span></div>
-              ${o.payment_screenshot ? `<div class="detail-row" style="flex-direction:column;align-items:stretch;gap:4px;"><span class="label">📸 Payment Screenshot</span><a href="${o.payment_screenshot}" target="_blank" style="display:block;"><img src="${o.payment_screenshot}" alt="Payment screenshot" style="width:100%;max-height:140px;object-fit:contain;border-radius:10px;border:2px solid #f5d6de;background:#fff;"></a></div>` : ''}
-              <div class="detail-row"><span class="label">📅 Ordered</span><span class="value">${d.toLocaleDateString('en-IN')}</span></div>
-              ${verifyBtn}
-            </div>
-          `;
-        }).join('');
+        grid.innerHTML = html;
       } catch (err) {
         grid.innerHTML = '<div class="empty-state"><div class="big">😿</div>Error loading. Check server.</div>';
+      }
+    }
+
+    async function unverifyPayment(orderId, btn) {
+      if (!confirm('Unverify order #' + orderId + '? This will revert it to paid status and deduct loyalty points.')) return;
+      btn.disabled = true;
+      btn.textContent = 'Unverifying...';
+      try {
+        const res = await fetch('/api/admin/orders/' + orderId + '/verify', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ unverify: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+          btn.textContent = '↩️ Unverified!';
+          setTimeout(() => {
+            const card = btn.closest('.verify-card');
+            card.style.transition = 'all 0.3s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9)';
+            setTimeout(() => card.remove(), 300);
+          }, 400);
+        } else {
+          alert(data.error || 'Failed to unverify');
+          btn.disabled = false;
+          btn.textContent = '↩️ Unverify';
+        }
+      } catch {
+        alert('Failed to unverify');
+        btn.disabled = false;
+        btn.textContent = '↩️ Unverify';
       }
     }
 
