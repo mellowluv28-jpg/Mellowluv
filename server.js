@@ -627,7 +627,11 @@ app.put('/api/admin/settings', adminAuth, async (req, res) => {
   const allowed = ['upi_id', 'upi_name', 'shipping_charge', 'admin_username', 'admin_password', 'contact_phone', 'contact_instagram', 'ntfy_topic'];
   for (const [key, value] of Object.entries(req.body)) {
     if (allowed.includes(key)) {
-      await execute('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2', [key, value]);
+      if (value === '' || value === null || value === undefined) {
+        await execute('DELETE FROM settings WHERE key = $1', [key]);
+      } else {
+        await execute('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2', [key, value]);
+      }
     }
   }
   res.json({ success: true });

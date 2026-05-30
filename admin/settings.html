@@ -100,7 +100,7 @@
         document.getElementById('shipping_charge').value = s.shipping_charge || '';
         document.getElementById('contact_instagram').value = s.contact_instagram || '';
         document.getElementById('ntfy_topic').value = s.ntfy_topic || '';
-        document.getElementById('admin_username').value = s.admin_username || '';
+        document.getElementById('admin_username').value = s.admin_username || 'admin';
       } catch {}
     }
 
@@ -115,7 +115,7 @@
         shipping_charge: document.getElementById('shipping_charge').value,
         contact_instagram: ci,
         ntfy_topic: document.getElementById('ntfy_topic').value,
-        admin_username: document.getElementById('admin_username').value
+        admin_username: document.getElementById('admin_username').value || 'admin'
       };
       const pwd = document.getElementById('admin_password').value;
       if (pwd) data.admin_password = pwd;
