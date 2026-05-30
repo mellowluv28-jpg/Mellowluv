@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Book - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .prebook-section { padding: 40px 0; min-height: 60vh; }
+    .prebook-box { max-width: 520px; margin: 0 auto; background: white; border-radius: 24px; padding: 30px; border: 2px solid #f5d6de; box-shadow: 0 4px 30px rgba(232,160,180,0.08); animation: pop 0.4s ease; }
+    .prebook-box h1 { font-size: 24px; margin-bottom: 4px; color: #5a4a4a; text-align: center; }
+    .prebook-box h1 span { color: #e8a0b4; }
+    .prebook-box p.sub { color: #b0878f; font-size: 14px; margin-bottom: 20px; text-align: center; }
+    .prebook-product { background: #fff8f9; border: 2px solid #f5d6de; border-radius: 14px; padding: 16px; margin-bottom: 16px; display: flex; gap: 14px; align-items: center; }
+    .prebook-product .pp-img { width: 60px; height: 60px; border-radius: 12px; background: linear-gradient(135deg,#fef4f6,#fce4ec); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; overflow: hidden; }
+    .prebook-product .pp-img img { width: 100%; height: 100%; object-fit: cover; }
+    .prebook-product .pp-info { flex: 1; }
+    .prebook-product .pp-name { font-weight: 700; color: #5a4a4a; font-size: 15px; }
+    .prebook-product .pp-price { color: #e8a0b4; font-weight: 600; font-size: 14px; }
+    .prebook-product .pp-extra { color: #b0878f; font-size: 12px; margin-top: 2px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-weight: 600; color: #5a4a4a; font-size: 13px; margin-bottom: 4px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 14px; border: 2px solid #f5d6de; border-radius: 14px; font-size: 14px; background: #fff8f9; color: #5a4a4a; font-family: inherit; transition: border-color 0.3s; box-sizing: border-box; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #e8a0b4; }
+    .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a; border: 2px solid #e8a0b4; border-radius: 14px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; }
+    .btn-submit:active { transform: scale(0.96); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .eligibility-bar { background: #fff8e1; border: 2px solid #ffe082; border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #5a4a4a; text-align: center; }
+    .eligibility-bar.eligible { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
+  </style>
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="prebook-section">
+    <div class="container">
+      <div class="prebook-box">
+        <h1>📅 Pre-Book <span>Now</span></h1>
+        <p class="sub">Secure your upcoming drop before it launches! 🐱</p>
+        <div id="prebook-content">
+          <div class="loading"><div class="spinner"></div>Loading product...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('product');
+
+    async function initPrebook() {
+      if (!productId) {
+        document.getElementById('prebook-content').innerHTML = '<div style="text-align:center;color:#b0878f;padding:30px;">No product selected. <a href="/">Go back</a></div>';
+        return;
+      }
+      try {
+        const res = await fetch('/api/products/' + productId);
+        const product = await res.json();
+        if (!product || product.error) {
+          document.getElementById('prebook-content').innerHTML = '<div style="text-align:center;color:#b0878f;padding:30px;">Product not found.</div>';
+          return;
+        }
+        if (!product.scheduled_at || new Date(product.scheduled_at) <= new Date()) {
+          document.getElementById('prebook-content').innerHTML = '<div style="text-align:center;color:#b0878f;padding:30px;">This product is already available for regular purchase. <a href="/">Shop now</a></div>';
+          return;
+        }
+        renderPrebook(product);
+      } catch {
+        document.getElementById('prebook-content').innerHTML = '<div style="text-align:center;color:#b0878f;padding:30px;">Error loading product.</div>';
+      }
+    }
+
+    function renderPrebook(product) {
+      const price = (product.offer_price && product.offer_price > 0) ? product.offer_price : product.price;
+      const total = price + 50;
+      document.getElementById('prebook-content').innerHTML = `
+        <div class="prebook-product">
+          <div class="pp-img" style="${product.image ? "background-image: url('" + product.image + "'); background-size: cover; background-position: center;" : ""}">${product.image ? '' : '📷'}</div>
+          <div class="pp-info">
+            <div class="pp-name">${product.name}</div>
+            <div class="pp-price">₹${price}</div>
+            <div class="pp-extra">+ ₹50 Pre-Booking Charge = <strong>₹${total}</strong></div>
+          </div>
+        </div>
+        <div id="eligibility-bar" class="eligibility-bar">📞 Enter your phone to check eligibility</div>
+        <form id="prebook-form" onsubmit="submitPrebook(event)">
+          <div class="form-group">
+            <label>🌸 Full Name *</label>
+            <input type="text" id="pb-name" required placeholder="Your full name">
+          </div>
+          <div class="form-group">
+            <label>📞 Phone Number *</label>
+            <input type="tel" id="pb-phone" required placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'');checkPrebookEligibility();">
+          </div>
+          <div class="form-group">
+            <label>📍 Address *</label>
+            <textarea id="pb-address" required placeholder="Street, area, landmark, city" minlength="5"></textarea>
+          </div>
+          <div class="form-group">
+            <label>📮 Pincode *</label>
+            <input type="text" id="pb-pincode" required placeholder="6-digit pincode" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="form-group">
+            <label>📸 Instagram Handle *</label>
+            <input type="text" id="pb-instagram" required placeholder="@yourhandle">
+          </div>
+          <div class="form-group">
+            <label>⏰ Delivery Speed <span style="font-weight:400;color:#b0878f;font-size:11px;">(Only for Jewelry)</span></label>
+            <select id="pb-urgency">
+              <option value="">Normal — 5-7 days making + 4-6 days shipping (depending on location) — Free</option>
+              <option value="urgent">⚡ Urgent — 2-3 days making + shipping (depending on location) — ₹30 extra</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>🎨 Aesthetics Preference <span style="font-weight:400;color:#b0878f;font-size:11px;">(Only for Jewelry)</span></label>
+            <textarea id="pb-aesthetics" placeholder="Tell us your style preferences — colors, vibes, occasion..."></textarea>
+          </div>
+          <button type="submit" class="btn-submit" id="pb-submit" disabled>📅 Confirm Pre-Book ₹${total}</button>
+        </form>
+        <input type="hidden" id="pb-product-id" value="${product.id}">
+        <input type="hidden" id="pb-total" value="${total}">
+      `;
+    }
+
+    async function checkPrebookEligibility() {
+      const phone = document.getElementById('pb-phone').value.trim();
+      const bar = document.getElementById('eligibility-bar');
+      const submitBtn = document.getElementById('pb-submit');
+      if (!phone || phone.length < 10) {
+        bar.className = 'eligibility-bar';
+        bar.textContent = '📞 Enter your phone to check eligibility';
+        submitBtn.disabled = true;
+        return;
+      }
+      try {
+        const res = await fetch('/api/loyalty/check?phone=' + encodeURIComponent(phone));
+        const data = await res.json();
+        if (data.prebook_eligible) {
+          bar.className = 'eligibility-bar eligible';
+          bar.innerHTML = '✅ <strong>You are eligible!</strong> You have ' + data.total_loyalty_score + ' loyalty points. Pre-book now! 🎉';
+          submitBtn.disabled = false;
+        } else {
+          bar.className = 'eligibility-bar';
+          const needed = Math.max(0, 2 - data.total_loyalty_score);
+          bar.innerHTML = '🔒 <strong>Not yet eligible.</strong> You need <strong>' + needed + ' more purchase(s)</strong> to unlock pre-booking. Current score: ' + data.total_loyalty_score + '/2';
+          submitBtn.disabled = true;
+        }
+      } catch {
+        bar.className = 'eligibility-bar';
+        bar.textContent = 'Could not check eligibility. Make sure the phone number is correct.';
+        submitBtn.disabled = true;
+      }
+    }
+
+    async function submitPrebook(event) {
+      event.preventDefault();
+      const name = document.getElementById('pb-name').value.trim();
+      const phone = document.getElementById('pb-phone').value.trim();
+      const address = document.getElementById('pb-address').value.trim();
+      const pincode = document.getElementById('pb-pincode').value.trim();
+      const instagram = document.getElementById('pb-instagram').value.trim();
+      const urgency = document.getElementById('pb-urgency')?.value || '';
+      const aesthetics = document.getElementById('pb-aesthetics')?.value.trim() || '';
+      const submitBtn = document.getElementById('pb-submit');
+
+      if (!name || !phone || !address || !pincode || !instagram) { alert('Please fill all fields'); return; }
+      if (!/^[0-9]{10}$/.test(phone)) { alert('Phone number must be exactly 10 digits'); return; }
+      if (!/^[0-9]{6}$/.test(pincode)) { alert('Pincode must be exactly 6 digits'); return; }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      try {
+        const res = await fetch('/api/prebook', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_name: name, phone, address, pincode, instagram, urgency, aesthetics, product_id: parseInt(productId) })
+        });
+        const result = await res.json();
+        if (result.success) {
+          const ci = result.contact_instagram ? '&ci=' + encodeURIComponent(result.contact_instagram) : '';
+          const lw = 2;
+          const lp = result.loyalty ? result.loyalty.points : 0;
+          window.location.href = '/public/order-success.html?order=' + result.order_id + '&qr=' + encodeURIComponent(result.qr_code) + '&upi=' + encodeURIComponent(result.upi_id) + '&amount=' + result.amount + ci + '&lp=' + lp + '&lw=' + lw;
+        } else {
+          alert(result.error || 'Failed to pre-book');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '📅 Confirm Pre-Book';
+        }
+      } catch {
+        alert('Network error. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📅 Confirm Pre-Book';
+      }
+    }
+
+    initPrebook();
+  </script>
+</body>
+</html>

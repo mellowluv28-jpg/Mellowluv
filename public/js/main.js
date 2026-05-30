@@ -1,0 +1,118 @@
+let allProductsCache = {};
+
+async function loadProducts(category, containerId, sort) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading products...</div>';
+  try {
+    let url = `/api/products?category=${category}`;
+    if (sort) url += `&sort=${sort}`;
+    const res = await fetch(url);
+    const products = await res.json();
+    allProductsCache[containerId] = products;
+    renderProducts(containerId, products);
+  } catch (err) {
+    container.innerHTML = '<div class="loading">Failed to load products. Please try again.</div>';
+  }
+}
+
+function renderProducts(containerId, products) {
+  const container = document.getElementById(containerId);
+  if (products.length === 0) {
+    container.innerHTML = '<div class="loading" style="grid-column: 1/-1;">No products available yet. Check back soon!</div>';
+    return;
+  }
+  container.innerHTML = products.map(p => {
+    const inStock = p.stock > 0;
+    const hasOffer = p.offer_price && p.offer_price > 0;
+    const isScheduled = p.scheduled_at && new Date(p.scheduled_at) > new Date();
+    const isLive = !isScheduled;
+    const displayPrice = hasOffer ? `<span class="product-price-original">₹${p.price}</span> <span class="product-price-offer">₹${p.offer_price}</span>` : `<span class="product-price">₹${p.price}</span>`;
+    const offerBadge = hasOffer && isLive ? `<div class="offer-badge">🔥 OFFER</div>` : '';
+    const offerNote = hasOffer && isLive && p.offer_note ? `<div class="offer-note">${p.offer_note}</div>` : '';
+    const dropText = isScheduled ? formatDropTime(p.scheduled_at) : '';
+    const dropBadge = isScheduled ? `<div class="drop-badge">📅 DROPPING SOON</div>` : '';
+    const scheduledOn = isScheduled ? `<div class="drop-time">${dropText}</div>` : '';
+    return `
+      <div class="product-card${hasOffer && isLive ? ' on-offer' : ''}${isScheduled ? ' scheduled' : ''}">
+        <div class="product-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}">${p.image ? '' : '📷'}</div>
+        ${offerBadge}${dropBadge}
+        <div class="product-info">
+          <div class="product-name">${p.name}</div>
+          <div class="product-price-row">${displayPrice}</div>
+          ${offerNote}
+          ${scheduledOn}
+          <div class="product-shipping">* Shipping charged separately</div>
+          <div class="product-stock ${inStock && isLive ? 'stock-in' : 'stock-out'}">${isScheduled ? '🔒 Coming Soon' : (inStock ? `In Stock (${p.stock} available)` : 'Out of Stock')}</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-buy" onclick="${isLive ? `buyProduct(${p.id})` : ''}" ${isLive && inStock ? '' : 'disabled'} style="flex:1;">${isScheduled ? '🔒 Not Available Yet' : (inStock ? (hasOffer ? 'Grab Offer 🎉' : 'Buy Now') : 'Sold Out')}</button>
+            ${isLive && inStock ? `<button class="btn-add-cart" onclick="addToCart(${p.id},'${p.name.replace(/'/g,"\\'")}',${p.offer_price||p.price},${p.price},'${(p.image||'').replace(/'/g,"\\'")}','${p.category}')" title="Add to Cart">🛒</button>` : ''}
+            ${isScheduled ? `<button class="btn-buy" onclick="location.href='/public/prebook.html?product=${p.id}'" style="flex:1;background:linear-gradient(135deg,#f3e5f5,#fce4ec);border-color:#ce93d8;color:#7b1fa2;">📅 Pre-Book</button>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function searchProducts(inputId, containerId) {
+  const query = document.getElementById(inputId).value.toLowerCase().trim();
+  const all = allProductsCache[containerId] || [];
+  if (!query) { renderProducts(containerId, all); return; }
+  const filtered = all.filter(p => p.name.toLowerCase().includes(query) || (p.description || '').toLowerCase().includes(query));
+  renderProducts(containerId, filtered);
+  const container = document.getElementById(containerId);
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="loading" style="grid-column: 1/-1;">No products match your search 🐱</div>';
+  }
+}
+
+function formatDropTime(isoStr) {
+  const d = new Date(isoStr);
+  const now = new Date();
+  const diff = d - now;
+  if (diff <= 0) return 'Live now!';
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  if (days > 0) return `Dropping on ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })} at ${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST`;
+  if (hours > 0) return `Dropping in ${hours}h ${mins}m`;
+  return `Dropping in ${mins}m`;
+}
+
+function buyProduct(productId) {
+  window.location.href = `/public/checkout.html?product=${productId}`;
+}
+
+async function addToCart(id, name, offerPrice, price, image, category) {
+  try {
+    const res = await fetch('/api/products/' + id);
+    const product = await res.json();
+    if (!product || product.error) return alert('Product not found!');
+    if (product.stock < 1) return alert('Out of stock!');
+    if (!product.is_live) return alert('This product is not available yet!');
+
+    let cart = JSON.parse(localStorage.getItem('mellowluv_cart') || '{"items":[]}');
+    const existing = cart.items.find(i => i.id === id);
+    const currentQty = existing ? existing.qty : 0;
+    if (currentQty >= product.stock) return alert('Only ' + product.stock + ' in stock!');
+
+    if (existing) { existing.qty += 1; } else { cart.items.push({ id, name, offer_price: offerPrice, price, image, category, qty: 1 }); }
+    localStorage.setItem('mellowluv_cart', JSON.stringify(cart));
+    updateCartBadge();
+    const btn = event?.target || document.querySelector('[onclick*="addToCart(' + id + '"]');
+    if (btn) { btn.textContent = '✅'; setTimeout(() => btn.textContent = '🛒', 1000); }
+  } catch { alert('Network error. Try again.'); }
+}
+
+function updateCartBadge() {
+  const cart = JSON.parse(localStorage.getItem('mellowluv_cart') || '{"items":[]}');
+  const count = cart.items.reduce((s, i) => s + i.qty, 0);
+  document.querySelectorAll('.cart-badge').forEach(b => { b.textContent = count > 0 ? count : ''; b.style.display = count > 0 ? 'inline' : 'none'; });
+}
+
+document.addEventListener('DOMContentLoaded', updateCartBadge);
+
+function updateSort(category, containerId, selectEl) {
+  loadProducts(category, containerId, selectEl.value);
+}

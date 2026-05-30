@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Verification - Mellowluv Admin</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <style>
+    .admin-layout { display: flex; }
+    .sidebar { width: 240px; background: linear-gradient(180deg, #fef4f6, #fce4ec); min-height: 100vh; padding: 30px 0; border-right: 2px solid #f5d6de; }
+    .sidebar h3 { color: #e8a0b4; padding: 0 20px; margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+    .sidebar a { display: block; padding: 12px 20px; color: #b0878f; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; font-weight: 500; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(232,160,180,0.1); color: #e8a0b4; border-left-color: #e8a0b4; }
+    .main-content { flex: 1; padding: 30px; background: #fffbfb; }
+    .main-content h1 { font-size: 26px; margin-bottom: 4px; color: #5a4a4a; }
+    .main-content h1 span { color: #e8a0b4; }
+    .main-content .subtitle { color: #b0878f; font-size: 14px; margin-bottom: 25px; }
+
+    .verify-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+    .verify-card {
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      border: 2px solid #f5d6de;
+      box-shadow: 0 2px 15px rgba(232,160,180,0.08);
+      transition: all 0.3s ease;
+      animation: fadeUp 0.4s ease both;
+    }
+    .verify-card:hover { box-shadow: 0 6px 25px rgba(232,160,180,0.12); }
+    .verify-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .verify-card .card-header h3 { font-size: 16px; color: #5a4a4a; }
+    .verify-card .card-header .badge-paid { background: #fff8e1; color: #f57f17; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .verify-card .card-header .badge-unpaid { background: #fbe9e7; color: #d84315; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .verify-card .detail-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #ffe8e4; }
+    .verify-card .detail-row:last-child { border-bottom: none; }
+    .verify-card .detail-row .label { color: #b0878f; }
+    .verify-card .detail-row .value { color: #5a4a4a; font-weight: 500; text-align: right; }
+    .verify-card .btn-verify {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px;
+      background: linear-gradient(135deg, #c8e6c9, #e8f5e9);
+      color: #2e7d32;
+      border: 2px solid #a5d6a7;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .verify-card .btn-verify:hover { background: linear-gradient(135deg, #a5d6a7, #c8e6c9); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(165,214,167,0.3); }
+    .verify-card .btn-verify:active { transform: scale(0.97); }
+    .verify-card .btn-verify:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .verify-card .cb-wrap { margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .verify-card .cb-wrap input[type="checkbox"] { width: 18px; height: 18px; accent-color: #e8a0b4; cursor: pointer; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #b0878f; font-size: 15px; grid-column: 1 / -1; }
+    .empty-state .big { font-size: 48px; margin-bottom: 10px; }
+    .bulk-bar { display: none; margin-bottom: 15px; padding: 12px 18px; background: #e8f5e9; border-radius: 14px; border: 2px solid #a5d6a7; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .bulk-bar.show { display: flex; }
+    .bulk-bar .count { font-size: 14px; color: #2e7d32; font-weight: 600; }
+    .bulk-bar .btn-verify-all { padding: 8px 20px; background: linear-gradient(135deg, #a5d6a7, #c8e6c9); color: #1b5e20; border: 2px solid #81c784; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.3s; }
+    .bulk-bar .btn-verify-all:hover { background: linear-gradient(135deg, #81c784, #a5d6a7); transform: translateY(-2px); }
+    .bulk-bar .btn-verify-all:active { transform: scale(0.96); }
+    .bulk-bar .btn-select-all { padding: 6px 14px; background: white; color: #5a4a4a; border: 2px solid #f5d6de; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; display: flex; gap: 5px; padding: 15px; overflow-x: auto; }
+      .sidebar h3 { display: none; }
+      .sidebar a { padding: 8px 12px; font-size: 12px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+      .verify-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <h3>🌸 Mellowluv</h3>
+      <a href="/admin/dashboard.html">📊 Dashboard</a>
+      <a href="/admin/verify.html" class="active">✅ Verify Payments</a>
+      <a href="/admin/orders.html">📦 Orders</a>
+      <a href="/admin/inventory.html">🏷️ Inventory</a>
+      <a href="/admin/loyalty.html">⭐ Loyalty</a>
+      <a href="/admin/settings.html">⚙️ Settings</a>
+
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
+    </div>
+    <div class="main-content">
+      <h1>✅ Payment <span>Verification</span></h1>
+      <div class="subtitle">All unpaid and paid orders — click Verify when payment is confirmed</div>
+      <div class="bulk-bar" id="bulk-bar">
+        <span class="count"><span id="selected-count">0</span> selected</span>
+        <button class="btn-select-all" onclick="toggleSelectAll()">☐ Select All</button>
+        <button class="btn-verify-all" onclick="bulkVerify()">✅ Verify Selected</button>
+      </div>
+      <div class="verify-grid" id="verify-grid">
+        <div class="empty-state"><div class="big">🐱</div>Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) window.location.href = '/admin/login.html';
+
+    async function loadPending() {
+      const grid = document.getElementById('verify-grid');
+      try {
+        const res = await fetch('/api/admin/verify', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const orders = await res.json();
+        if (orders.length === 0) {
+          grid.innerHTML = '<div class="empty-state"><div class="big">✅</div>All payments verified! Nothing pending 🌸</div>';
+          return;
+        }
+        grid.innerHTML = orders.map((o, i) => {
+          const d = new Date(o.created_at);
+          const catIcon = o.product_category === 'mellowluv' ? '💎' : '🛍️';
+          const catName = o.product_category === 'mellowluv' ? 'Mellowluv' : 'Thrift';
+          const isPaid = o.payment_status === 'paid';
+          const badgeClass = isPaid ? 'badge-paid' : 'badge-unpaid';
+          const badgeLabel = isPaid ? 'Paid' : 'Unpaid';
+          const verifyBtn = isPaid
+            ? `<button class="btn-verify" onclick="verifyPayment(${o.id}, this)">✅ Verify Payment</button>`
+            : `<p style="text-align:center; color:#b5838d; font-size:13px; margin-top:12px;">⏳ Awaiting customer payment...</p>`;
+          const cb = isPaid ? `<div class="cb-wrap"><input type="checkbox" class="verify-cb" value="${o.id}" onchange="updateBulkBar()"> <span style="font-size:12px;color:#b0878f;">Select</span></div>` : '';
+          return `
+            <div class="verify-card" style="animation-delay:${i * 0.05}s" data-order-id="${o.id}">
+              ${cb}
+              <div class="card-header">
+                <h3>${o.customer_name}</h3>
+                <span class="${badgeClass}">${badgeLabel}</span>
+              </div>
+              <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'}</span></div>
+              <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram || '-'}</span></div>
+              <div class="detail-row"><span class="label">🛒 Product</span><span class="value">${catIcon} ${o.product_name}</span></div>
+              <div class="detail-row"><span class="label">🔢 Quantity</span><span class="value">${o.quantity || 1}</span></div>
+              <div class="detail-row"><span class="label">💰 Amount</span><span class="value">₹${o.total}</span></div>
+              <div class="detail-row"><span class="label">📅 Ordered</span><span class="value">${d.toLocaleDateString('en-IN')}</span></div>
+              ${verifyBtn}
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        grid.innerHTML = '<div class="empty-state"><div class="big">😿</div>Error loading. Check server.</div>';
+      }
+    }
+
+    async function verifyPayment(orderId, btn) {
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      try {
+        await fetch('/api/admin/orders/' + orderId + '/verify', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payment_status: 'verified' })
+        });
+        btn.textContent = '✅ Verified!';
+        btn.style.background = '#e8f5e9';
+        btn.style.borderColor = '#a5d6a7';
+        setTimeout(() => {
+          const card = btn.closest('.verify-card');
+          card.style.transition = 'all 0.3s ease';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.9)';
+          setTimeout(() => card.remove(), 300);
+        }, 600);
+      } catch {
+        btn.disabled = false;
+        btn.textContent = '✅ Verify Payment';
+      }
+    }
+
+    function updateBulkBar() {
+      const checked = document.querySelectorAll('.verify-cb:checked').length;
+      const bar = document.getElementById('bulk-bar');
+      document.getElementById('selected-count').textContent = checked;
+      bar.classList.toggle('show', checked > 0);
+    }
+
+    function toggleSelectAll() {
+      const cbs = document.querySelectorAll('.verify-cb');
+      const allChecked = Array.from(cbs).every(c => c.checked);
+      cbs.forEach(c => c.checked = !allChecked);
+      updateBulkBar();
+    }
+
+    async function bulkVerify() {
+      const checked = document.querySelectorAll('.verify-cb:checked');
+      if (checked.length === 0) return;
+      if (!confirm('Verify ' + checked.length + ' payment(s)? This will confirm all selected orders.')) return;
+      const btn = document.querySelector('.btn-verify-all');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      for (const cb of checked) {
+        try {
+          await fetch('/api/admin/orders/' + cb.value + '/verify', {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_status: 'verified' })
+          });
+          const card = cb.closest('.verify-card');
+          if (card) { card.style.opacity = '0'; card.style.transform = 'scale(0.9)'; setTimeout(() => card.remove(), 300); }
+        } catch {}
+      }
+      btn.disabled = false;
+      btn.textContent = '✅ Verify Selected';
+      updateBulkBar();
+      setTimeout(() => { if (!document.querySelector('.verify-cb')) loadPending(); }, 500);
+    }
+
+    loadPending();
+  </script>
+</body>
+</html>
+
+

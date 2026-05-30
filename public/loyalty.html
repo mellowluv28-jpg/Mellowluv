@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Loyalty - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .loyalty-section { padding: 40px 0; min-height: 60vh; }
+    .loyalty-box { max-width: 520px; margin: 0 auto; background: white; border-radius: 24px; padding: 30px; border: 2px solid #f5d6de; box-shadow: 0 4px 30px rgba(232,160,180,0.08); text-align: center; animation: pop 0.4s ease; }
+    .loyalty-box h1 { font-size: 24px; margin-bottom: 4px; color: #5a4a4a; }
+    .loyalty-box h1 span { color: #e8a0b4; }
+    .loyalty-box p.sub { color: #b0878f; font-size: 14px; margin-bottom: 20px; }
+    .track-form { display: flex; flex-direction: column; gap: 12px; }
+    .track-form input { padding: 14px 16px; border: 2px solid #f5d6de; border-radius: 14px; font-size: 15px; background: #fff8f9; color: #5a4a4a; font-family: inherit; transition: border-color 0.3s; }
+    .track-form input:focus { outline: none; border-color: #e8a0b4; box-shadow: 0 0 0 3px rgba(232,160,180,0.1); }
+    .track-form .btn-track { padding: 14px; background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a; border: 2px solid #e8a0b4; border-radius: 14px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; }
+    .track-form .btn-track:active { transform: scale(0.96); }
+    .loyalty-result { display: none; margin-top: 20px; text-align: left; }
+    .loyalty-result.show { display: block; }
+    .loyalty-card { background: white; border: 2px solid #f5d6de; border-radius: 18px; padding: 22px; box-shadow: 0 2px 12px rgba(232,160,180,0.06); }
+    .loyalty-score { text-align: center; padding: 20px 0; }
+    .loyalty-score .big-number { font-size: 48px; font-weight: 800; color: #e8a0b4; }
+    .loyalty-score .label { color: #b0878f; font-size: 14px; margin-top: 4px; }
+    .loyalty-bar { background: #fce4ec; border-radius: 10px; height: 12px; margin: 16px 0; overflow: hidden; }
+    .loyalty-bar .fill { height: 100%; background: linear-gradient(90deg, #e8a0b4, #f5c542); border-radius: 10px; transition: width 0.6s ease; }
+    .loyalty-detail { padding: 10px 14px; background: #fff8f9; border-radius: 12px; margin: 8px 0; font-size: 14px; color: #5a4a4a; display: flex; justify-content: space-between; }
+    .loyalty-detail .val { font-weight: 700; color: #e8a0b4; }
+    .loyalty-badge { display: inline-block; padding: 4px 12px; border-radius: 10px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+    .badge-ready { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .badge-soon { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+    .badge-premium { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+    .loyalty-error { display: none; color: #d4808a; font-size: 14px; margin-top: 15px; padding: 12px; background: #fef4f6; border-radius: 12px; }
+    .loyalty-error.show { display: block; }
+  </style>
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html" class="active">⭐ Loyalty</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="loyalty-section">
+    <div class="container">
+      <div class="loyalty-box animate-pop">
+        <h1>⭐ Loyalty <span>Rewards</span></h1>
+        <p class="sub">Enter your phone number to check your loyalty score 🐱</p>
+        <div class="track-form">
+          <input type="tel" id="loyalty-phone" placeholder="Phone Number (10 digits)" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
+          <button class="btn-track" onclick="checkLoyalty()">⭐ Check My Score</button>
+        </div>
+        <div class="loyalty-result" id="loyalty-result"></div>
+        <div class="loyalty-error" id="loyalty-error"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    async function checkLoyalty() {
+      const phone = document.getElementById('loyalty-phone').value.trim();
+      const resultDiv = document.getElementById('loyalty-result');
+      const errorDiv = document.getElementById('loyalty-error');
+      errorDiv.classList.remove('show');
+      resultDiv.classList.remove('show');
+
+      if (!phone) { errorDiv.textContent = 'Please enter your phone number'; errorDiv.classList.add('show'); return; }
+      if (!/^[0-9]{10}$/.test(phone)) { errorDiv.textContent = 'Phone number must be exactly 10 digits'; errorDiv.classList.add('show'); return; }
+
+      try {
+        const res = await fetch('/api/loyalty/check?phone=' + encodeURIComponent(phone));
+        if (!res.ok) { errorDiv.textContent = 'Could not fetch loyalty info. Try again later.'; errorDiv.classList.add('show'); return; }
+        const d = await res.json();
+        const pct = d.discount_eligible ? 100 : ((d.points_toward_next_discount / 4) * 100);
+        const badge = d.discount_eligible ? '<span class="loyalty-badge badge-ready">🎉 Discount Ready!</span>' : (d.total_loyalty_score > 5 ? '<span class="loyalty-badge badge-premium">💎 Premium Member</span>' : '<span class="loyalty-badge badge-soon">' + d.orders_until_discount + ' order(s) to discount</span>');
+        const prebookTag = d.prebook_eligible ? '<span class="loyalty-badge badge-ready" style="margin-left:6px;">✅ Pre-Booking Eligible</span>' : '<span class="loyalty-badge badge-soon" style="margin-left:6px;">🔒 Pre-Book at ' + Math.max(0, 2 - d.total_loyalty_score) + ' more purchase(s)</span>';
+
+        resultDiv.innerHTML = '<div class="loyalty-card">' +
+          '<div class="loyalty-score">' +
+            '<div class="big-number">' + d.total_loyalty_score + '</div>' +
+            '<div class="label">Total Loyalty Score</div>' +
+            badge + prebookTag +
+          '</div>' +
+          '<div class="loyalty-bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="loyalty-detail"><span>Orders Until Next 50% Discount</span><span class="val">' + d.orders_until_discount + '</span></div>' +
+          '<div class="loyalty-detail"><span>Pre-Booking Access</span><span class="val">' + (d.prebook_eligible ? '✅ Eligible' : '🔒 Need ' + Math.max(0, 2 - d.total_loyalty_score) + ' more') + '</span></div>' +
+          '<div style="margin-top:14px;padding:12px;background:#fef4f6;border-radius:12px;font-size:13px;color:#b0878f;text-align:center;">🎁 <strong>Higher loyalty score = higher chances of winning freebies!</strong> Keep shopping to unlock more rewards 🌸</div>' +
+        '</div>';
+        resultDiv.classList.add('show');
+      } catch {
+        errorDiv.textContent = 'Network error. Please try again later.';
+        errorDiv.classList.add('show');
+      }
+    }
+
+    document.getElementById('loyalty-phone').addEventListener('keydown', e => { if (e.key === 'Enter') checkLoyalty(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders - Mellowluv Admin</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <style>
+    .admin-layout { display: flex; }
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(180deg, #fef4f6, #fce4ec);
+      min-height: 100vh;
+      padding: 30px 0;
+      border-right: 2px solid #f5d6de;
+    }
+    .sidebar h3 { color: #e8a0b4; padding: 0 20px; margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+    .sidebar a { display: block; padding: 12px 20px; color: #b0878f; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; font-weight: 500; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(232,160,180,0.1); color: #e8a0b4; border-left-color: #e8a0b4; }
+    .main-content { flex: 1; padding: 30px; background: #fffbfb; }
+    .main-content h1 { font-size: 26px; margin-bottom: 20px; color: #5a4a4a; }
+    .orders-table-wrap {
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 2px 20px rgba(232,160,180,0.08);
+      border: 2px solid #f5d6de;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 15px; text-align: left; font-size: 13px; border-bottom: 1px solid #ffe8e4; }
+    th { background: linear-gradient(135deg, #fff5f5, #fffbe6); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; color: #b0878f; }
+    tr:hover { background: #fffdfc; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .badge-pending { background: #fff3e0; color: #e65100; }
+    .badge-confirmed { background: #e3f2fd; color: #1565c0; }
+    .badge-completed { background: #e8f5e9; color: #2e7d32; }
+    .badge-cancelled { background: #ffebee; color: #c62828; }
+    .badge-unpaid { background: #fce4ec; color: #880e4f; }
+    .badge-paid { background: #fff8e1; color: #f57f17; }
+    .badge-verified { background: #e8f5e9; color: #1b5e20; }
+    select.status-select { padding: 5px 8px; border: 2px solid #f5d6de; border-radius: 8px; font-size: 12px; background: white; color: #5a4a4a; }
+    .filters { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .filters select, .filters input { padding: 8px 12px; border: 2px solid #f5d6de; border-radius: 10px; font-size: 13px; background: white; color: #5a4a4a; }
+    .cat-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; border-radius: 14px; padding: 4px; border: 2px solid #f5d6de; width: fit-content; }
+    .cat-tab { padding: 8px 20px; border-radius: 11px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; color: #b0878f; background: transparent; border: none; }
+    .cat-tab:hover { background: #fff5f5; }
+    .cat-tab.active { background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a; box-shadow: 0 2px 8px rgba(232,160,180,0.15); }
+    .order-detail { display: none; background: #fffdfc; padding: 20px; border-radius: 12px; margin-top: 8px; font-size: 13px; border: 1px solid #ffe8e4; }
+    .order-detail.show { display: block; }
+    .order-detail strong { color: #5a4a4a; }
+    .toggle-detail { cursor: pointer; color: #e8a0b4; font-size: 12px; font-weight: 600; transition: transform 0.3s; display: inline-block; }
+
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; display: flex; gap: 5px; padding: 15px; overflow-x: auto; }
+      .sidebar h3 { display: none; }
+      .sidebar a { padding: 8px 12px; font-size: 12px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+      .main-content { padding: 15px; }
+      .main-content h1 { font-size: 20px; }
+      .main-content > div:first-child { flex-direction: column; gap: 10px; align-items: flex-start !important; }
+      .orders-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .orders-table-wrap table { min-width: 650px; }
+      th, td { padding: 8px 8px; font-size: 11px; white-space: nowrap; }
+      .filters { flex-direction: column; }
+      .filters select, .filters input { width: 100%; }
+      .cat-tabs { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+      .cat-tab { font-size: 12px; padding: 6px 14px; white-space: nowrap; }
+      .order-detail { padding: 12px; }
+      .order-detail > div > div { grid-template-columns: 1fr !important; }
+      .order-detail select.status-select { width: 100%; padding: 8px 10px; font-size: 13px; }
+      .order-detail input { font-size: 14px !important; padding: 8px 10px !important; }
+      .order-detail button { padding: 8px 16px !important; font-size: 13px !important; }
+      [id^="track-id-wrap-"] input { font-size: 14px !important; }
+      td select.status-select { min-height: 36px; }
+      td button { min-height: 36px; min-width: 36px; }
+      .toggle-detail { font-size: 16px; padding: 6px; }
+      .sidebar a { font-size: 13px; padding: 10px 14px; }
+    }
+    @media (max-width: 480px) {
+      .main-content h1 { font-size: 18px; }
+      th, td { padding: 6px 5px; font-size: 10px; }
+      .order-detail > div > div { font-size: 12px; gap: 8px; }
+    }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <h3>🌸 Mellowluv</h3>
+      <a href="/admin/dashboard.html">📊 Dashboard</a>
+      <a href="/admin/verify.html">✅ Verify Payments</a>
+      <a href="/admin/orders.html" class="active">📦 Orders</a>
+      <a href="/admin/inventory.html">🏷️ Inventory</a>
+      <a href="/admin/loyalty.html">⭐ Loyalty</a>
+      <a href="/admin/settings.html">⚙️ Settings</a>
+
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
+    </div>
+    <div class="main-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <h1>📦 Orders</h1>
+        <a href="/" style="padding:8px 18px; background:linear-gradient(135deg,#ffe4e1,#fff5f5); border:2px solid #f5c542; border-radius:20px; color:#d4808a; font-weight:700; font-size:13px; text-decoration:none; transition:all 0.3s;">🏪 Back to Store</a>
+      </div>
+      <div class="cat-tabs">
+        <button class="cat-tab active" data-cat="" onclick="switchCatTab(this)">📋 All Orders</button>
+        <button class="cat-tab" data-cat="thrift" onclick="switchCatTab(this)">🛍️ Thrift Store</button>
+        <button class="cat-tab" data-cat="mellowluv" onclick="switchCatTab(this)">💎 Mellowluv</button>
+      </div>
+      <div class="filters">
+        <select id="status-filter" onchange="loadOrders()">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <select id="payment-filter" onchange="loadOrders()">
+          <option value="">All Payments</option>
+          <option value="unpaid">Unpaid</option>
+          <option value="paid">Paid</option>
+          <option value="verified">Verified</option>
+        </select>
+        <input type="text" id="search-input" placeholder="Search name or phone..." style="border:2px solid #ffe4e1; border-radius:10px; padding:8px 12px;">
+      </div>
+      <div class="orders-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>📸 Instagram</th>
+              <th>Product</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Date</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+      </div>
+      <div id="orders-paginator"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) window.location.href = '/admin/login.html';
+
+    function switchCatTab(el) {
+      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      loadOrders();
+    }
+
+    let currentPage = 1;
+
+    async function loadOrders() {
+      const activeTab = document.querySelector('.cat-tab.active');
+      const categoryFilter = activeTab ? activeTab.dataset.cat || '' : '';
+      const statusFilter = document.getElementById('status-filter').value;
+      const paymentFilter = document.getElementById('payment-filter').value;
+      const searchQuery = document.getElementById('search-input').value;
+      try {
+        let url = '/api/admin/orders?page=' + currentPage + '&limit=20';
+        if (statusFilter) url += '&status=' + encodeURIComponent(statusFilter);
+        if (paymentFilter) url += '&payment_status=' + encodeURIComponent(paymentFilter);
+        if (searchQuery) url += '&search=' + encodeURIComponent(searchQuery);
+        if (categoryFilter) url += '&category=' + encodeURIComponent(categoryFilter);
+        const tbody = document.getElementById('orders-body');
+        const paginator = document.getElementById('orders-paginator');
+        const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.status === 401) { sessionStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
+        const data = await res.json();
+        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:#b0878f;">Error loading orders</td></tr>'; paginator.innerHTML = ''; return; }
+        const orders = data.orders || [];
+        const total = data.total || 0;
+        const pages = data.pages || 1;
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:#b0878f;">No orders found</td></tr>';
+          paginator.innerHTML = '';
+          return;
+        }
+        tbody.innerHTML = orders.map(o => {
+          const d = new Date(o.created_at);
+          const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          return `
+          <tr>
+            <td>#${o.id}</td>
+            <td><strong>${o.customer_name}</strong></td>
+            <td>${o.instagram || '-'}</td>
+            <td>${o.product_name || '-'}</td>
+            <td>₹${o.total}</td>
+            <td>
+              <select class="status-select" onchange="updateStatus(${o.id}, 'status', this.value)">
+                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Completed</option>
+                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+              </select>
+            </td>
+            <td><span class="badge badge-${o.payment_status}">${o.payment_status}</span></td>
+            <td style="font-size:12px; color:#b5838d;">${dateStr}<br><small>${timeStr}</small></td>
+            <td><span class="toggle-detail" onclick="toggleDetail(${o.id})">▼</span></td>
+            <td><button class="btn-sm btn-delete" onclick="deleteOrder(${o.id})" style="padding:3px 10px; border:none; border-radius:8px; background:#ffebee; color:#c62828; cursor:pointer; font-size:11px;">✕</button></td>
+          </tr>
+          <tr id="detail-${o.id}" class="order-detail">
+            <td colspan="10">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div><strong>📅 Ordered on:</strong> ${dateStr} at ${timeStr}</div>
+                <div><strong>📞 Phone:</strong> <a href="#" onclick="filterByPhone('${o.phone}'); return false;" style="color:#e8a0b4; font-weight:600; text-decoration:underline;">${o.phone || '-'}</a></div>
+                <div><strong>📸 Instagram:</strong> ${o.instagram || '-'}</div>
+                <div><strong>📍 Address:</strong> ${o.address}</div>
+                <div><strong>📮 Pincode:</strong> ${o.pincode}</div>
+                <div><strong>🔢 Quantity:</strong> ${o.quantity || 1}</div>
+                <div><strong>⏰ Urgency:</strong> ${o.urgency || 'N/A'}</div>
+                <div><strong>🎨 Aesthetics:</strong> ${o.aesthetics || 'N/A'}</div>
+                <div><strong>💬 Note:</strong> ${o.extra_note || 'N/A'}</div>
+                <div><strong>🚚 Shipping:</strong> ₹${o.shipping_charge}</div>
+                <div><strong>💰 Total:</strong> ₹${o.total}</div>
+                <div><strong>💰 Payment:</strong>
+                  <select class="status-select" onchange="updateStatus(${o.id}, 'payment_status', this.value)">
+                    <option value="unpaid" ${o.payment_status === 'unpaid' ? 'selected' : ''}>Unpaid</option>
+                    <option value="paid" ${o.payment_status === 'paid' ? 'selected' : ''}>Paid (verify)</option>
+                    <option value="verified" ${o.payment_status === 'verified' ? 'selected' : ''}>Verified ✓</option>
+                  </select>
+                </div>
+                <div><strong>📦 Tracking:</strong>
+                  <select class="status-select" id="track-status-${o.id}" onchange="onTrackingChange(${o.id})">
+                    <option value="unverified" ${o.tracking_status === 'unverified' ? 'selected' : ''}>🔴 Unverified</option>
+                    <option value="verified" ${o.tracking_status === 'verified' ? 'selected' : ''}>🟡 Verified</option>
+                    ${o.product_category === 'thrift' ? '' : '<option value="in_making" ' + (o.tracking_status === 'in_making' ? 'selected' : '') + '>🟠 In Making</option>'}
+                    <option value="dispatched" ${o.tracking_status === 'dispatched' ? 'selected' : ''}>🟢 Dispatched ✓</option>
+                  </select>
+                  <div id="track-id-wrap-${o.id}" style="margin-top:6px;${o.tracking_status === 'dispatched' ? '' : 'display:none;'}">
+                    <input type="text" id="track-id-input-${o.id}" placeholder="India Post tracking ID" value="${o.tracking_id || ''}" style="padding:6px 10px;border:2px solid #f5d6de;border-radius:8px;font-size:12px;width:100%;">
+                    <button onclick="saveTrackId(${o.id})" style="margin-top:4px;padding:4px 12px;border:none;border-radius:8px;background:#e8a0b4;color:white;font-size:11px;cursor:pointer;">💾 Save ID</button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `}).join('');
+        let pagHtml = '<div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:20px 0;">';
+        if (currentPage > 1) pagHtml += '<button onclick="goPage(' + (currentPage - 1) + ')" style="padding:6px 14px;border:2px solid #f5d6de;border-radius:10px;background:white;color:#5a4a4a;cursor:pointer;">←</button>';
+        pagHtml += '<span style="color:#b0878f;font-size:13px;">Page ' + currentPage + ' of ' + pages + ' (' + total + ' orders)</span>';
+        if (currentPage < pages) pagHtml += '<button onclick="goPage(' + (currentPage + 1) + ')" style="padding:6px 14px;border:2px solid #f5d6de;border-radius:10px;background:white;color:#5a4a4a;cursor:pointer;">→</button>';
+        pagHtml += '</div>';
+        paginator.innerHTML = pagHtml;
+      } catch {}
+    }
+
+    function goPage(p) { currentPage = p; loadOrders(); }
+    document.getElementById('status-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
+    document.getElementById('payment-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
+    document.getElementById('search-input').addEventListener('input', () => { currentPage = 1; loadOrders(); });
+
+    async function updateStatus(orderId, field, value) {
+      await fetch('/api/admin/orders/' + orderId, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+      });
+      loadOrders();
+    }
+
+    function onTrackingChange(orderId) {
+      const sel = document.getElementById('track-status-' + orderId);
+      const wrap = document.getElementById('track-id-wrap-' + orderId);
+      if (sel.value === 'dispatched') {
+        wrap.style.display = 'block';
+      } else {
+        wrap.style.display = 'none';
+        updateTracking(orderId, sel.value, null);
+      }
+    }
+
+    async function saveTrackId(orderId) {
+      const sel = document.getElementById('track-status-' + orderId);
+      const trackId = document.getElementById('track-id-input-' + orderId).value.trim();
+      if (!trackId) { alert('Please enter a India Post tracking ID'); return; }
+      await updateTracking(orderId, 'dispatched', trackId);
+    }
+
+    async function updateTracking(orderId, status, trackId) {
+      try {
+        const body = { tracking_status: status };
+        if (trackId) body.tracking_id = trackId;
+        await fetch('/api/admin/orders/' + orderId + '/tracking', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } catch {}
+      loadOrders();
+    }
+
+    async function deleteOrder(orderId) {
+      if (!confirm('Delete order #' + orderId + '? This cannot be undone.')) return;
+      await fetch('/api/admin/orders/' + orderId, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      loadOrders();
+    }
+
+    function toggleDetail(id) {
+      document.getElementById('detail-' + id).classList.toggle('show');
+    }
+
+    function filterByPhone(phone) {
+      document.getElementById('search-input').value = phone;
+      document.getElementById('status-filter').value = '';
+      document.getElementById('payment-filter').value = '';
+      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.cat-tab[data-cat=""]').classList.add('active');
+      loadOrders();
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>
+
+

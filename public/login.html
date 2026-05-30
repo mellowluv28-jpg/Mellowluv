@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Mellowluv</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .login-page { min-height: calc(100vh - 200px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-box { background: #fff; border-radius: 20px; padding: 40px 30px; max-width: 400px; width: 100%; box-shadow: 0 8px 32px rgba(233,30,99,0.1); text-align: center; }
+    .login-box h2 { color: var(--pink); font-size: 1.6rem; margin-bottom: 8px; }
+    .login-box .subtitle { color: #888; font-size: .9rem; margin-bottom: 25px; }
+    .login-box .form-group { margin-bottom: 15px; text-align: left; }
+    .login-box .form-group label { display: block; font-weight: 600; color: #555; margin-bottom: 4px; font-size: .85rem; }
+    .login-box .form-group input { width: 100%; padding: 12px 15px; border: 2px solid #ffe0ec; border-radius: 12px; font-size: 1rem; outline: none; transition: border-color .3s; box-sizing: border-box; }
+    .login-box .form-group input:focus { border-color: var(--pink); }
+    .login-box .btn-pink { width: 100%; padding: 14px; font-size: 1.05rem; border-radius: 12px; margin-top: 10px; }
+    .login-box .toggle-text { margin-top: 18px; font-size: .9rem; color: #888; }
+    .login-box .toggle-text a { color: var(--pink); cursor: pointer; text-decoration: underline; }
+    .login-box .error-msg { color: #e91e63; font-size: .85rem; margin-top: 10px; min-height: 20px; }
+    .login-box .success-msg { color: #2e7d32; font-size: .85rem; margin-bottom: 10px; }
+    .login-box .password-hint { font-size: .75rem; color: #aaa; margin-top: 2px; }
+    .login-box .points-preview { background: #fce4ec; border-radius: 12px; padding: 15px; margin-top: 20px; }
+    .login-box .points-preview p { margin: 3px 0; font-size: .85rem; color: #555; }
+    .back-link { display: inline-block; margin-top: 15px; color: var(--pink); text-decoration: none; font-size: .9rem; }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">🌸 Mellowluv</a>
+    <nav>
+      <a href="thrift.html">Thrift</a>
+      <a href="jewelry.html">Jewelry</a>
+      <a href="tracking.html">Track</a>
+      <a href="cart.html" class="cart-link">Cart <span id="cartBadge" class="cart-badge">0</span></a>
+    </nav>
+    <button class="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <div class="login-page">
+    <div class="login-box" id="loginBox">
+      <h2 id="formTitle">Welcome Back 💕</h2>
+      <p class="subtitle" id="formSubtitle">Sign in to access your account</p>
+      <div id="successMsg" class="success-msg"></div>
+      <div class="form-group">
+        <label for="loginName" id="nameLabel">Full Name</label>
+        <input type="text" id="loginName" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label for="loginPhone">Phone Number</label>
+        <input type="tel" id="loginPhone" placeholder="10-digit phone number" maxlength="10" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+        <p class="password-hint" id="passwordHint">Min 4 characters</p>
+      </div>
+      <div id="errorMsg" class="error-msg"></div>
+      <button class="btn btn-pink" id="submitBtn" onclick="handleSubmit()">Sign In</button>
+      <p class="toggle-text" id="toggleText">Don't have an account? <a onclick="toggleForm()">Sign Up</a></p>
+      <div id="pointsPreview" class="points-preview" style="display:none;">
+        <p>🏆 Your Loyalty Points: <strong id="displayPoints">0</strong>/2</p>
+        <p id="displayNextDiscount"></p>
+      </div>
+      <a href="index.html" class="back-link">← Continue Browsing</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-col"><h4>🌸 Mellowluv</h4><p>Your aesthetic thrift & jewelry store</p></div>
+      <div class="footer-col"><h4>Quick Links</h4><a href="thrift.html">Thrift</a><a href="jewelry.html">Jewelry</a><a href="tracking.html">Track Order</a><a href="cart.html">Cart</a></div>
+      <div class="footer-col"><h4>Contact</h4><p>Instagram - @mellowluvv_</p><p>✉️ nishthapanchal287@gmail.com</p><p>Store ran by <strong>Nishtha Panchal</strong></p></div>
+    </div>
+    <p class="footer-bottom">© 2026 Mellowluv. All rights reserved.</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    let isLogin = true;
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect') || 'index.html';
+
+    function toggleForm() {
+      isLogin = !isLogin;
+      document.getElementById('formTitle').textContent = isLogin ? 'Welcome Back 💕' : 'Create Account 💕';
+      document.getElementById('formSubtitle').textContent = isLogin ? 'Sign in to access your account' : 'Join Mellowluv family!';
+      document.getElementById('submitBtn').textContent = isLogin ? 'Sign In' : 'Sign Up';
+      document.getElementById('toggleText').innerHTML = isLogin
+        ? "Don't have an account? <a onclick='toggleForm()'>Sign Up</a>"
+        : "Already have an account? <a onclick='toggleForm()'>Sign In</a>";
+      document.getElementById('nameLabel').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('loginName').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('passwordHint').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('errorMsg').textContent = '';
+      document.getElementById('successMsg').textContent = '';
+    }
+
+    async function handleSubmit() {
+      const phone = document.getElementById('loginPhone').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const name = document.getElementById('loginName').value.trim();
+      const url = isLogin ? '/api/customer/login' : '/api/customer/signup';
+      const body = isLogin ? { phone, password } : { name, phone, password };
+
+      document.getElementById('errorMsg').textContent = '';
+      if (!phone) { document.getElementById('errorMsg').textContent = 'Please enter your phone number'; return; }
+      if (!password) { document.getElementById('errorMsg').textContent = 'Please enter your password'; return; }
+      if (!isLogin && !name) { document.getElementById('errorMsg').textContent = 'Please enter your name'; return; }
+
+      try {
+        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (!res.ok) { document.getElementById('errorMsg').textContent = data.error; return; }
+        localStorage.setItem('mellowluv_token', data.token);
+        localStorage.setItem('mellowluv_customer', JSON.stringify(data.customer));
+        if (isLogin) {
+          document.getElementById('successMsg').textContent = 'Signed in successfully! Redirecting...';
+          setTimeout(() => window.location.href = redirect, 800);
+        } else {
+          document.getElementById('successMsg').textContent = 'Account created! Signed in successfully! Redirecting...';
+          setTimeout(() => window.location.href = redirect, 800);
+        }
+      } catch { document.getElementById('errorMsg').textContent = 'Something went wrong. Try again.'; }
+    }
+
+    // If already logged in, show points
+    async function checkSession() {
+      const token = localStorage.getItem('mellowluv_token');
+      if (!token) return;
+      try {
+        const res = await fetch('/api/customer/session', { headers: { 'x-customer-token': token } });
+        const data = await res.json();
+        if (data.loggedIn) {
+          document.getElementById('loginName').value = data.customer.name;
+          document.getElementById('loginPhone').value = data.customer.phone;
+          document.getElementById('pointsPreview').style.display = 'block';
+          document.getElementById('displayPoints').textContent = data.customer.points;
+          document.getElementById('displayNextDiscount').textContent =
+            data.customer.can_use_50_off
+              ? '🎉 You qualify for 50% off on your next order!'
+              : `📦 ${data.customer.points_to_50} more order(s) for 50% off`;
+        }
+      } catch {}
+    }
+
+    checkSession();
+    toggleForm(); // set initial visibility
+  </script>
+</body>
+</html>

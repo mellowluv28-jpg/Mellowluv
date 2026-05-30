@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Track Order - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .track-section { padding: 40px 0; min-height: 60vh; }
+    .track-box {
+      max-width: 520px; margin: 0 auto; background: white; border-radius: 24px;
+      padding: 30px; border: 2px solid #f5d6de; box-shadow: 0 4px 30px rgba(232,160,180,0.08);
+      text-align: center; animation: pop 0.4s ease;
+    }
+    .track-box h1 { font-size: 24px; margin-bottom: 4px; color: #5a4a4a; }
+    .track-box h1 span { color: #e8a0b4; }
+    .track-box p.sub { color: #b0878f; font-size: 14px; margin-bottom: 20px; }
+    .track-form { display: flex; flex-direction: column; gap: 12px; }
+    .track-form input { padding: 14px 16px; border: 2px solid #f5d6de; border-radius: 14px; font-size: 15px; background: #fff8f9; color: #5a4a4a; font-family: inherit; transition: border-color 0.3s; }
+    .track-form input:focus { outline: none; border-color: #e8a0b4; box-shadow: 0 0 0 3px rgba(232,160,180,0.1); }
+    .track-form .btn-track {
+      padding: 14px; background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a;
+      border: 2px solid #e8a0b4; border-radius: 14px; font-size: 16px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease;
+    }
+    .track-form .btn-track:active { transform: scale(0.96); }
+    .track-result { display: none; margin-top: 20px; text-align: left; }
+    .track-result.show { display: block; }
+    .order-card {
+      background: white; border: 2px solid #f5d6de; border-radius: 18px;
+      padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(232,160,180,0.06);
+    }
+    .order-card .oc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .order-card .oc-id { font-weight: 800; color: #5a4a4a; font-size: 15px; }
+    .order-card .oc-date { color: #b0878f; font-size: 12px; }
+    .order-card .oc-info { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 13px; margin-bottom: 12px; }
+    .order-card .oc-info .l { color: #b0878f; }
+    .order-card .oc-info .v { color: #5a4a4a; font-weight: 600; text-align: right; }
+    .track-steps { display: flex; flex-direction: column; gap: 4px; }
+    .track-step {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+      border-radius: 12px; font-size: 13px; font-weight: 600; transition: all 0.3s ease;
+      border: 2px solid #f5d6de; background: #fff8f9;
+    }
+    .track-step .step-icon { font-size: 20px; width: 32px; text-align: center; }
+    .track-step .step-label { flex: 1; color: #b0878f; }
+    .track-step.active { border-color: #e8a0b4; background: #fef4f6; }
+    .track-step.active .step-label { color: #5a4a4a; font-weight: 700; }
+    .track-step.done { border-color: #c8e6c9; background: #e8f5e9; }
+    .track-step.done .step-label { color: #2e7d32; }
+    .track-id-display { margin-top: 8px; background: #fff8e1; border: 2px solid #ffe082; border-radius: 10px; padding: 10px 14px; font-size: 13px; text-align: center; }
+    .track-id-display strong { color: #f57f17; }
+    .track-id-display code { background: white; padding: 4px 10px; border-radius: 6px; font-size: 15px; font-weight: 700; color: #e65100; display: inline-block; margin-top: 4px; letter-spacing: 0.5px; }
+    .track-error { display: none; color: #d4808a; font-size: 14px; margin-top: 15px; padding: 12px; background: #fef4f6; border-radius: 12px; }
+    .track-error.show { display: block; }
+    .no-orders { text-align: center; padding: 30px 0; color: #b0878f; font-size: 15px; }
+    @media (max-width: 480px) {
+      .track-box { padding: 20px 16px; }
+      .order-card .oc-info { grid-template-columns: 1fr; }
+      .order-card .oc-info .v { text-align: left; }
+    }
+  </style>
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="track-section">
+    <div class="container">
+      <div class="track-box animate-pop">
+        <h1>📦 Track <span>Your Order</span></h1>
+        <p class="sub">Enter your phone number to see all your orders 🐱</p>
+        <div class="track-form">
+          <input type="tel" id="track-phone" placeholder="Phone Number (10 digits)" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
+          <button class="btn-track" onclick="trackOrders()">🔍 Find My Orders</button>
+        </div>
+        <div class="track-result" id="track-result"></div>
+        <div class="track-error" id="track-error"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    const STATUS_STEPS = [
+      { key: 'unverified', icon: '📝', label: 'Order Placed — Awaiting Verification' },
+      { key: 'verified', icon: '✅', label: 'Payment Verified! Working on It' },
+      { key: 'in_making', icon: '🎨', label: 'In the Making — Getting Ready!' },
+      { key: 'dispatched', icon: '🚚', label: 'Dispatched! Tracking ID Below 🎉' }
+    ];
+
+    async function trackOrders() {
+      const phone = document.getElementById('track-phone').value.trim();
+      const resultDiv = document.getElementById('track-result');
+      const errorDiv = document.getElementById('track-error');
+      errorDiv.classList.remove('show');
+      resultDiv.classList.remove('show');
+      resultDiv.innerHTML = '';
+
+      if (!phone) {
+        errorDiv.textContent = 'Please enter your phone number 🌸';
+        errorDiv.classList.add('show');
+        return;
+      }
+      if (!/^[0-9]{10}$/.test(phone)) {
+        errorDiv.textContent = 'Phone number must be exactly 10 digits 🌸';
+        errorDiv.classList.add('show');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/orders/track?phone=' + encodeURIComponent(phone));
+        const data = await res.json();
+        if (!res.ok) {
+          errorDiv.textContent = data.error || 'No orders found for this number 🐱';
+          errorDiv.classList.add('show');
+          return;
+        }
+
+        resultDiv.innerHTML = '<div style="font-size:14px;color:#b0878f;margin-bottom:16px;text-align:center;">Found <strong style="color:#e8a0b4;">' + data.length + '</strong> order(s) 🎀</div>' +
+          data.map(o => renderOrderCard(o)).join('');
+        resultDiv.classList.add('show');
+      } catch {
+        errorDiv.textContent = 'Network error. Please try again later 🐱';
+        errorDiv.classList.add('show');
+      }
+    }
+
+    function renderOrderCard(o) {
+      const d = new Date(o.created_at);
+      const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const status = o.tracking_status || 'unverified';
+      const steps = (o.product_category === 'thrift')
+        ? STATUS_STEPS.filter(s => s.key !== 'in_making')
+        : STATUS_STEPS;
+      const statusIndex = steps.findIndex(s => s.key === status);
+
+      const stepsHtml = steps.map((s, i) => {
+        let cls = '';
+        if (i < statusIndex) cls = 'done';
+        else if (i === statusIndex) cls = 'active';
+        const icon = i < statusIndex ? '✅' : (i === statusIndex ? s.icon : '⭕');
+        const label = i < statusIndex ? s.label + ' ✓' : s.label;
+        return '<div class="track-step ' + cls + '"><span class="step-icon">' + icon + '</span><span class="step-label">' + label + '</span></div>';
+      }).join('');
+
+      const trackIdHtml = status === 'dispatched' && o.tracking_id
+        ? '<div class="track-id-display">📬 <strong>India Post Tracking ID:</strong><br><code>' + o.tracking_id + '</code></div>'
+        : '';
+
+      return '<div class="order-card">' +
+        '<div class="oc-header"><span class="oc-id"># ' + o.id + '</span><span class="oc-date">' + dateStr + '</span></div>' +
+        '<div class="oc-info">' +
+          '<span class="l">👤 Customer</span><span class="v">' + o.customer_name + '</span>' +
+          '<span class="l">🛒 Product</span><span class="v">' + o.product_name + '</span>' +
+          '<span class="l">🔢 Qty</span><span class="v">' + (o.quantity || 1) + '</span>' +
+          '<span class="l">💰 Total</span><span class="v">₹' + o.total + '</span>' +
+        '</div>' +
+        '<div class="track-steps">' + stepsHtml + '</div>' +
+        trackIdHtml +
+      '</div>';
+    }
+
+    document.getElementById('track-phone').addEventListener('keydown', e => { if (e.key === 'Enter') trackOrders(); });
+  </script>
+</body>
+</html>

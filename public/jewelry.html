@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jewelry - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html" class="active">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="page-header">
+    <div class="container">
+      <h1>💎 <span>Mellowluv</span> Jewelry</h1>
+      <p>Handmade jewelleries that suit all your aesthetics.</p>
+    </div>
+  </section>
+
+  <div class="cat-deco">✨ 🐱 ✨ 🐱 ✨</div>
+
+  <section class="products-section">
+    <div class="container">
+      <div class="sort-bar" style="margin-bottom:8px;">
+        <input type="text" id="search-jewelry" placeholder="🔍 Search products..." oninput="searchProducts('search-jewelry','jewelry-products')" style="flex:1;min-width:140px;padding:9px 14px;border:2px solid #f5d6de;border-radius:12px;font-size:14px;background:white;color:#5a4a4a;font-family:inherit;">
+      </div>
+      <div class="sort-bar">
+        <label for="sort-jewelry">Sort by:</label>
+        <select id="sort-jewelry" onchange="updateSort('jewelry', 'jewelry-products', this)">
+          <option value="">Newest First</option>
+          <option value="price_asc">Price: Low → High</option>
+          <option value="price_desc">Price: High → Low</option>
+        </select>
+      </div>
+      <div class="products-grid" id="jewelry-products"></div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    loadProducts('jewelry', 'jewelry-products');
+    document.querySelectorAll('.btn-buy, .btn').forEach(el => {
+      el.addEventListener('click', function(e) {
+        this.style.transform = 'scale(0.97)';
+        setTimeout(() => { this.style.transform = ''; }, 150);
+      });
+    });
+  </script>
+</body>
+</html>

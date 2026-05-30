@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Mellowluv Admin</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <style>
+    .admin-layout { display: flex; }
+    .sidebar { width: 240px; background: linear-gradient(180deg, #fef4f6, #fce4ec); min-height: 100vh; padding: 30px 0; border-right: 2px solid #f5d6de; }
+    .sidebar h3 { color: #e8a0b4; padding: 0 20px; margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+    .sidebar a { display: block; padding: 12px 20px; color: #b0878f; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; font-weight: 500; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(232,160,180,0.1); color: #e8a0b4; border-left-color: #e8a0b4; }
+    .main-content { flex: 1; padding: 30px; background: #fffbfb; }
+    .main-content h1 { font-size: 26px; margin-bottom: 20px; color: #5a4a4a; }
+    .settings-card { background: white; border-radius: 18px; box-shadow: 0 2px 20px rgba(232,160,180,0.08); padding: 30px; max-width: 600px; border: 2px solid #f5d6de; }
+    .settings-card .form-group { margin-bottom: 18px; }
+    .settings-card label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #b0878f; margin-bottom: 5px; }
+    .settings-card input { width: 100%; padding: 10px 15px; border: 2px solid #f5d6de; border-radius: 12px; font-size: 14px; color: #5a4a4a; background: #fffdfc; }
+    .settings-card input:focus { outline: none; border-color: #e8a0b4; box-shadow: 0 0 0 3px rgba(245,197,66,0.1); }
+    .settings-card .btn-submit { width: 100%; margin-top: 10px; }
+    .success-msg { color: #7fb87f; font-size: 14px; font-weight: 600; display: none; margin-top: 12px; text-align: center; }
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; display: flex; gap: 5px; padding: 15px; overflow-x: auto; }
+      .sidebar h3 { display: none; }
+      .sidebar a { padding: 8px 12px; font-size: 12px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <h3>🌸 Mellowluv</h3>
+      <a href="/admin/dashboard.html">📊 Dashboard</a>
+      <a href="/admin/verify.html">✅ Verify Payments</a>
+      <a href="/admin/orders.html">📦 Orders</a>
+      <a href="/admin/inventory.html">🏷️ Inventory</a>
+      <a href="/admin/loyalty.html">⭐ Loyalty</a>
+      <a href="/admin/settings.html" class="active">⚙️ Settings</a>
+
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
+    </div>
+    <div class="main-content">
+      <h1>⚙️ Settings</h1>
+      <div class="settings-card">
+        <form id="settings-form" onsubmit="saveSettings(event)">
+          <div class="form-group">
+            <label>💳 UPI ID</label>
+            <input type="text" id="upi_id" placeholder="e.g. 8401535686@fam">
+          </div>
+          <div class="form-group">
+            <label>🏪 UPI Name</label>
+            <input type="text" id="upi_name" placeholder="e.g. Mellowluv">
+          </div>
+          <div class="form-group">
+            <label>🚚 Shipping Charge (₹)</label>
+            <input type="number" id="shipping_charge" step="1" placeholder="e.g. 50">
+          </div>
+          <hr style="border:none; border-top:2px solid #ffe8e4; margin:20px 0;">
+          <div class="form-group">
+            <label>📸 Contact Instagram (shown to customers)</label>
+            <input type="text" id="contact_instagram" placeholder="e.g. @mellowluvv_">
+          </div>
+          <hr style="border:none; border-top:2px solid #ffe8e4; margin:20px 0;">
+          <div class="form-group">
+            <label>📬 ntfy.sh Topic <span style="font-weight:400;text-transform:none;color:#b0878f;">(for phone notifications)</span></label>
+            <input type="text" id="ntfy_topic" placeholder="e.g. mellowluv-orders">
+            <p style="font-size:11px;color:#b0878f;margin-top:4px;">Install <strong>ntfy</strong> app on your phone, subscribe to this topic → get push notifications on new orders! <a href="https://ntfy.sh" target="_blank" style="color:#e8a0b4;">Learn more</a></p>
+          </div>
+          <hr style="border:none; border-top:2px solid #ffe8e4; margin:20px 0;">
+          <div class="form-group">
+            <label>👤 Admin Username</label>
+            <input type="text" id="admin_username" placeholder="Admin username">
+          </div>
+          <div class="form-group">
+            <label>🔑 Admin Password (leave blank to keep current)</label>
+            <input type="text" id="admin_password" placeholder="New password">
+          </div>
+          <button type="submit" class="btn-submit">Save Settings ✨</button>
+          <div class="success-msg" id="success-msg">✅ Settings saved successfully! 🌸</div>
+        </form>
+        <div style="margin-top:24px;padding-top:20px;border-top:2px solid #f5d6de;">
+          <p style="font-size:12px;color:#b0878f;text-align:center;">💾 Database is managed in Supabase. Use the Supabase dashboard for backups.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) window.location.href = '/admin/login.html';
+
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/admin/settings', { headers: { 'Authorization': 'Bearer ' + token } });
+        const s = await res.json();
+        document.getElementById('upi_id').value = s.upi_id || '';
+        document.getElementById('upi_name').value = s.upi_name || '';
+        document.getElementById('shipping_charge').value = s.shipping_charge || '';
+        document.getElementById('contact_instagram').value = s.contact_instagram || '';
+        document.getElementById('ntfy_topic').value = s.ntfy_topic || '';
+        document.getElementById('admin_username').value = s.admin_username || '';
+      } catch {}
+    }
+
+    async function saveSettings(event) {
+      event.preventDefault();
+      const btn = event.target.querySelector('.btn-submit');
+      btn.textContent = 'Saving...';
+      const ci = document.getElementById('contact_instagram').value;
+      const data = {
+        upi_id: document.getElementById('upi_id').value,
+        upi_name: document.getElementById('upi_name').value,
+        shipping_charge: document.getElementById('shipping_charge').value,
+        contact_instagram: ci,
+        admin_username: document.getElementById('admin_username').value
+      };
+      const pwd = document.getElementById('admin_password').value;
+      if (pwd) data.admin_password = pwd;
+      await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      btn.textContent = 'Save Settings ✨';
+      const msg = document.getElementById('success-msg');
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+      document.getElementById('admin_password').value = '';
+    }
+
+    loadSettings();
+  </script>
+</body>
+</html>
+
+

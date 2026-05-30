@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <ul class="nav-links">
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="subtitle animate-fade-up">Curated Finds & Handcrafted Elegance</div>
+      <h1 class="animate-pop">Welcome to <span>Mellowluv</span> 🐱</h1>
+      <div class="deco">🌸✨🐱✨🌸</div>
+      <p class="animate-fade-up">Update your style with our curated thrift pieces and handmade jewellery made by love.</p>
+    </div>
+  </section>
+
+  <section class="categories">
+    <div class="container">
+      <div id="upcoming-banner" class="upcoming-banner">
+        <div class="upcoming-title"><span>📅</span> UPCOMING DROPS</div>
+        <div id="upcoming-list"></div>
+      </div>
+      <div class="grid" style="margin-top:30px;">
+        <a href="/public/thrift.html" class="category-card animate-fade-up">
+          <div class="card-img">🛍️</div>
+          <div class="card-body">
+            <h3>Thrift</h3>
+            <p>Curated pieces, up-cycled fits and imported clothing.</p>
+            <span class="btn">Explore Thrift ✨</span>
+          </div>
+        </a>
+        <a href="/public/jewelry.html" class="category-card animate-fade-up" style="animation-delay:0.2s">
+          <div class="card-img">💎</div>
+          <div class="card-body">
+            <h3>Jewelry</h3>
+            <p>Handmade adorns made with love just for you. Customs accepted.</p>
+            <span class="btn">Explore Jewelry ✨</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+      <div style="text-align:center;margin-top:30px;">
+        <a href="/public/loyalty.html" class="btn" style="margin-right:10px;">⭐ Check Loyalty</a>
+        <a href="/public/thrift.html" class="btn">📅 Pre-Book Drops</a>
+      </div>
+
+      <div id="offer-popup" class="offer-popup">
+    <div class="offer-popup-header">🔥 OFFER ALERT!</div>
+    <div id="offer-popup-body"></div>
+    <button class="offer-popup-close" onclick="dismissOffer()">✕</button>
+  </div>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    document.querySelectorAll('.btn, .btn-buy, .btn-submit, .category-card').forEach(el => {
+      el.addEventListener('click', function(e) {
+        this.style.transform = 'scale(0.97)';
+        setTimeout(() => { this.style.transform = ''; }, 150);
+      });
+    });
+
+    async function loadUpcomingDrops() {
+      try {
+        const res = await fetch('/api/products/upcoming');
+        const upcoming = await res.json();
+        const banner = document.getElementById('upcoming-banner');
+        const list = document.getElementById('upcoming-list');
+        if (upcoming.length === 0) { banner.style.display = 'none'; return; }
+        banner.classList.add('show');
+        list.innerHTML = '<div class="upcoming-grid">' + upcoming.map(p => {
+          const d = new Date(p.scheduled_at);
+          const timeStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ' at ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST';
+          return '<div class="upcoming-item" style="cursor:default;">' +
+            '<div class="upcoming-img" style="' + (p.image ? "background-image: url(\'" + p.image + "\'); background-size: cover; background-position: center;" : "") + '">' + (p.image ? '' : '📷') + '</div>' +
+            '<div class="upcoming-body">' +
+            '<span class="upcoming-name">' + p.name + '</span>' +
+            '<span class="upcoming-price">' + (p.offer_price ? '<s>₹' + p.price + '</s> <strong>₹' + p.offer_price + '</strong>' : '₹' + p.price) + '</span>' +
+            '<span class="upcoming-when">📅 ' + timeStr + '</span>' +
+            '<a href="/public/prebook.html?product=' + p.id + '" class="btn" style="margin-top:8px;display:inline-block;padding:8px 16px;font-size:13px;">📅 Pre-Book Now</a>' +
+            '</div></div>';
+        }).join('') + '</div>';
+      } catch {}
+    }
+
+    async function loadOfferPopup() {
+      try {
+        const res = await fetch('/api/products?sort=price_asc');
+        const products = await res.json();
+        const liveProducts = products.filter(p => p.is_live !== false);
+        const offers = liveProducts.filter(p => p.offer_price && p.offer_price > 0);
+        if (offers.length === 0) { document.getElementById('offer-popup').style.display = 'none'; return; }
+        const body = document.getElementById('offer-popup-body');
+        body.innerHTML = offers.map(o => `
+          <a href="/public/checkout.html?product=${o.id}" class="offer-popup-item">
+            <span class="offer-popup-name">${o.name}</span>
+            <span class="offer-popup-price"><s>₹${o.price}</s> <strong>₹${o.offer_price}</strong></span>
+            ${o.offer_note ? `<span class="offer-popup-note">${o.offer_note}</span>` : ''}
+          </a>
+        `).join('');
+        setTimeout(() => document.getElementById('offer-popup').classList.add('show'), 3000);
+      } catch {}
+    }
+
+    function dismissOffer() {
+      document.getElementById('offer-popup').classList.remove('show');
+    }
+
+    loadUpcomingDrops();
+    loadOfferPopup();
+  </script>
+</body>
+</html>

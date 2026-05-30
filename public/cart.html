@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .cart-section { padding: 30px 0; min-height: 50vh; }
+    .cart-box { max-width: 600px; margin: 0 auto; }
+    .cart-box h1 { font-size: 24px; color: #5a4a4a; margin-bottom: 4px; }
+    .cart-box h1 span { color: #e8a0b4; }
+    .cart-box .sub { color: #b0878f; font-size: 14px; margin-bottom: 20px; }
+    .cart-items { display: flex; flex-direction: column; gap: 12px; }
+    .cart-item { display: flex; gap: 14px; align-items: center; background: white; border: 2px solid #f5d6de; border-radius: 16px; padding: 14px 16px; }
+    .cart-item .ci-img { width: 60px; height: 60px; border-radius: 12px; background: linear-gradient(135deg,#fef4f6,#fce4ec); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; overflow:hidden; }
+    .cart-item .ci-img img { width:100%; height:100%; object-fit:cover; }
+    .cart-item .ci-info { flex: 1; }
+    .cart-item .ci-name { font-weight: 700; color: #5a4a4a; font-size: 14px; }
+    .cart-item .ci-price { color: #e8a0b4; font-weight: 600; font-size: 14px; }
+    .cart-item .ci-actions { display: flex; gap: 8px; align-items: center; }
+    .cart-item .ci-actions button { width: 30px; height: 30px; border: 2px solid #f5d6de; border-radius: 8px; background: white; cursor: pointer; font-size: 16px; font-weight: 700; color: #5a4a4a; transition: all 0.2s; display:flex;align-items:center;justify-content:center; }
+    .cart-item .ci-actions button:hover { background: #fce4ec; border-color: #e8a0b4; }
+    .cart-item .ci-actions button:active { transform: scale(0.9); }
+    .cart-item .ci-actions .ci-qty { font-weight: 700; color: #5a4a4a; min-width: 24px; text-align: center; }
+    .cart-item .ci-remove { background: none; border: none; color: #d4808a; cursor: pointer; font-size: 16px; padding: 6px; border-radius: 8px; transition: all 0.2s; }
+    .cart-item .ci-remove:hover { background: #fef4f6; }
+    .cart-summary { background: white; border: 2px solid #f5d6de; border-radius: 16px; padding: 20px; margin-top: 20px; }
+    .cart-summary .total-line { display:flex;justify-content:space-between;padding:6px 0;font-size:14px;color:#5a4a4a; }
+    .cart-summary .total-line.grand { font-size:18px;font-weight:700;border-top:2px solid #f5d6de;padding-top:10px;margin-top:4px;color:#e8a0b4; }
+    .cart-empty { text-align:center; padding: 50px 0; color: #b0878f; }
+    .cart-empty .big { font-size:48px; margin-bottom:10px; }
+    .btn-checkout { width:100%;margin-top:16px; }
+    @media (max-width:480px) { .cart-item { flex-wrap:wrap; } }
+  </style>
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="cart-section">
+    <div class="container">
+      <div class="cart-box">
+        <h1>🛒 Your <span>Cart</span></h1>
+        <p class="sub">Review your items before checking out 🐱</p>
+        <div id="cart-content"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    let stockCache = {};
+
+    async function fetchStock() {
+      const raw = localStorage.getItem('mellowluv_cart');
+      const cart = raw ? JSON.parse(raw) : { items: [] };
+      for (const item of cart.items) {
+        try {
+          const r = await fetch('/api/products/' + item.id);
+          const p = await r.json();
+          stockCache[item.id] = p.stock || 0;
+        } catch { stockCache[item.id] = 99; }
+      }
+    }
+
+    function renderCart() {
+      const raw = localStorage.getItem('mellowluv_cart');
+      const cart = raw ? JSON.parse(raw) : { items: [] };
+      const content = document.getElementById('cart-content');
+
+      if (cart.items.length === 0) {
+        content.innerHTML = '<div class="cart-empty"><div class="big">🛒</div><p>Your cart is empty</p><a href="/" class="btn-submit" style="display:inline-block;margin-top:16px;text-decoration:none;">Browse Store 🐱</a></div>';
+        return;
+      }
+
+      let subtotal = 0;
+      const itemsHtml = cart.items.map((item, i) => {
+        const price = (item.offer_price && item.offer_price > 0) ? item.offer_price : item.price;
+        const lineTotal = price * item.qty;
+        subtotal += lineTotal;
+        const maxStock = stockCache[item.id] ?? 99;
+        const atMax = item.qty >= maxStock;
+        const imgHtml = item.image ? `<img src="${item.image}" alt="${item.name}">` : '📷';
+        return `<div class="cart-item" data-index="${i}">
+          <div class="ci-img">${imgHtml}</div>
+          <div class="ci-info">
+            <div class="ci-name">${item.name}</div>
+            <div class="ci-price">₹${price} × ${item.qty} = ₹${lineTotal}</div>
+            <div style="font-size:11px;color:#b0878f;">In stock: ${maxStock} ${atMax ? '— max reached' : ''}</div>
+          </div>
+          <div class="ci-actions">
+            <button onclick="changeQty(${i}, -1)">−</button>
+            <span class="ci-qty">${item.qty}</span>
+            <button onclick="changeQty(${i}, 1)" ${atMax ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>+</button>
+            <button class="ci-remove" onclick="removeItem(${i})">✕</button>
+          </div>
+        </div>`;
+      }).join('');
+
+      const shipping = 50;
+      const total = subtotal + shipping;
+
+      content.innerHTML = `<div class="cart-items">${itemsHtml}</div>
+        <div class="cart-summary">
+          <div class="total-line"><span>Subtotal</span><span>₹${subtotal}</span></div>
+          <div class="total-line"><span>Shipping</span><span>₹${shipping}</span></div>
+          <div class="total-line grand"><span>Total</span><span>₹${total}</span></div>
+          <button class="btn-submit btn-checkout" onclick="checkoutCart()">Proceed to Checkout 🌸</button>
+        </div>
+        <p style="text-align:center;margin-top:10px;"><a href="javascript:void(0)" onclick="clearCart()" style="color:#d4808a;font-size:13px;">🗑️ Clear Cart</a></p>`;
+    }
+
+    function changeQty(index, delta) {
+      let cart = JSON.parse(localStorage.getItem('mellowluv_cart') || '{"items":[]}');
+      if (cart.items[index]) {
+        const newQty = cart.items[index].qty + delta;
+        const maxStock = stockCache[cart.items[index].id] ?? 99;
+        if (newQty > maxStock) { alert('Only ' + maxStock + ' in stock!'); return; }
+        cart.items[index].qty = Math.max(1, newQty);
+        localStorage.setItem('mellowluv_cart', JSON.stringify(cart));
+        renderCart();
+        updateCartBadge();
+      }
+    }
+
+    function removeItem(index) {
+      let cart = JSON.parse(localStorage.getItem('mellowluv_cart') || '{"items":[]}');
+      cart.items.splice(index, 1);
+      localStorage.setItem('mellowluv_cart', JSON.stringify(cart));
+      renderCart();
+      updateCartBadge();
+    }
+
+    function clearCart() {
+      if (!confirm('Clear all items from cart?')) return;
+      localStorage.removeItem('mellowluv_cart');
+      renderCart();
+      updateCartBadge();
+    }
+
+    function checkoutCart() {
+      window.location.href = '/public/checkout.html?cart=1';
+    }
+
+    (async () => { await fetchStock(); renderCart(); })();
+  </script>
+</body>
+</html>

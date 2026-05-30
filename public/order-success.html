@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Placed - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <style>
+    .order-number { font-size: 22px; font-weight: 800; color: #c98a9a; background: #fce4ec; display: inline-block; padding: 6px 18px; border-radius: 12px; margin: 8px 0; letter-spacing: 1px; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="checkout-section">
+    <div class="container">
+      <div class="payment-section animate-pop">
+        <h2>Order Placed! 🐱✨</h2>
+        <p>Yay! Your order has been received. Complete payment to confirm it 🌸</p>
+        <div class="order-number">Order #<span id="display-order-id"></span></div>
+        <div class="amount" id="display-amount"></div>
+        <div class="qr-container">
+          <img id="qr-image" src="" alt="Scan to pay">
+        </div>
+        <div class="upi-details">
+          Pay to UPI ID: <strong id="display-upi"></strong>
+        </div>
+        <div id="loyalty-success" style="display:none;margin-bottom:14px;background:#fff8e1;border:2px solid #ffe082;border-radius:12px;padding:12px;font-size:13px;color:#5a4a4a;"></div>
+        <p class="note">After payment, please wait for manual verification. You will be notified once confirmed.</p>
+        <button class="btn-paid" onclick="markPaid()">I Have Paid ✅</button>
+        <p class="note" id="paid-message" style="display:none; color:#7fb87f; font-weight:600; margin-top:15px;">
+          Thank you! Your payment will be verified shortly 🐱💕
+        </p>
+
+        <div id="contact-section" style="margin-top:25px; padding-top:20px; border-top:2px dashed #ffe4e1; text-align:center;">
+          <p style="color:#b5838d; font-size:13px; margin-bottom:8px;">📬 For any order queries, contact us:</p>
+          <p style="font-size:18px; font-weight:700; color:#e8a0b4;"><span id="contact-insta">Instagram - @mellowluvv_</span></p>
+          <p style="font-size:15px; color:#5a4a4a; font-weight:500;">✉️ nishthapanchal287@gmail.com</p>
+          <p style="font-size:14px; color:#5a4a4a; font-weight:500;">Store ran by <strong>Nishtha Panchal</strong></p>
+          <p style="color:#b5838d; font-size:12px; margin-top:10px;">📦 Tracking ID will be shared on Instagram as soon as your order is dispatched!</p>
+        </div>
+
+        <p class="note" style="margin-top:10px;"><a href="/public/tracking.html" style="color:#c98a9a; font-weight:700;">📦 Track Your Order</a></p>
+        <p class="note" style="margin-top:10px;"><a href="/" style="color:#e8a0b4; font-weight:600;">← Back to Home</a></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('qr-image').src = decodeURIComponent(params.get('qr') || '');
+    document.getElementById('display-upi').textContent = decodeURIComponent(params.get('upi') || '');
+    document.getElementById('display-amount').textContent = '₹' + (params.get('amount') || '0');
+    document.getElementById('display-order-id').textContent = params.get('order') || 'N/A';
+
+    const loyaltyPts = parseInt(params.get('lp') || '0');
+    const loyaltyWillEarn = parseInt(params.get('lw') || '0');
+    if (loyaltyWillEarn > 0) {
+      const el = document.getElementById('loyalty-success');
+      el.style.display = 'block';
+      el.innerHTML = `<strong>⭐ Loyalty Points:</strong> You'll earn <strong>${loyaltyWillEarn}</strong> point${loyaltyWillEarn > 1 ? 's' : ''} from this order! 🎉<br><small style="color:#b0878f;">🎁 Higher loyalty = higher chances of winning freebies!</small>`;
+    }
+
+    const contactInsta = decodeURIComponent(params.get('ci') || '');
+    if (contactInsta) {
+      document.getElementById('contact-insta').textContent = 'Instagram - ' + contactInsta;
+    }
+
+    async function markPaid() {
+      const orderId = params.get('order');
+      const btn = document.querySelector('.btn-paid');
+      if (!orderId) { alert('Order ID not found. Please re-order.'); return; }
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+      try {
+        const res = await fetch('/api/orders/' + orderId + '/pay', { method: 'PUT' });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.error || 'Unknown error')); btn.disabled = false; btn.textContent = 'I Have Paid ✅'; return; }
+      } catch (err) {
+        alert('Network error. Please try again or DM @mellowluvv_ on Instagram.');
+        btn.disabled = false;
+        btn.textContent = 'I Have Paid ✅';
+        return;
+      }
+      btn.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        btn.style.display = 'none';
+        document.getElementById('paid-message').style.display = 'block';
+      }, 200);
+    }
+  </script>
+</body>
+</html>

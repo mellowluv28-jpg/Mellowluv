@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loyalty - Mellowluv Admin</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <style>
+    .admin-layout { display: flex; }
+    .sidebar { width: 240px; background: linear-gradient(180deg, #fef4f6, #fce4ec); min-height: 100vh; padding: 30px 0; border-right: 2px solid #f5d6de; }
+    .sidebar h3 { color: #e8a0b4; padding: 0 20px; margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+    .sidebar a { display: block; padding: 12px 20px; color: #b0878f; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; font-weight: 500; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(232,160,180,0.1); color: #e8a0b4; border-left-color: #e8a0b4; }
+    .main-content { flex: 1; padding: 30px; background: #fffbfb; }
+    .main-content h1 { font-size: 26px; margin-bottom: 4px; color: #5a4a4a; }
+    .main-content h1 span { color: #e8a0b4; }
+    .main-content .subtitle { color: #b0878f; font-size: 14px; margin-bottom: 25px; }
+    .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-box input { flex: 1; padding: 12px 16px; border: 2px solid #f5d6de; border-radius: 14px; font-size: 14px; background: white; color: #5a4a4a; font-family: inherit; }
+    .search-box input:focus { outline: none; border-color: #e8a0b4; }
+    .search-box button { padding: 12px 24px; background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a; border: 2px solid #e8a0b4; border-radius: 14px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .loyalty-card { background: white; border: 2px solid #f5d6de; border-radius: 18px; padding: 22px; box-shadow: 0 2px 12px rgba(232,160,180,0.06); max-width: 500px; }
+    .loyalty-card .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ffe8e4; font-size: 14px; }
+    .loyalty-card .row:last-child { border-bottom: none; }
+    .loyalty-card .row .l { color: #b0878f; }
+    .loyalty-card .row .r { color: #5a4a4a; font-weight: 600; }
+    .loyalty-card .badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+    .badge-ready { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .badge-soon { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table th { text-align: left; padding: 12px 10px; color: #b0878f; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #f5d6de; }
+    table td { padding: 10px; color: #5a4a4a; border-bottom: 1px solid #ffe8e4; }
+    table tr:hover td { background: #fff8f9; }
+    .empty-state { text-align: center; padding: 40px; color: #b0878f; }
+    @media (max-width: 768px) { .admin-layout { flex-direction: column; } .sidebar { width: 100%; min-height: auto; display: flex; gap: 5px; padding: 15px; overflow-x: auto; } .sidebar h3 { display: none; } .sidebar a { padding: 8px 12px; font-size: 12px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <h3>🌸 Mellowluv</h3>
+      <a href="/admin/dashboard.html">📊 Dashboard</a>
+      <a href="/admin/verify.html">✅ Verify Payments</a>
+      <a href="/admin/orders.html">📦 Orders</a>
+      <a href="/admin/inventory.html">🏷️ Inventory</a>
+      <a href="/admin/loyalty.html" class="active">⭐ Loyalty</a>
+      <a href="/admin/settings.html">⚙️ Settings</a>
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
+    </div>
+    <div class="main-content">
+      <h1>⭐ Loyalty <span>Management</span></h1>
+      <div class="subtitle">Check loyalty scores and discount eligibility by phone number</div>
+      <div class="search-box">
+        <input type="tel" id="search-phone" placeholder="Enter phone number to search..." maxlength="10" onkeydown="if(event.key==='Enter')searchLoyalty()">
+        <button onclick="searchLoyalty()">🔍 Search</button>
+        <button onclick="loadAll()" style="background:white;border:2px solid #f5d6de;color:#b0878f;">📋 All</button>
+      </div>
+      <div id="loyalty-result"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) window.location.href = '/admin/login.html';
+
+    async function searchLoyalty() {
+      const phone = document.getElementById('search-phone').value.trim();
+      if (!phone) return alert('Enter a phone number');
+      const resultDiv = document.getElementById('loyalty-result');
+      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      try {
+        const res = await fetch('/api/admin/loyalty?phone=' + encodeURIComponent(phone), {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) { resultDiv.innerHTML = '<div class="empty-state">No customer found with this phone</div>'; return; }
+        const d = await res.json();
+        const badge = d.discount_eligible ? '<span class="badge badge-ready">🎉 Discount Ready!</span>' : '<span class="badge badge-soon">' + d.orders_until_discount + ' order(s) to discount</span>';
+        const prebook = d.prebook_eligible ? '<span class="badge badge-ready">✅ Eligible</span>' : '<span class="badge badge-soon">🔒 Need ' + (3 - d.total_loyalty_score) + ' more</span>';
+        resultDiv.innerHTML = '<div class="loyalty-card">' +
+          '<h3 style="margin:0 0 14px;color:#5a4a4a;">👤 ' + (d.name || 'Unknown') + '</h3>' +
+          '<div class="row"><span class="l">📞 Phone</span><span class="r">' + d.phone + '</span></div>' +
+          '<div class="row"><span class="l">⭐ Total Loyalty Score</span><span class="r">' + d.total_loyalty_score + '</span></div>' +
+          '<div class="row"><span class="l">🔄 Points Toward Next Discount</span><span class="r">' + d.points_toward_next_discount + '/4</span></div>' +
+          '<div class="row"><span class="l">🏷️ 50% Discount Eligibility</span><span class="r">' + badge + '</span></div>' +
+          '<div class="row"><span class="l">📅 Pre-Booking</span><span class="r">' + prebook + '</span></div>' +
+          '<div class="row"><span class="l">💰 Discount Used</span><span class="r">' + (d.discount_used || 0) + ' times</span></div>' +
+          '<div style="margin-top:14px;padding:12px;background:#fef4f6;border-radius:12px;font-size:13px;color:#b0878f;">🎁 Higher loyalty score = higher chances of winning freebies!</div>' +
+        '</div>';
+      } catch { resultDiv.innerHTML = '<div class="empty-state">Error fetching data</div>'; }
+    }
+
+    async function loadAll() {
+      const resultDiv = document.getElementById('loyalty-result');
+      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      try {
+        const res = await fetch('/api/admin/loyalty', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) { resultDiv.innerHTML = '<div class="empty-state">Error loading</div>'; return; }
+        const data = await res.json();
+        if (data.length === 0) { resultDiv.innerHTML = '<div class="empty-state">No customers yet</div>'; return; }
+        resultDiv.innerHTML = '<table><thead><tr><th>Phone</th><th>Name</th><th>Loyalty Score</th><th>Discount Used</th><th>Next Discount In</th><th>Pre-Book</th></tr></thead><tbody>' +
+          data.map(c => {
+            const nextIn = 3 - (c.loyalty_points % 4);
+            const prebookOk = c.loyalty_points > 1;
+            return '<tr onclick="document.getElementById(\'search-phone\').value=\'' + c.phone + '\';searchLoyalty()" style="cursor:pointer;">' +
+              '<td>' + c.phone + '</td>' +
+              '<td>' + (c.name || '-') + '</td>' +
+              '<td><strong>' + c.loyalty_points + '</strong></td>' +
+              '<td>' + (c.discount_used || 0) + '</td>' +
+              '<td>' + (c.loyalty_points > 0 && c.loyalty_points % 4 === 3 ? '🎉 Now!' : nextIn + ' order(s)') + '</td>' +
+              '<td>' + (prebookOk ? '✅' : '🔒') + '</td>' +
+            '</tr>';
+          }).join('') + '</tbody></table>';
+      } catch { resultDiv.innerHTML = '<div class="empty-state">Error loading</div>'; }
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>

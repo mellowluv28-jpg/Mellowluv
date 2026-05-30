@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory - Mellowluv Admin</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <style>
+    .admin-layout { display: flex; }
+    .sidebar { width: 240px; background: linear-gradient(180deg, #fef4f6, #fce4ec); min-height: 100vh; padding: 30px 0; border-right: 2px solid #f5d6de; }
+    .sidebar h3 { color: #c98a9a; padding: 0 20px; margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+    .sidebar a { display: block; padding: 12px 20px; color: #b0878f; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; font-weight: 500; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(232,160,180,0.1); color: #d4808a; border-left-color: #e8a0b4; }
+    .main-content { flex: 1; padding: 30px; background: #fffbfb; }
+    .main-content h1 { font-size: 26px; margin-bottom: 20px; color: #5a4a4a; }
+    .btn-add {
+      padding: 10px 25px;
+      background: linear-gradient(135deg, #fce4ec, #fef4f6);
+      color: #d4808a;
+      border: 2px solid #e8a0b4;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-add:hover { background: linear-gradient(135deg, #e8a0b4, #fce4ec); color: white; transform: translateY(-2px); }
+    .btn-sm { padding: 5px 14px; border: none; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .btn-edit { background: #fce4ec; color: #c98a9a; }
+    .btn-delete { background: #fef4f6; color: #d4808a; }
+    .btn-sm:hover { opacity: 0.8; }
+    .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
+    .inv-card {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 2px 15px rgba(232,160,180,0.06);
+      border: 2px solid #f5d6de;
+      transition: all 0.3s ease;
+    }
+    .inv-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(232,160,180,0.12); }
+    .inv-card .inv-img { width: 100%; height: 190px; object-fit: cover; background: linear-gradient(135deg, #fef4f6, #fce4ec); display: flex; align-items: center; justify-content: center; color: #d4a0a0; font-size: 36px; }
+    .inv-card .inv-body { padding: 15px; }
+    .inv-card .inv-name { font-size: 15px; font-weight: 600; color: #5a4a4a; }
+    .inv-card .inv-price { color: #e8a0b4; font-weight: 700; font-size: 17px; }
+    .inv-card .inv-category { font-size: 11px; text-transform: uppercase; color: #d4a0a0; letter-spacing: 1px; }
+    .inv-card .inv-stock { font-size: 12px; margin: 6px 0; color: #b0878f; }
+    .inv-card .inv-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(90,74,74,0.3); align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 2px solid #f5d6de;
+      animation: pop 0.3s ease;
+    }
+    .modal-content h2 { margin-bottom: 20px; color: #5a4a4a; }
+    .modal-content .form-group { margin-bottom: 15px; }
+    .modal-content .form-group label { font-size: 12px; color: #b0878f; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .modal-content .form-group input, .modal-content .form-group textarea, .modal-content .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #f5d6de; border-radius: 12px; font-size: 14px; color: #5a4a4a; background: #fff8f9; font-family: inherit; }
+    .modal-content .form-group input:focus, .modal-content .form-group textarea:focus, .modal-content .form-group select:focus { outline: none; border-color: #e8a0b4; box-shadow: 0 0 0 3px rgba(232,160,180,0.1); }
+    .modal-content .btn-submit { width: 100%; }
+    .modal-content .close { float: right; font-size: 24px; cursor: pointer; color: #d4a0a0; transition: transform 0.3s; }
+    .modal-content .close:hover { transform: rotate(90deg); color: #d4808a; }
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; display: flex; gap: 5px; padding: 15px; overflow-x: auto; }
+      .sidebar h3 { display: none; }
+      .sidebar a { padding: 8px 12px; font-size: 12px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+      .inventory-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <h3>🌸 Mellowluv</h3>
+      <a href="/admin/dashboard.html">📊 Dashboard</a>
+      <a href="/admin/verify.html">✅ Verify Payments</a>
+      <a href="/admin/orders.html">📦 Orders</a>
+      <a href="/admin/inventory.html" class="active">🏷️ Inventory</a>
+      <a href="/admin/loyalty.html">⭐ Loyalty</a>
+      <a href="/admin/settings.html">⚙️ Settings</a>
+
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
+    </div>
+    <div class="main-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
+        <h1>🏷️ Inventory</h1>
+        <button class="btn-add" onclick="openAddModal()">+ Add Product</button>
+      </div>
+      <div class="inventory-grid" id="inventory-grid"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="product-modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modal-title">Add Product</h2>
+      <form id="product-form" onsubmit="saveProduct(event)">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+          <label>🌸 Product Name *</label>
+          <input type="text" id="prod-name" required>
+        </div>
+        <div class="form-group">
+          <label>📝 Description</label>
+          <textarea id="prod-desc"></textarea>
+        </div>
+        <div class="form-group">
+          <label>💰 Price (₹) *</label>
+          <input type="number" id="prod-price" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>📂 Category *</label>
+          <select id="prod-category" required>
+            <option value="thrift">🛍️ Thrift Store</option>
+            <option value="jewelry">💎 Mellowluv Jewelry</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📦 Stock *</label>
+          <input type="number" id="prod-stock" value="1" min="0">
+        </div>
+        <div class="form-group">
+          <label>🖼️ Image</label>
+          <input type="file" id="prod-image" accept="image/*" style="padding:8px;">
+        </div>
+        <hr style="border:none;border-top:2px dashed #ffe4e1;margin:18px 0;">
+        <div style="font-size:13px;color:#7fb87f;font-weight:700;margin-bottom:12px;">📅 Schedule Drop</div>
+        <div class="form-group">
+          <label>Schedule Drop Date/Time (IST) — leave blank for immediate</label>
+          <input type="datetime-local" id="prod-scheduled-at">
+        </div>
+        <hr style="border:none;border-top:2px dashed #ffe4e1;margin:18px 0;">
+        <div style="font-size:13px;color:#e8a0b4;font-weight:700;margin-bottom:12px;">🔥 Offer Settings</div>
+        <div class="form-group">
+          <label>Offer Price (₹) — leave blank for no offer</label>
+          <input type="number" id="prod-offer-price" step="0.01" min="0" placeholder="e.g. 299">
+        </div>
+        <div class="form-group">
+          <label>Offer Note (shown under product)</label>
+          <input type="text" id="prod-offer-note" placeholder="e.g. Limited time deal!">
+        </div>
+        <button type="submit" class="btn-submit">Save Product 🌸</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const token = sessionStorage.getItem('admin_token');
+    if (!token) window.location.href = '/admin/login.html';
+
+    async function loadInventory() {
+      try {
+        const res = await fetch('/api/products');
+        const products = await res.json();
+        const grid = document.getElementById('inventory-grid');
+        grid.innerHTML = products.map(p => {
+          const catLabel = p.category === 'thrift' ? '🛍️ Thrift' : '💎 Mellowluv';
+          const hasOffer = p.offer_price && p.offer_price > 0;
+          const offerTag = hasOffer ? `<div style="font-size:11px;color:#d84315;font-weight:700;">🔥 Offer: ₹${p.offer_price}${p.offer_note ? ' — ' + p.offer_note : ''}</div>` : '';
+          const isScheduled = p.scheduled_at && new Date(p.scheduled_at) > new Date();
+          const schedTag = isScheduled ? `<div style="font-size:11px;color:#7fb87f;font-weight:700;">📅 Scheduled: ${new Date(p.scheduled_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>` : (p.scheduled_at ? `<div style="font-size:11px;color:#b5838d;font-weight:600;">✅ Drop live</div>` : '');
+          return `
+            <div class="inv-card">
+              <div class="inv-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}">${p.image ? '' : '📷'}</div>
+              <div class="inv-body">
+                <div class="inv-category">${catLabel}</div>
+                <div class="inv-name">${p.name}</div>
+                <div class="inv-price">₹${p.price}</div>
+                ${schedTag}
+                ${offerTag}
+                <div class="inv-stock">📦 Stock: ${p.stock}</div>
+                <div class="inv-actions">
+                  <button class="btn-sm btn-edit" onclick="openEditModal(${p.id})">Edit</button>
+                  <button class="btn-sm btn-delete" onclick="deleteProduct(${p.id})">Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch {}
+    }
+
+    function openAddModal() {
+      document.getElementById('modal-title').textContent = 'Add Product 🌸';
+      document.getElementById('product-form').reset();
+      document.getElementById('edit-id').value = '';
+      document.getElementById('prod-scheduled-at').value = '';
+      document.getElementById('product-modal').classList.add('show');
+    }
+
+    async function openEditModal(id) {
+      const res = await fetch('/api/products/' + id);
+      const p = await res.json();
+      document.getElementById('modal-title').textContent = 'Edit Product ✏️';
+      document.getElementById('edit-id').value = p.id;
+      document.getElementById('prod-name').value = p.name;
+      document.getElementById('prod-desc').value = p.description || '';
+      document.getElementById('prod-price').value = p.price;
+      document.getElementById('prod-category').value = p.category;
+      document.getElementById('prod-stock').value = p.stock;
+      document.getElementById('prod-offer-price').value = p.offer_price || '';
+      document.getElementById('prod-offer-note').value = p.offer_note || '';
+      document.getElementById('prod-scheduled-at').value = p.scheduled_at ? p.scheduled_at.slice(0, 16) : '';
+      document.getElementById('prod-image').value = '';
+      document.getElementById('product-modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('product-modal').classList.remove('show');
+    }
+
+    async function saveProduct(event) {
+      event.preventDefault();
+      const btn = event.target.querySelector('.btn-submit');
+      btn.textContent = 'Saving...';
+      const id = document.getElementById('edit-id').value;
+      const formData = new FormData();
+      formData.append('name', document.getElementById('prod-name').value);
+      formData.append('description', document.getElementById('prod-desc').value);
+      formData.append('price', document.getElementById('prod-price').value);
+      formData.append('category', document.getElementById('prod-category').value);
+      formData.append('stock', document.getElementById('prod-stock').value);
+      formData.append('offer_price', document.getElementById('prod-offer-price').value || '');
+      formData.append('offer_note', document.getElementById('prod-offer-note').value || '');
+      const schedVal = document.getElementById('prod-scheduled-at').value;
+      formData.append('scheduled_at', schedVal ? new Date(schedVal).toISOString() : '');
+      const imgFile = document.getElementById('prod-image').files[0];
+      if (imgFile) formData.append('image', imgFile);
+
+      const url = id ? '/api/admin/products/' + id : '/api/admin/products';
+      const method = id ? 'PUT' : 'POST';
+
+      await fetch(url, {
+        method,
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
+      });
+      closeModal();
+      loadInventory();
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Delete this product? 🌸')) return;
+      await fetch('/api/admin/products/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      loadInventory();
+    }
+
+    loadInventory();
+  </script>
+</body>
+</html>
