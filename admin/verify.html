@@ -249,13 +249,7 @@
         btn.textContent = '✅ Verified!';
         btn.style.background = '#e8f5e9';
         btn.style.borderColor = '#a5d6a7';
-        setTimeout(() => {
-          const card = btn.closest('.verify-card');
-          card.style.transition = 'all 0.3s ease';
-          card.style.opacity = '0';
-          card.style.transform = 'scale(0.9)';
-          setTimeout(() => card.remove(), 300);
-        }, 600);
+        setTimeout(() => loadPending(), 600);
       } catch {
         btn.disabled = false;
         btn.textContent = '✅ Verify Payment';
@@ -290,14 +284,12 @@
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify({ payment_status: 'verified' })
           });
-          const card = cb.closest('.verify-card');
-          if (card) { card.style.opacity = '0'; card.style.transform = 'scale(0.9)'; setTimeout(() => card.remove(), 300); }
         } catch {}
       }
       btn.disabled = false;
       btn.textContent = '✅ Verify Selected';
       updateBulkBar();
-      setTimeout(() => { if (!document.querySelector('.verify-cb')) loadPending(); }, 500);
+      loadPending();
     }
 
     loadPending();

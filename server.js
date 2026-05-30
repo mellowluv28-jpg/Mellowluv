@@ -525,12 +525,14 @@ app.put('/api/admin/orders/:id/verify', adminAuth, async (req, res) => {
   if (!order) return res.status(404).json({ error: 'Order not found' });
   if (unverify) {
     if (order.payment_status !== 'verified') return res.status(400).json({ error: 'Order is not verified' });
-    const award = order.loyalty_award || 1;
-    await execute("UPDATE orders SET payment_status = 'paid', tracking_status = 'unverified', status = 'pending' WHERE id = $1", [req.params.id]);
-    if (order.phone) {
-      await execute('UPDATE customers SET loyalty_points = GREATEST(0, loyalty_points - $1) WHERE phone = $2', [award, order.phone]);
+    if (order.payment_screenshot) {
+      try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
     }
-    return res.json({ success: true, message: 'Verification removed' });
+    if (order.product_id && order.quantity) {
+      await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [order.quantity, order.product_id]);
+    }
+    await execute('DELETE FROM orders WHERE id = $1', [req.params.id]);
+    return res.json({ success: true, message: 'Order deleted' });
   }
   if (payment_status === 'verified') {
     if (order.payment_status === 'verified') return res.status(400).json({ error: 'Order already verified' });
@@ -639,6 +641,10 @@ app.put('/api/admin/products/:id', adminAuth, upload.single('image'), async (req
 });
 
 app.delete('/api/admin/products/:id', adminAuth, async (req, res) => {
+  const product = await queryOne('SELECT * FROM products WHERE id = $1', [req.params.id]);
+  if (product && product.image) {
+    try { const m = product.image.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+  }
   await execute('DELETE FROM products WHERE id = $1', [req.params.id]);
   res.json({ success: true });
 });
