@@ -246,22 +246,22 @@ app.post('/api/orders', async (req, res) => {
       }
     }
 
-    let firstOrderId = null;
-    for (let idx = 0; idx < allItems.length; idx++) {
-      const item = allItems[idx];
-      const cat = item.category;
-      let line = item.lineTotal + (item.qty * (extraCharge / allItems.reduce((s, i2) => s + i2.qty, 0)));
-      const isDiscounted = idx === discountedItemIndex;
-      if (isDiscounted) {
-        const itemOriginal = item.unitPrice * item.qty;
-        line = line - (itemOriginal * 0.5);
-      }
-      const result = await execute(
-        "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, 'unpaid', 'unverified', $16)",
-        [customer_name, phone, instagram, address, pincode, urgency || '', aesthetics || '', extra_note || '', item.qty, item.product.id, item.product.name, item.product.price, cat, shipping, Math.round(line), isDiscounted ? 1 : 0]
-      );
-      if (!firstOrderId) firstOrderId = result.lastInsertRowid;
-    }
+    const totalQty = allItems.reduce((s, i) => s + i.qty, 0);
+    const itemNames = allItems.map(i => i.product.name).join(', ');
+    const cats = [...new Set(allItems.map(i => i.product.category))];
+    const mainCat = cats.length === 1 ? cats[0] : 'mixed';
+    const category = mainCat === 'jewelry' ? 'mellowluv' : (mainCat === 'mixed' ? 'mixed' : 'thrift');
+    const itemsJson = JSON.stringify(allItems.map(i => ({ id: i.product.id, name: i.product.name, qty: i.qty, price: i.unitPrice })));
+    const cartNote = extra_note ? extra_note + ' | Items: ' + itemsJson : 'Items: ' + itemsJson;
+
+    const result = await execute(
+      "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, 'unpaid', 'unverified', $16)",
+      [customer_name, phone, instagram, address, pincode, urgency || '', aesthetics || '', cartNote, totalQty, allItems[0].product.id, 'Cart (' + allItems.length + ' items): ' + itemNames, allItems[0].product.price, category, shipping, Math.round(grandTotal), discountAmount > 0 ? 1 : 0]
+    );
+    const firstOrderId = result.lastInsertRowid;
+
+    const newCartOrder = await queryOne('SELECT * FROM orders WHERE id = $1', [firstOrderId]);
+    if (newCartOrder) notifyNewOrder(newCartOrder);
 
     const upiId = await getSetting('upi_id');
     const upiName = await getSetting('upi_name');
