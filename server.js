@@ -450,7 +450,7 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
   if (req.query.payment_status) { sql += ` AND payment_status = $${pIdx++}`; params.push(req.query.payment_status); }
   if (req.query.phone) { sql += ` AND phone = $${pIdx++}`; params.push(req.query.phone); }
   if (req.query.search) { sql += ` AND (customer_name ILIKE $${pIdx} OR phone ILIKE $${pIdx+1})`; const s = '%' + req.query.search + '%'; params.push(s, s); pIdx += 2; }
-  if (req.query.category) { sql += ` AND product_category = $${pIdx++}`; params.push(req.query.category); }
+  if (req.query.category) { sql += ` AND (LOWER(product_category) = LOWER($${pIdx++}) OR product_category = 'mixed')`; params.push(req.query.category); }
   sql += ' ORDER BY created_at DESC';
   const page = Math.max(1, parseInt(req.query.page) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
