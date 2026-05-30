@@ -57,15 +57,6 @@ app.get('/api/admin/events', (req, res) => {
 async function notifyNewOrder(order) {
   const data = JSON.stringify({ type: 'new_order', order: { id: order.id, customer_name: order.customer_name, product_name: order.product_name, total: order.total, phone: order.phone } });
   sseClients.forEach(c => c.write('data: ' + data + '\n\n'));
-  const topic = await getSetting('ntfy_topic');
-  if (topic) {
-    try {
-      const body = '🛵 You have received an order. Please verify it.';
-      const req = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'text/plain' } });
-      req.write(body);
-      req.end();
-    } catch {}
-  }
 }
 
 function adminAuth(req, res, next) {
@@ -512,7 +503,7 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/verify', adminAuth, async (req, res) => {
-  const pending = await query("SELECT * FROM orders WHERE payment_status IN ('unpaid', 'paid') ORDER BY created_at DESC");
+  const pending = await query("SELECT * FROM orders WHERE payment_status = 'paid' AND payment_screenshot != '' ORDER BY created_at DESC");
   const verified = await query("SELECT * FROM orders WHERE payment_status = 'verified' ORDER BY created_at DESC");
   res.json({ pending, verified });
 });

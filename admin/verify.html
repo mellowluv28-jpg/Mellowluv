@@ -89,7 +89,7 @@
     </div>
     <div class="main-content">
       <h1>✅ Payment <span>Verification</span></h1>
-      <div class="subtitle">Unpaid/paid orders — Verify when payment is confirmed. Remove unpaid orders that won't be paid.</div>
+      <div class="subtitle">Orders with payment screenshot uploaded — Verify or Reject payments here.</div>
       <div class="bulk-bar" id="bulk-bar">
         <span class="count"><span id="selected-count">0</span> selected</span>
         <button class="btn-select-all" onclick="toggleSelectAll()">☐ Select All</button>
@@ -121,30 +121,17 @@
         grid.innerHTML = orders.map((o, i) => {
           const d = new Date(o.created_at);
           const catIcon = o.product_category === 'mellowluv' ? '💎' : '🛍️';
-          const isPaid = o.payment_status === 'paid';
-          const badgeClass = isPaid ? 'badge-paid' : 'badge-unpaid';
-          const badgeLabel = isPaid ? 'Paid' : 'Unpaid';
           let screenshotTime = '';
           if (o.screenshot_uploaded_at) {
             const st = new Date(o.screenshot_uploaded_at);
             screenshotTime = st.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ' at ' + st.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
           }
-          const verifyBtn = isPaid
-            ? `<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;">
-                <button class="btn-verify" style="flex:1;" onclick="verifyPayment(${o.id}, this)">✅ Verify</button>
-                ${o.payment_screenshot ? `<button onclick="rejectProof(${o.id}, this)" style="padding:8px 14px;background:#fbe9e7;color:#bf360c;border:2px solid #ffab91;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">🚫 Reject</button>` : ''}
-              </div>`
-            : `<div style="display:flex;gap:8px;margin-top:12px;">
-                <p style="flex:1;text-align:center; color:#b5838d; font-size:13px;">⏳ Awaiting customer payment...</p>
-                <button onclick="removeOrder(${o.id}, this)" style="padding:8px 14px;background:#fbe9e7;color:#bf360c;border:2px solid #ffab91;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">🗑️ Remove</button>
-              </div>`;
-          const cb = isPaid ? `<div class="cb-wrap"><input type="checkbox" class="verify-cb" value="${o.id}" onchange="updateBulkBar()"> <span style="font-size:12px;color:#b0878f;">Select</span></div>` : '';
           return `
             <div class="verify-card" style="animation-delay:${i * 0.05}s" data-order-id="${o.id}">
-              ${cb}
+              <div class="cb-wrap"><input type="checkbox" class="verify-cb" value="${o.id}" onchange="updateBulkBar()"> <span style="font-size:12px;color:#b0878f;">Select</span></div>
               <div class="card-header">
                 <h3>${o.customer_name}</h3>
-                <span class="${badgeClass}">${badgeLabel}</span>
+                <span class="badge-paid">Paid</span>
               </div>
               <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'}</span></div>
               <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram || '-'}</span></div>
@@ -154,7 +141,10 @@
               ${o.payment_screenshot ? `<div class="detail-row" style="flex-direction:column;align-items:stretch;gap:4px;"><span class="label">📸 Screenshot</span><a href="${o.payment_screenshot}" target="_blank" style="display:block;"><img src="${o.payment_screenshot}" alt="Screenshot" style="width:100%;max-height:140px;object-fit:contain;border-radius:10px;border:2px solid #f5d6de;background:#fff;"></a></div>` : ''}
               ${screenshotTime ? `<div class="detail-row"><span class="label">⏰ Screenshot at</span><span class="value" style="font-size:11px;">${screenshotTime}</span></div>` : ''}
               <div class="detail-row"><span class="label">📅 Ordered</span><span class="value">${d.toLocaleDateString('en-IN')}</span></div>
-              ${verifyBtn}
+              <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;">
+                <button class="btn-verify" style="flex:1;" onclick="verifyPayment(${o.id}, this)">✅ Verify</button>
+                <button onclick="rejectProof(${o.id}, this)" style="padding:8px 14px;background:#fbe9e7;color:#bf360c;border:2px solid #ffab91;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">🚫 Reject</button>
+              </div>
             </div>
           `;
         }).join('');
