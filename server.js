@@ -371,6 +371,28 @@ app.put('/api/orders/:id/pay', async (req, res) => {
   res.json({ success: true });
 });
 
+app.post('/api/orders/:id/upload-proof', async (req, res) => {
+  const order = await queryOne('SELECT * FROM orders WHERE id = $1', [req.params.id]);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  const { screenshot } = req.body;
+  if (!screenshot) return res.status(400).json({ error: 'No screenshot provided' });
+  const matches = screenshot.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!matches) return res.status(400).json({ error: 'Invalid image format' });
+  const buffer = Buffer.from(matches[2], 'base64');
+  const result = await cloudinary.uploadBuffer(buffer, 'payment_proofs');
+  await execute("UPDATE orders SET payment_screenshot = $1, payment_status = 'paid' WHERE id = $2", [result.url, req.params.id]);
+  const topic = await getSetting('ntfy_topic');
+  if (topic) {
+    try {
+      const body = JSON.stringify({ title: '📸 Payment Proof Uploaded!', message: `${order.customer_name} uploaded payment screenshot for Order #${order.id} — ₹${order.total}`, priority: 5, tags: ['camera'] });
+      const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      req2.write(body);
+      req2.end();
+    } catch {}
+  }
+  res.json({ success: true });
+});
+
 // --- Admin ---
 app.all('/api/admin/reset-credentials', async (req, res) => {
   const master_key = req.body?.master_key || req.query?.key || '';
@@ -515,6 +537,9 @@ app.put('/api/admin/orders/:id/verify', adminAuth, async (req, res) => {
     await execute("UPDATE orders SET payment_status = 'verified', tracking_status = 'verified', status = 'confirmed' WHERE id = $1", [req.params.id]);
     await ensureCustomer(order.phone);
     await execute('UPDATE customers SET loyalty_points = loyalty_points + 1 WHERE phone = $1', [order.phone]);
+    if (order.payment_screenshot) {
+      try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+    }
   } else {
     await execute('UPDATE orders SET payment_status = $1 WHERE id = $2', [payment_status, req.params.id]);
   }
@@ -582,7 +607,8 @@ app.post('/api/admin/products', adminAuth, upload.single('image'), async (req, r
   if (isNaN(parsedStock) || parsedStock < 0) return res.status(400).json({ error: 'Valid non-negative stock is required' });
   let image = null;
   if (req.file) {
-    image = await cloudinary.uploadBuffer(req.file.buffer);
+    const result = await cloudinary.uploadBuffer(req.file.buffer, 'mellowluv');
+    image = result.url;
   }
   const result = await execute(
     'INSERT INTO products (name, description, price, offer_price, offer_note, category, stock, image, scheduled_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
@@ -602,7 +628,8 @@ app.put('/api/admin/products/:id', adminAuth, upload.single('image'), async (req
   if (!product) return res.status(404).json({ error: 'Product not found' });
   let image = product.image;
   if (req.file) {
-    image = await cloudinary.uploadBuffer(req.file.buffer);
+    const result = await cloudinary.uploadBuffer(req.file.buffer, 'mellowluv');
+    image = result.url;
   }
   await execute(
     'UPDATE products SET name=$1, description=$2, price=$3, offer_price=$4, offer_note=$5, category=$6, stock=$7, image=$8, scheduled_at=$9 WHERE id=$10',

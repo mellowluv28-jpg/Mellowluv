@@ -143,6 +143,7 @@
               <div class="detail-row"><span class="label">🛒 Product</span><span class="value">${catIcon} ${o.product_name}</span></div>
               <div class="detail-row"><span class="label">🔢 Quantity</span><span class="value">${o.quantity || 1}</span></div>
               <div class="detail-row"><span class="label">💰 Amount</span><span class="value">₹${o.total}</span></div>
+              ${o.payment_screenshot ? `<div class="detail-row" style="flex-direction:column;align-items:stretch;gap:4px;"><span class="label">📸 Payment Screenshot</span><a href="${o.payment_screenshot}" target="_blank" style="display:block;"><img src="${o.payment_screenshot}" alt="Payment screenshot" style="width:100%;max-height:140px;object-fit:contain;border-radius:10px;border:2px solid #f5d6de;background:#fff;"></a></div>` : ''}
               <div class="detail-row"><span class="label">📅 Ordered</span><span class="value">${d.toLocaleDateString('en-IN')}</span></div>
               ${verifyBtn}
             </div>

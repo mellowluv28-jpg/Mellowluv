@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS products (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Run this separately on existing databases:
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_screenshot TEXT DEFAULT '';
+
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
   customer_name TEXT NOT NULL,
@@ -39,6 +42,7 @@ CREATE TABLE IF NOT EXISTS orders (
   discount_applied INTEGER DEFAULT 0,
   is_prebook INTEGER DEFAULT 0,
   loyalty_award INTEGER DEFAULT 1,
+  payment_screenshot TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

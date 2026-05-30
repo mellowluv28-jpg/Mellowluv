@@ -7,17 +7,28 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-function uploadBuffer(buffer) {
+function uploadBuffer(buffer, folder) {
   return new Promise((resolve, reject) => {
+    const opts = { resource_type: 'image' };
+    if (folder) opts.folder = folder;
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'mellowluv' },
+      opts,
       (err, result) => {
         if (err) reject(err);
-        else resolve(result.secure_url);
+        else resolve({ url: result.secure_url, public_id: result.public_id });
       }
     );
     streamifier.createReadStream(buffer).pipe(stream);
   });
 }
 
-module.exports = { uploadBuffer };
+function deleteImage(publicId) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.destroy(publicId, (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+}
+
+module.exports = { uploadBuffer, deleteImage };

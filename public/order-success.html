@@ -41,11 +41,16 @@
           Pay to UPI ID: <strong id="display-upi"></strong>
         </div>
         <div id="loyalty-success" style="display:none;margin-bottom:14px;background:#fff8e1;border:2px solid #ffe082;border-radius:12px;padding:12px;font-size:13px;color:#5a4a4a;"></div>
-        <p class="note">After payment, please wait for manual verification. You will be notified once confirmed.</p>
-        <button class="btn-paid" onclick="markPaid()">I Have Paid ✅</button>
-        <p class="note" id="paid-message" style="display:none; color:#7fb87f; font-weight:600; margin-top:15px;">
-          Thank you! Your payment will be verified shortly 🐱💕
-        </p>
+        <p class="note" style="margin-top:20px;">📸 After paying, upload your payment screenshot below for verification:</p>
+        <div style="background:#fff8e1;border:2px solid #ffe082;border-radius:14px;padding:18px;margin:14px 0;">
+          <div style="margin-bottom:10px;">
+            <label style="display:block;font-weight:600;color:#5a4a4a;font-size:14px;margin-bottom:6px;">📎 Upload Payment Screenshot</label>
+            <input type="file" id="screenshot-input" accept="image/*" capture="environment" style="width:100%;padding:10px;border:2px dashed #ffe082;border-radius:12px;font-size:13px;background:white;color:#5a4a4a;">
+          </div>
+          <button class="btn-paid" id="upload-btn" onclick="uploadScreenshot()">Submit Screenshot ✅</button>
+          <div id="upload-status" style="margin-top:10px;font-size:14px;"></div>
+        </div>
+        <p class="note" style="color:#b5838d;font-size:13px;">Your order will be confirmed after we verify your payment screenshot. You'll be notified on Instagram once verified 🐱</p>
 
         <div id="contact-section" style="margin-top:25px; padding-top:20px; border-top:2px dashed #ffe4e1; text-align:center;">
           <p style="color:#b5838d; font-size:13px; margin-bottom:8px;">📬 For any order queries, contact us:</p>
@@ -95,27 +100,42 @@
       document.getElementById('contact-insta').textContent = 'Instagram - ' + contactInsta;
     }
 
-    async function markPaid() {
+    async function uploadScreenshot() {
       const orderId = params.get('order');
-      const btn = document.querySelector('.btn-paid');
-      if (!orderId) { alert('Order ID not found. Please re-order.'); return; }
+      const input = document.getElementById('screenshot-input');
+      const btn = document.getElementById('upload-btn');
+      const status = document.getElementById('upload-status');
+      if (!orderId) { alert('Order ID not found.'); return; }
+      const file = input.files[0];
+      if (!file) { status.innerHTML = '<span style="color:#d4808a;">Please select a screenshot first</span>'; return; }
+      if (file.size > 5 * 1024 * 1024) { status.innerHTML = '<span style="color:#d4808a;">File too large. Max 5MB</span>'; return; }
       btn.disabled = true;
-      btn.textContent = 'Processing...';
-      try {
-        const res = await fetch('/api/orders/' + orderId + '/pay', { method: 'PUT' });
-        const data = await res.json();
-        if (!data.success) { alert('Failed: ' + (data.error || 'Unknown error')); btn.disabled = false; btn.textContent = 'I Have Paid ✅'; return; }
-      } catch (err) {
-        alert('Network error. Please try again or DM @mellowluvv_ on Instagram.');
-        btn.disabled = false;
-        btn.textContent = 'I Have Paid ✅';
-        return;
-      }
-      btn.style.transform = 'scale(0.95)';
-      setTimeout(() => {
-        btn.style.display = 'none';
-        document.getElementById('paid-message').style.display = 'block';
-      }, 200);
+      btn.textContent = 'Uploading...';
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const res = await fetch('/api/orders/' + orderId + '/upload-proof', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ screenshot: e.target.result })
+          });
+          const data = await res.json();
+          if (data.success) {
+            status.innerHTML = '<span style="color:#2e7d32;font-weight:600;">✅ Screenshot uploaded! We will verify and confirm your order shortly. 🐱💕</span>';
+            btn.style.display = 'none';
+            input.style.display = 'none';
+          } else {
+            status.innerHTML = '<span style="color:#d4808a;">Upload failed: ' + (data.error || 'Unknown error') + '</span>';
+            btn.disabled = false;
+            btn.textContent = 'Submit Screenshot ✅';
+          }
+        } catch {
+          status.innerHTML = '<span style="color:#d4808a;">Network error. Try again or DM @mellowluvv_ on Instagram.</span>';
+          btn.disabled = false;
+          btn.textContent = 'Submit Screenshot ✅';
+        }
+      };
+      reader.readAsDataURL(file);
     }
   </script>
 <script>function toggleNav(){document.querySelector('.navbar').classList.toggle('active')}</script>
