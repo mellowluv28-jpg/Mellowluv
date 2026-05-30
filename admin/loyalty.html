@@ -86,7 +86,7 @@
           '<div class="row"><span class="l">💰 Discount Used</span><span class="r">' + (d.discount_used || 0) + ' times</span></div>' +
           '<div style="margin-top:14px;padding:12px;background:#fef4f6;border-radius:12px;font-size:13px;color:#b0878f;">🎁 Higher loyalty score = higher chances of winning freebies!</div>' +
         '</div>';
-      } catch { resultDiv.innerHTML = '<div class="empty-state">Error fetching data</div>'; }
+        } catch (e) { resultDiv.innerHTML = '<div class="empty-state">Error: ' + e.message + '</div>'; }
     }
 
     async function loadAll() {
@@ -96,7 +96,7 @@
         const res = await fetch('/api/admin/loyalty', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
-        if (!res.ok) { resultDiv.innerHTML = '<div class="empty-state">Error loading</div>'; return; }
+        if (!res.ok) { const err = await res.text(); resultDiv.innerHTML = '<div class="empty-state">Error: ' + err + '</div>'; return; }
         const data = await res.json();
         if (data.length === 0) { resultDiv.innerHTML = '<div class="empty-state">No customers yet</div>'; return; }
         resultDiv.innerHTML = '<table><thead><tr><th>Phone</th><th>Name</th><th>Loyalty Score</th><th>Discount Used</th><th>Next Discount In</th><th>Pre-Book</th></tr></thead><tbody>' +
@@ -112,7 +112,7 @@
               '<td>' + (prebookOk ? '✅' : '🔒') + '</td>' +
             '</tr>';
           }).join('') + '</tbody></table>';
-      } catch { resultDiv.innerHTML = '<div class="empty-state">Error loading</div>'; }
+      } catch (e) { resultDiv.innerHTML = '<div class="empty-state">Error: ' + e.message + '</div>'; }
     }
 
     loadAll();
