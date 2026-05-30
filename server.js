@@ -523,24 +523,14 @@ app.post('/api/admin/orders/bulk-verify', adminAuth, async (req, res) => {
 
 app.get('/api/admin/loyalty', adminAuth, async (req, res) => {
   const { phone } = req.query;
-  try {
-    if (!phone) {
-      const allCustomers = await query('SELECT phone, COALESCE(name,customer_name,\'\') as name, loyalty_points, discount_used FROM customers ORDER BY loyalty_points DESC');
-      return res.json(allCustomers);
-    }
-    const customer = await queryOne('SELECT * FROM customers WHERE phone = $1', [phone]);
-    if (!customer) return res.status(404).json({ error: 'No customer found with this phone' });
-    const info = await getLoyaltyInfo(phone);
-    res.json({ ...customer, ...info });
-  } catch (e) {
-    // If customers table doesn't exist, create it
-    if (e.message && (e.message.includes('relation') && e.message.includes('customers'))) {
-      await execute('CREATE TABLE IF NOT EXISTS customers (phone TEXT PRIMARY KEY, name TEXT DEFAULT \'\', password TEXT, token TEXT, loyalty_points INTEGER DEFAULT 0, discount_used INTEGER DEFAULT 0)');
-      if (!phone) return res.json([]);
-      return res.status(404).json({ error: 'No customer found' });
-    }
-    res.status(500).json({ error: e.message });
+  if (!phone) {
+    const allCustomers = await query('SELECT phone, name, loyalty_points, discount_used FROM customers ORDER BY loyalty_points DESC');
+    return res.json(allCustomers);
   }
+  const customer = await queryOne('SELECT * FROM customers WHERE phone = $1', [phone]);
+  if (!customer) return res.status(404).json({ error: 'No customer found with this phone' });
+  const info = await getLoyaltyInfo(phone);
+  res.json({ ...customer, ...info });
 });
 
 app.put('/api/admin/orders/:id/tracking', adminAuth, async (req, res) => {
