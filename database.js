@@ -39,12 +39,12 @@ async function execute(sql, params) {
   const client = getPool();
   const trimmed = sql.trim().toUpperCase();
   const isInsert = trimmed.startsWith('INSERT');
-  const finalSql = isInsert ? sql + ' RETURNING id' : sql;
+  const finalSql = isInsert ? sql + ' RETURNING *' : sql;
   const pgSql = toPgSql(finalSql);
   const result = await client.query(pgSql, params);
   return {
     changes: result.rowCount,
-    lastInsertRowid: isInsert && result.rows.length > 0 ? result.rows[0].id : null
+    lastInsertRowid: isInsert && result.rows.length > 0 ? (result.rows[0].id || result.rows[0].phone || null) : null
   };
 }
 
