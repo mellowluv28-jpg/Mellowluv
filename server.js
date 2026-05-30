@@ -460,7 +460,9 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/verify', adminAuth, async (req, res) => {
-  res.json(await query("SELECT * FROM orders WHERE payment_status IN ('unpaid', 'paid') ORDER BY created_at DESC"));
+  const pending = await query("SELECT * FROM orders WHERE payment_status IN ('unpaid', 'paid') ORDER BY created_at DESC");
+  const verified = await query("SELECT * FROM orders WHERE payment_status = 'verified' ORDER BY created_at DESC");
+  res.json({ pending, verified });
 });
 
 app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
@@ -479,9 +481,18 @@ app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
 });
 
 app.put('/api/admin/orders/:id/verify', adminAuth, async (req, res) => {
-  const { payment_status } = req.body;
+  const { payment_status, unverify } = req.body;
   const order = await queryOne('SELECT * FROM orders WHERE id = $1', [req.params.id]);
   if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (unverify) {
+    if (order.payment_status !== 'verified') return res.status(400).json({ error: 'Order is not verified' });
+    const award = order.loyalty_award || 1;
+    await execute("UPDATE orders SET payment_status = 'paid', tracking_status = 'unverified', status = 'pending' WHERE id = $1", [req.params.id]);
+    if (order.phone) {
+      await execute('UPDATE customers SET loyalty_points = GREATEST(0, loyalty_points - $1) WHERE phone = $2', [award, order.phone]);
+    }
+    return res.json({ success: true, message: 'Verification removed' });
+  }
   if (payment_status === 'verified') {
     if (order.payment_status === 'verified') return res.status(400).json({ error: 'Order already verified' });
     await execute("UPDATE orders SET payment_status = 'verified', tracking_status = 'verified', status = 'confirmed' WHERE id = $1", [req.params.id]);
