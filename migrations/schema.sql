@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS products (
 -- Run these separately on existing databases:
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_screenshot TEXT DEFAULT '';
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS screenshot_uploaded_at TIMESTAMPTZ;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS whatsapp_optin BOOLEAN DEFAULT false;
 
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,

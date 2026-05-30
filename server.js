@@ -151,7 +151,7 @@ app.get('/api/loyalty/check', async (req, res) => {
 });
 
 app.post('/api/prebook', async (req, res) => {
-  const { customer_name, phone, instagram, address, pincode, product_id, urgency } = req.body;
+  const { customer_name, phone, instagram, address, pincode, product_id, urgency, whatsapp_optin } = req.body;
   if (!customer_name || !phone || !address || !pincode || !product_id) return res.status(400).json({ error: 'Missing required fields' });
   const info = await getLoyaltyInfo(phone);
   if (!info.prebook_eligible) return res.status(403).json({ error: `Not eligible for pre-booking. You need ${Math.max(0, 2 - info.total_loyalty_score)} more purchase(s) to unlock pre-booking.`, loyalty: info });
@@ -165,8 +165,8 @@ app.post('/api/prebook', async (req, res) => {
   const category = product.category === 'jewelry' ? 'mellowluv' : 'thrift';
   await execute('UPDATE products SET stock = stock - 1 WHERE id = $1 AND stock >= 1', [product_id]);
   const result = await execute(
-    "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied, is_prebook, loyalty_award) VALUES ($1, $2, $3, $4, $5, $6, '', '', 1, $7, $8, $9, $10, $11, $12, 'unpaid', 'unverified', 0, 1, 2)",
-    [customer_name, phone, instagram || '', address, pincode, urgency || '', product_id, product.name, product.price, category, shipping, Math.round(total)]
+    "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied, is_prebook, loyalty_award, whatsapp_optin) VALUES ($1, $2, $3, $4, $5, $6, '', '', 1, $7, $8, $9, $10, $11, $12, 'unpaid', 'unverified', 0, 1, 2, $13)",
+    [customer_name, phone, instagram || '', address, pincode, urgency || '', product_id, product.name, product.price, category, shipping, Math.round(total), whatsapp_optin ? 1 : 0]
   );
   const upiId = await getSetting('upi_id');
   const upiName = await getSetting('upi_name');
@@ -187,7 +187,7 @@ app.post('/api/prebook', async (req, res) => {
 
 // --- Orders ---
 app.post('/api/orders', async (req, res) => {
-  const { customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, product_id, quantity, is_cart, cart_items } = req.body;
+  const { customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, product_id, quantity, is_cart, cart_items, whatsapp_optin } = req.body;
   if (!customer_name || !phone || !address || !pincode) return res.status(400).json({ error: 'Missing required fields' });
   await ensureCustomer(phone, customer_name);
 
@@ -246,8 +246,8 @@ app.post('/api/orders', async (req, res) => {
     const cartNote = extra_note ? extra_note + ' | Items: ' + itemsJson : 'Items: ' + itemsJson;
 
     const result = await execute(
-      "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, 'unpaid', 'unverified', $16)",
-      [customer_name, phone, instagram, address, pincode, urgency || '', aesthetics || '', cartNote, totalQty, allItems[0].product.id, 'Cart (' + allItems.length + ' items): ' + itemNames, allItems[0].product.price, category, shipping, Math.round(grandTotal), discountAmount > 0 ? 1 : 0]
+      "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied, whatsapp_optin) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, 'unpaid', 'unverified', $16, $17)",
+      [customer_name, phone, instagram, address, pincode, urgency || '', aesthetics || '', cartNote, totalQty, allItems[0].product.id, 'Cart (' + allItems.length + ' items): ' + itemNames, allItems[0].product.price, category, shipping, Math.round(grandTotal), discountAmount > 0 ? 1 : 0, whatsapp_optin ? 1 : 0]
     );
     const firstOrderId = result.lastInsertRowid;
 
@@ -298,8 +298,8 @@ app.post('/api/orders', async (req, res) => {
   }
 
   const result = await execute(
-    "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'unpaid', 'unverified', $16)",
-    [customer_name, phone, instagram, address, pincode, urgency || '', aesthetics || '', extra_note || '', qty, product_id, product.name, product.price, category, shipping, Math.round(total), discountApplied]
+    "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied, whatsapp_optin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'unpaid', 'unverified', $16, $17)",
+    [customer_name, phone, instagram, address, pincode, urgency || '', aesthetics || '', extra_note || '', qty, product_id, product.name, product.price, category, shipping, Math.round(total), discountApplied, whatsapp_optin ? 1 : 0]
   );
 
   const newOrder = await queryOne('SELECT * FROM orders WHERE id = $1', [result.lastInsertRowid]);
