@@ -31,7 +31,7 @@
     <div class="container">
       <div class="payment-section animate-pop">
         <h2>Order Placed! 🐱✨</h2>
-        <p>Yay! Your order has been received. Complete payment to confirm it 🌸</p>
+        <p>Yay! Your order has been received. <strong style="color:#d4808a;">👇 Scroll down to complete payment and upload screenshot!</strong></p>
         <div class="order-number">Order #<span id="display-order-id"></span></div>
         <div class="amount" id="display-amount"></div>
         <div class="qr-container">
@@ -40,14 +40,13 @@
         <div class="upi-details">
           Pay to UPI ID: <strong id="display-upi"></strong>
         </div>
-        <div id="loyalty-success" style="display:none;margin-bottom:14px;background:#fff8e1;border:2px solid #ffe082;border-radius:12px;padding:12px;font-size:13px;color:#5a4a4a;"></div>
 
-        <div style="background:#d4808a;color:white;border-radius:12px;padding:12px 14px;margin:14px 0;text-align:center;border:2px solid #bf6d7a;font-size:13px;line-height:1.5;">
+        <div style="background:#d4808a;color:white;border-radius:12px;padding:10px 12px;margin:12px 0;text-align:center;border:2px solid #bf6d7a;font-size:13px;line-height:1.5;">
           <strong>⚠️ Put Order <span style="background:white;color:#bf6d7a;padding:1px 10px;border-radius:6px;" id="note-order-id"></span> in the "Note" box of Google Pay / PhonePe / Paytm</strong>
           <br><span style="opacity:0.9;">✅ Fast verification in minutes!</span>
         </div>
 
-        <div style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border:3px solid #e8a0b4;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 4px 20px rgba(232,160,180,0.15);">
+        <div style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border:3px solid #e8a0b4;border-radius:16px;padding:20px;margin:12px 0;box-shadow:0 4px 20px rgba(232,160,180,0.15);">
           <div style="font-size:16px;font-weight:800;color:#d4808a;margin-bottom:12px;text-align:center;">📸 STEP 2: UPLOAD PAYMENT SCREENSHOT</div>
           <div style="margin-bottom:10px;">
             <input type="file" id="screenshot-input" accept="image/*" style="width:100%;padding:14px;border:2px dashed #e8a0b4;border-radius:12px;font-size:14px;background:white;color:#5a4a4a;cursor:pointer;">
@@ -55,7 +54,9 @@
           <button class="btn-paid" id="upload-btn" onclick="uploadScreenshot()" style="width:100%;padding:16px;font-size:16px;">Submit Screenshot ✅</button>
           <div id="upload-status" style="margin-top:10px;font-size:14px;text-align:center;"></div>
         </div>
-        <p class="note" style="color:#b5838d;font-size:13px;">Your order will be confirmed after we verify your payment screenshot. You'll be notified on Instagram once verified 🐱</p>
+        <p class="note" style="color:#b5838d;font-size:13px;margin-top:0;">Your order will be confirmed after we verify your payment screenshot. You'll be notified on Instagram once verified 🐱</p>
+
+        <div id="loyalty-success" style="display:none;margin-bottom:14px;background:#fff8e1;border:2px solid #ffe082;border-radius:12px;padding:12px;font-size:13px;color:#5a4a4a;"></div>
 
         <div id="contact-section" style="margin-top:25px; padding-top:20px; border-top:2px dashed #ffe4e1; text-align:center;">
           <p style="color:#b5838d; font-size:13px; margin-bottom:8px;">📬 For any order queries, contact us:</p>
