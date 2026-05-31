@@ -109,9 +109,22 @@ function updateCartBadge() {
   const cart = JSON.parse(localStorage.getItem('mellowluv_cart') || '{"items":[]}');
   const count = cart.items.reduce((s, i) => s + i.qty, 0);
   document.querySelectorAll('.cart-badge').forEach(b => { b.textContent = count > 0 ? count : ''; b.style.display = count > 0 ? 'inline' : 'none'; });
+  const fabBadge = document.getElementById('cart-fab-badge');
+  if (fabBadge) { fabBadge.textContent = count > 0 ? count : ''; fabBadge.style.display = count > 0 ? 'flex' : 'none'; }
 }
 
-document.addEventListener('DOMContentLoaded', updateCartBadge);
+document.addEventListener('DOMContentLoaded', function() {
+  updateCartBadge();
+  if (!document.querySelector('.cart-fab')) {
+    const hidePages = ['/public/cart.html', '/public/checkout.html', '/public/order-success.html'];
+    if (hidePages.some(p => window.location.pathname.endsWith(p))) return;
+    const fab = document.createElement('a');
+    fab.href = '/public/cart.html';
+    fab.className = 'cart-fab';
+    fab.innerHTML = '🛒<span class="cart-fab-badge" id="cart-fab-badge">0</span>';
+    document.body.appendChild(fab);
+  }
+});
 
 function updateSort(category, containerId, selectEl) {
   loadProducts(category, containerId, selectEl.value);
