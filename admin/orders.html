@@ -219,8 +219,8 @@
             <td colspan="11">
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 <div><strong>📅 Ordered on:</strong> ${dateStr} at ${timeStr}</div>
-                <div><strong>📞 Phone:</strong> <a href="#" onclick="filterByPhone('${o.phone}'); return false;" style="color:#e8a0b4; font-weight:600; text-decoration:underline;">${o.phone || '-'}</a> <a href="https://wa.me/91${o.phone}?text=Hi%20${encodeURIComponent(o.customer_name)}%2C%20your%20order%20%23${o.id}%20status%3A%20${o.status}" target="_blank" style="display:inline-block;padding:2px 10px;background:#25D366;color:white;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;margin-left:6px;">📲 WhatsApp</a></div>
-                <div><strong>📸 Instagram:</strong> ${o.instagram || '-'}</div>
+                <div><strong>📞 Phone:</strong> <a href="#" onclick="filterByPhone('${o.phone}'); return false;" style="color:#e8a0b4; font-weight:600; text-decoration:underline;">${o.phone || '-'}</a></div>
+                <div><strong>📸 Instagram:</strong> ${o.instagram ? '<a href="https://www.instagram.com/' + o.instagram.replace('@', '') + '/" target="_blank" style="color:#e8a0b4;font-weight:600;text-decoration:underline;">' + o.instagram + '</a> <a href="https://www.instagram.com/' + o.instagram.replace('@', '') + '/" target="_blank" style="display:inline-block;padding:2px 10px;background:linear-gradient(135deg,#f58529,#dd2a7b);color:white;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;margin-left:6px;">📷 DM</a>' : '-'}</div>
                 <div><strong>📍 Address:</strong> ${o.address}</div>
                 <div><strong>📮 Pincode:</strong> ${o.pincode}</div>
                 <div><strong>🔢 Quantity:</strong> ${o.quantity || 1}</div>
