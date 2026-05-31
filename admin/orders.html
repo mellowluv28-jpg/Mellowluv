@@ -44,10 +44,14 @@
     select.status-select { padding: 5px 8px; border: 2px solid #f5d6de; border-radius: 8px; font-size: 12px; background: white; color: #5a4a4a; }
     .filters { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     .filters select, .filters input { padding: 8px 12px; border: 2px solid #f5d6de; border-radius: 10px; font-size: 13px; background: white; color: #5a4a4a; }
-    .cat-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; border-radius: 14px; padding: 4px; border: 2px solid #f5d6de; width: fit-content; }
+    .cat-tabs { display: flex; gap: 4px; margin-bottom: 12px; background: white; border-radius: 14px; padding: 4px; border: 2px solid #f5d6de; width: fit-content; }
     .cat-tab { padding: 8px 20px; border-radius: 11px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; color: #b0878f; background: transparent; border: none; }
     .cat-tab:hover { background: #fff5f5; }
     .cat-tab.active { background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a; box-shadow: 0 2px 8px rgba(232,160,180,0.15); }
+    .dispatch-tabs { display: flex; gap: 4px; margin-bottom: 12px; background: white; border-radius: 14px; padding: 4px; border: 2px solid #f5d6de; width: fit-content; }
+    .dispatch-tab { padding: 8px 24px; border-radius: 11px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; color: #b0878f; background: transparent; border: none; }
+    .dispatch-tab:hover { background: #fff5f5; }
+    .dispatch-tab.active { background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a; box-shadow: 0 2px 8px rgba(232,160,180,0.15); }
     .order-detail { display: none; background: #fffdfc; padding: 20px; border-radius: 12px; margin-top: 8px; font-size: 13px; border: 1px solid #ffe8e4; }
     .order-detail.show { display: block; }
     .order-detail strong { color: #5a4a4a; }
@@ -105,12 +109,16 @@
         <h1>📦 Orders</h1>
         <a href="/" style="padding:8px 18px; background:linear-gradient(135deg,#ffe4e1,#fff5f5); border:2px solid #f5c542; border-radius:20px; color:#d4808a; font-weight:700; font-size:13px; text-decoration:none; transition:all 0.3s;">🏪 Back to Store</a>
       </div>
-      <div class="cat-tabs">
-        <button class="cat-tab active" data-cat="" onclick="switchCatTab(this)">📋 All Orders</button>
-        <button class="cat-tab" data-cat="thrift" onclick="switchCatTab(this)">🛍️ Thrift Store</button>
-        <button class="cat-tab" data-cat="mellowluv" onclick="switchCatTab(this)">💎 Mellowluv</button>
+      <div class="dispatch-tabs" id="dispatch-tabs">
+        <button class="dispatch-tab active" data-dispatch="new" onclick="switchDispatchTab(this)">🆕 New Orders</button>
+        <button class="dispatch-tab" data-dispatch="previous" onclick="switchDispatchTab(this)">📦 Previous Orders</button>
       </div>
       <div class="filters">
+        <select id="category-filter" onchange="loadOrders()">
+          <option value="">All Categories</option>
+          <option value="thrift">🛍️ Thrift Store</option>
+          <option value="mellowluv">💎 Mellowluv</option>
+        </select>
         <select id="status-filter" onchange="loadOrders()">
           <option value="">All Status</option>
           <option value="pending">Pending</option>
@@ -134,6 +142,7 @@
               <th style="width:30px;"><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
               <th>ID</th>
               <th>Customer</th>
+              <th>📦 Tracking</th>
               <th>📸 Instagram</th>
               <th>Product</th>
               <th>Amount</th>
@@ -155,22 +164,24 @@
     const token = sessionStorage.getItem('admin_token');
     if (!token) window.location.href = '/admin/login.html';
 
-    function switchCatTab(el) {
-      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    function switchDispatchTab(el) {
+      document.querySelectorAll('.dispatch-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
+      currentPage = 1;
       loadOrders();
     }
 
     let currentPage = 1;
 
     async function loadOrders() {
-      const activeTab = document.querySelector('.cat-tab.active');
-      const categoryFilter = activeTab ? activeTab.dataset.cat || '' : '';
+      const activeTab = document.querySelector('.dispatch-tab.active');
+      const dispatchFilter = activeTab ? activeTab.dataset.dispatch || 'new' : 'new';
+      const categoryFilter = document.getElementById('category-filter').value;
       const statusFilter = document.getElementById('status-filter').value;
       const paymentFilter = document.getElementById('payment-filter').value;
       const searchQuery = document.getElementById('search-input').value;
       try {
-        let url = '/api/admin/orders?page=' + currentPage + '&limit=20';
+        let url = '/api/admin/orders?page=' + currentPage + '&limit=20&dispatch_status=' + dispatchFilter;
         if (statusFilter) url += '&status=' + encodeURIComponent(statusFilter);
         if (paymentFilter) url += '&payment_status=' + encodeURIComponent(paymentFilter);
         if (searchQuery) url += '&search=' + encodeURIComponent(searchQuery);
@@ -185,7 +196,7 @@
         const total = data.total || 0;
         const pages = data.pages || 1;
         if (orders.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:#b0878f;">No orders found</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:#b0878f;">No orders found</td></tr>';
           paginator.innerHTML = '';
           return;
         }
@@ -199,6 +210,18 @@
             <td><input type="checkbox" class="order-checkbox" value="${o.id}" ${checked} onchange="onCheckChange()"></td>
             <td>#${o.id}</td>
             <td><strong>${o.customer_name}</strong></td>
+            <td>
+              <select class="status-select" style="font-size:11px;padding:3px 6px;" onchange="onRowTrackingChange(${o.id}, this.value)">
+                <option value="unverified" ${o.tracking_status === 'unverified' ? 'selected' : ''}>🔴 Unverified</option>
+                <option value="verified" ${o.tracking_status === 'verified' ? 'selected' : ''}>🟡 Verified</option>
+                ${o.product_category === 'thrift' ? '' : '<option value="in_making" ' + (o.tracking_status === 'in_making' ? 'selected' : '') + '>🟠 In Making</option>'}
+                <option value="dispatched" ${o.tracking_status === 'dispatched' ? 'selected' : ''}>🟢 Dispatched ✓</option>
+              </select>
+              <div id="row-track-id-${o.id}" style="margin-top:4px;${o.tracking_status === 'dispatched' ? '' : 'display:none;'}">
+                <input type="text" id="row-track-input-${o.id}" placeholder="Tracking ID" value="${o.tracking_id || ''}" style="width:90px;padding:3px 6px;border:2px solid #f5d6de;border-radius:6px;font-size:11px;">
+                <button onclick="saveRowTrackId(${o.id})" style="padding:2px 6px;border:none;border-radius:4px;background:#e8a0b4;color:white;font-size:10px;cursor:pointer;">💾</button>
+              </div>
+            </td>
             <td>${o.instagram || '-'}</td>
             <td>${o.product_name || '-'}</td>
             <td>₹${o.total}</td>
@@ -216,7 +239,7 @@
             <td><button class="btn-sm btn-delete" onclick="deleteOrder(${o.id})" style="padding:3px 10px; border:none; border-radius:8px; background:#ffebee; color:#c62828; cursor:pointer; font-size:11px;">✕</button></td>
           </tr>
           <tr id="detail-${o.id}" class="order-detail">
-            <td colspan="11">
+            <td colspan="12">
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 <div><strong>📅 Ordered on:</strong> ${dateStr} at ${timeStr}</div>
                 <div><strong>📞 Phone:</strong> <a href="#" onclick="filterByPhone('${o.phone}'); return false;" style="color:#e8a0b4; font-weight:600; text-decoration:underline;">${o.phone || '-'}</a> <a href="https://wa.me/91${o.phone}?text=Hi%20${encodeURIComponent(o.customer_name)}%2C%20your%20order%20%23${o.id}%20status%3A%20${o.status}" target="_blank" style="display:inline-block;padding:2px 10px;background:#25D366;color:white;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;margin-left:6px;">📲 WhatsApp</a></div>
@@ -262,6 +285,7 @@
     }
 
     function goPage(p) { currentPage = p; loadOrders(); }
+    document.getElementById('category-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
     document.getElementById('status-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
     document.getElementById('payment-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
     document.getElementById('search-input').addEventListener('input', () => { currentPage = 1; loadOrders(); });
@@ -286,7 +310,24 @@
       }
     }
 
+    function onRowTrackingChange(orderId, val) {
+      const wrap = document.getElementById('row-track-id-' + orderId);
+      if (val === 'dispatched') {
+        wrap.style.display = 'block';
+      } else {
+        wrap.style.display = 'none';
+        updateTracking(orderId, val, null);
+      }
+    }
+
+    function saveRowTrackId(orderId) {
+      const val = document.getElementById('row-track-input-' + orderId).value.trim();
+      if (!val) { alert('Enter a tracking ID'); return; }
+      updateTracking(orderId, 'dispatched', val);
+    }
+
     async function saveTrackId(orderId) {
+      const sel = document.getElementById('track-status-' + orderId);
       const sel = document.getElementById('track-status-' + orderId);
       const trackId = document.getElementById('track-id-input-' + orderId).value.trim();
       if (!trackId) { alert('Please enter a India Post tracking ID'); return; }

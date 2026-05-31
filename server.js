@@ -503,11 +503,14 @@ app.get('/api/admin/stats/most-sold', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/orders', adminAuth, async (req, res) => {
+  await execute("DELETE FROM orders WHERE dispatched_at IS NOT NULL AND dispatched_at < NOW() - INTERVAL '28 days'");
   let sql = 'SELECT * FROM orders WHERE 1=1';
   const params = [];
   let pIdx = 1;
   if (req.query.status) { sql += ` AND status = $${pIdx++}`; params.push(req.query.status); }
   if (req.query.payment_status) { sql += ` AND payment_status = $${pIdx++}`; params.push(req.query.payment_status); }
+  if (req.query.dispatch_status === 'new') { sql += " AND (tracking_status IS NULL OR tracking_status != 'dispatched')"; }
+  if (req.query.dispatch_status === 'previous') { sql += " AND tracking_status = 'dispatched'"; }
   if (req.query.phone) { sql += ` AND phone = $${pIdx++}`; params.push(req.query.phone); }
   if (req.query.search) { sql += ` AND (customer_name ILIKE $${pIdx} OR phone ILIKE $${pIdx+1})`; const s = '%' + req.query.search + '%'; params.push(s, s); pIdx += 2; }
   if (req.query.category) { sql += ` AND (LOWER(product_category) = LOWER($${pIdx++}) OR product_category = 'mixed')`; params.push(req.query.category); }
@@ -603,7 +606,11 @@ app.put('/api/admin/orders/:id/tracking', adminAuth, async (req, res) => {
   const order = await queryOne('SELECT * FROM orders WHERE id = $1', [req.params.id]);
   if (!order) return res.status(404).json({ error: 'Order not found' });
   if (tracking_status === 'dispatched' && !tracking_id) return res.status(400).json({ error: 'Tracking ID is required for dispatched status' });
-  await execute('UPDATE orders SET tracking_status = $1, tracking_id = $2 WHERE id = $3', [tracking_status, tracking_id || null, req.params.id]);
+  if (tracking_status === 'dispatched') {
+    await execute('UPDATE orders SET tracking_status = $1, tracking_id = $2, dispatched_at = NOW() WHERE id = $3', [tracking_status, tracking_id, req.params.id]);
+  } else {
+    await execute('UPDATE orders SET tracking_status = $1, tracking_id = $2 WHERE id = $3', [tracking_status, tracking_id || null, req.params.id]);
+  }
   res.json({ success: true });
 });
 
