@@ -191,7 +191,7 @@
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.status === 401) { sessionStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
         const data = await res.json();
-        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:#b0878f;">Error loading orders</td></tr>'; paginator.innerHTML = ''; return; }
+        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:#c62828;">API error: ' + (data.error || res.status) + '</td></tr>'; paginator.innerHTML = ''; return; }
         const orders = data.orders || [];
         const total = data.total || 0;
         const pages = data.pages || 1;
@@ -281,7 +281,9 @@
         if (currentPage < pages) pagHtml += '<button onclick="goPage(' + (currentPage + 1) + ')" style="padding:6px 14px;border:2px solid #f5d6de;border-radius:10px;background:white;color:#5a4a4a;cursor:pointer;">→</button>';
         pagHtml += '</div>';
         paginator.innerHTML = pagHtml;
-      } catch {}
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:#c62828;">Error: ' + e.message + '</td></tr>';
+      }
     }
 
     function goPage(p) { currentPage = p; loadOrders(); }
