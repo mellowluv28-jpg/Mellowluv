@@ -402,8 +402,7 @@
       document.getElementById('search-input').value = phone;
       document.getElementById('status-filter').value = '';
       document.getElementById('payment-filter').value = '';
-      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-      document.querySelector('.cat-tab[data-cat=""]').classList.add('active');
+      document.getElementById('category-filter').value = '';
       loadOrders();
     }
 

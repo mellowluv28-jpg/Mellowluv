@@ -503,7 +503,7 @@ app.get('/api/admin/stats/most-sold', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/orders', adminAuth, async (req, res) => {
-  await execute("DELETE FROM orders WHERE dispatched_at IS NOT NULL AND dispatched_at < NOW() - INTERVAL '28 days'");
+  try { await execute("DELETE FROM orders WHERE dispatched_at IS NOT NULL AND dispatched_at < NOW() - INTERVAL '28 days'"); } catch {}
   let sql = 'SELECT * FROM orders WHERE 1=1';
   const params = [];
   let pIdx = 1;
