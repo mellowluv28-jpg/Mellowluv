@@ -47,12 +47,31 @@
           <option value="price_asc">Price: Low → High</option>
           <option value="price_desc">Price: High → Low</option>
         </select>
+        <button class="btn-sizechart" onclick="openSizeChart()" style="margin-left:auto;">📏 Size Guide</button>
       </div>
       <div class="products-grid" id="thrift-products"></div>
     </div>
   </section>
 
   <div class="cat-deco">🐱 ✨ 🐱 ✨ 🐱</div>
+
+  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()"><img id="zoom-img" src="" alt="Zoom"></div>
+
+  <div id="sizechart-overlay" class="sizechart-overlay" onclick="closeSizeChart()"></div>
+  <div id="sizechart-popup" class="sizechart-popup">
+    <button class="size-close" onclick="closeSizeChart()">✕</button>
+    <h2>📏 Thrift Size Guide</h2>
+    <table class="sizechart-table">
+      <tr><th>Size</th><th>Chest</th><th>Length</th><th>Waist</th></tr>
+      <tr><td>XS</td><td>32-34"</td><td>24-26"</td><td>26-28"</td></tr>
+      <tr><td>S</td><td>34-36"</td><td>26-28"</td><td>28-30"</td></tr>
+      <tr><td>M</td><td>36-38"</td><td>28-30"</td><td>30-32"</td></tr>
+      <tr><td>L</td><td>38-40"</td><td>30-32"</td><td>32-34"</td></tr>
+      <tr><td>XL</td><td>40-42"</td><td>32-34"</td><td>34-36"</td></tr>
+      <tr><td>XXL</td><td>42-44"</td><td>34-36"</td><td>36-38"</td></tr>
+    </table>
+    <p class="sizechart-note">💡 Measurements are approximate. Fit varies by brand/style. DM us for exact measurements of specific pieces!</p>
+  </div>
 
   <footer class="footer">
     <div class="container">

@@ -35,7 +35,7 @@ function renderProducts(containerId, products) {
     const scheduledOn = isScheduled ? `<div class="drop-time">${dropText}</div>` : '';
     return `
       <div class="product-card${hasOffer && isLive ? ' on-offer' : ''}${isScheduled ? ' scheduled' : ''}">
-        <div class="product-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}">${p.image ? '' : '📷'}</div>
+        <div class="product-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}" onclick="${p.image ? `openZoom('${p.image}')` : ''}">${p.image ? '' : '📷'}</div>
         ${offerBadge}${dropBadge}
         <div class="product-info">
           <div class="product-name">${p.name}</div>
@@ -116,3 +116,40 @@ document.addEventListener('DOMContentLoaded', updateCartBadge);
 function updateSort(category, containerId, selectEl) {
   loadProducts(category, containerId, selectEl.value);
 }
+
+function openZoom(src) {
+  document.getElementById('zoom-img').src = src;
+  document.getElementById('zoom-overlay').classList.add('show');
+}
+
+function closeZoom() {
+  document.getElementById('zoom-overlay').classList.remove('show');
+}
+
+function openSizeChart() {
+  document.getElementById('sizechart-popup').classList.add('show');
+  document.getElementById('sizechart-overlay').classList.add('show');
+}
+
+function closeSizeChart() {
+  document.getElementById('sizechart-popup').classList.remove('show');
+  document.getElementById('sizechart-overlay').classList.remove('show');
+}
+
+async function loadDealBanner() {
+  try {
+    const res = await fetch('/api/products?sort=price_asc');
+    const products = await res.json();
+    const live = products.filter(p => p.is_live !== false);
+    const deals = live.filter(p => p.offer_price && p.offer_price > 0);
+    if (deals.length === 0) return;
+    const best = deals.sort((a,b) => (a.offer_price/a.price) - (b.offer_price/b.price))[0];
+    const banner = document.getElementById('deal-banner');
+    if (!banner) return;
+    const discount = Math.round((1 - best.offer_price / best.price) * 100);
+    banner.style.display = 'flex';
+    banner.innerHTML = `🔥 <strong>${discount}% OFF</strong> on ${best.name}! <a href="/public/checkout.html?product=${best.id}" class="deal-link">Shop Now →</a>`;
+  } catch {}
+}
+
+if (document.getElementById('deal-banner')) loadDealBanner();
