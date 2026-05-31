@@ -95,6 +95,10 @@
     document.getElementById('display-order-id').textContent = params.get('order') || 'N/A';
     document.getElementById('note-order-id2').textContent = params.get('order') || 'N/A';
 
+    if (window.innerWidth <= 768) {
+      setTimeout(() => window.scrollTo({ top: 340, behavior: 'smooth' }), 800);
+    }
+
     const loyaltyPts = parseInt(params.get('lp') || '0');
     const loyaltyWillEarn = parseInt(params.get('lw') || '0');
     if (loyaltyWillEarn > 0) {
