@@ -136,8 +136,8 @@
                 <h3>${o.customer_name}</h3>
                 <span class="badge-paid">Paid</span>
               </div>
-              <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'} <a href="https://wa.me/91${o.phone}?text=Hi%20${encodeURIComponent(o.customer_name)}%2C%20your%20order%20%23${o.id}%20has%20been%20verified!%20We%20will%20ship%20it%20soon.%20🐱" target="_blank" style="display:inline-block;padding:2px 8px;background:#25D366;color:white;border-radius:6px;font-size:10px;font-weight:600;text-decoration:none;margin-left:4px;">📲 WhatsApp</a></span></div>
-              <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram || '-'}</span></div>
+              <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'}</span></div>
+              <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram ? '<a href="https://www.instagram.com/' + o.instagram.replace('@', '') + '/" target="_blank" style="color:#e8a0b4;font-weight:600;text-decoration:underline;">' + o.instagram + '</a> <a href="https://www.instagram.com/' + o.instagram.replace('@', '') + '/" target="_blank" style="display:inline-block;padding:2px 8px;background:linear-gradient(135deg,#f58529,#dd2a7b);color:white;border-radius:6px;font-size:10px;font-weight:600;text-decoration:none;margin-left:4px;">📷 DM</a>' : '-'}</span></div>
               <div class="detail-row"><span class="label">🛒 Product</span><span class="value">${catIcon} ${o.product_name}</span></div>
               <div class="detail-row"><span class="label">🔢 Quantity</span><span class="value">${o.quantity || 1}</span></div>
               <div class="detail-row"><span class="label">💰 Amount</span><span class="value">₹${o.total}</span></div>
