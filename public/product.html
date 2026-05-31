@@ -151,7 +151,7 @@
             galleryHtml += '<div class="thumb ' + (i === 0 ? 'active' : '') + '" onclick="switchImage(' + i + ', this)"><img src="' + img + '" alt=""></div>';
           });
           videos.forEach((vid, i) => {
-            galleryHtml += '<div class="thumb video-thumb" onclick="playVideo(' + (images.length + i) + ', this)"><img src="' + vid + '" alt=""></div>';
+            galleryHtml += '<div class="thumb video-thumb" onclick="showVideo(' + (images.length + i) + ', this)"><img src="' + vid + '" alt=""></div>';
           });
           galleryHtml += '</div>';
         }
@@ -210,14 +210,14 @@
     function switchImage(index, thumb) {
       const imgs = window._productImages || [];
       if (index < 0 || index >= imgs.length) return;
-      document.getElementById('main-img').src = imgs[index];
-      document.getElementById('main-img').onclick = function() { openZoom(imgs[index]); };
+      const main = document.getElementById('gallery-main');
+      main.innerHTML = '<img id="main-img" src="' + imgs[index] + '" alt="" onclick="openZoom(\'' + imgs[index] + '\')">';
       document.querySelectorAll('.gallery-thumbs .thumb').forEach(t => t.classList.remove('active'));
       if (thumb) thumb.classList.add('active');
       window._currentImageIndex = index;
     }
 
-    function playVideo(index, thumb) {
+    function showVideo(index, thumb) {
       const videos = window._productVideos || [];
       const images = window._productImages || [];
       const vidIndex = index - images.length;

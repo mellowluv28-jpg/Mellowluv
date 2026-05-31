@@ -7,9 +7,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-function uploadBuffer(buffer, folder) {
+function uploadBuffer(buffer, folder, resourceType) {
   return new Promise((resolve, reject) => {
-    const opts = { resource_type: 'image' };
+    const opts = { resource_type: resourceType || 'image' };
     if (folder) opts.folder = folder;
     const stream = cloudinary.uploader.upload_stream(
       opts,

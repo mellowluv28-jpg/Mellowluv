@@ -140,8 +140,11 @@
           <div id="image-previews" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
         </div>
         <div class="form-group">
-          <label>🎥 Video URLs (one per line)</label>
-          <textarea id="prod-videos" placeholder="https://...&#10;https://..." style="min-height:50px;"></textarea>
+          <label>🎥 Videos (up to 2)</label>
+          <input type="hidden" id="existing-videos-json" value="[]">
+          <input type="file" id="prod-videos" accept="video/*" multiple style="padding:8px;">
+          <div id="video-previews" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
+          <small style="color:#b0878f;font-size:11px;">Upload video files directly. Max 2 videos.</small>
         </div>
         <hr style="border:none;border-top:2px dashed #ffe4e1;margin:18px 0;">
         <div style="font-size:13px;color:#7fb87f;font-weight:700;margin-bottom:12px;">📅 Schedule Drop</div>
@@ -224,9 +227,12 @@
       document.getElementById('prod-scheduled-at').value = p.scheduled_at ? p.scheduled_at.slice(0, 16) : '';
       document.getElementById('prod-image').value = '';
       document.getElementById('prod-images').value = '';
-      let videosStr = '';
-      try { const v = JSON.parse(p.videos || '[]'); if (Array.isArray(v)) videosStr = v.join('\n'); } catch {}
-      document.getElementById('prod-videos').value = videosStr;
+      let videosArr = [];
+      try { const v = JSON.parse(p.videos || '[]'); if (Array.isArray(v)) videosArr = v; } catch {}
+      document.getElementById('prod-videos').value = '';
+      document.getElementById('existing-videos-json').value = JSON.stringify(videosArr);
+      const vidPreviews = document.getElementById('video-previews');
+      vidPreviews.innerHTML = videosArr.map(v => '<div style="position:relative;width:80px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;background:#000;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;">▶</div>').join('');
       let existingImgs = [];
       try { const parsed = JSON.parse(p.images || '[]'); if (Array.isArray(parsed)) existingImgs = parsed; } catch {}
       const previews = document.getElementById('image-previews');
@@ -257,9 +263,8 @@
       if (imgFile) formData.append('image', imgFile);
       const imgFiles = document.getElementById('prod-images').files;
       for (const f of imgFiles) formData.append('images', f);
-      const videosRaw = document.getElementById('prod-videos').value.trim();
-      const videosArr = videosRaw ? videosRaw.split('\n').map(v => v.trim()).filter(v => v) : [];
-      formData.append('videos', JSON.stringify(videosArr));
+      const vidFiles = document.getElementById('prod-videos').files;
+      for (const f of vidFiles) formData.append('videos', f);
 
       if (id) {
         const previews = document.getElementById('image-previews');

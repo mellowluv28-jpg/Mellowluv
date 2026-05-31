@@ -18,7 +18,7 @@ const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_MINUTES = 15;
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -626,8 +626,8 @@ app.get('/api/admin/products/:id', adminAuth, async (req, res) => {
   res.json(product);
 });
 
-app.post('/api/admin/products', adminAuth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }]), async (req, res) => {
-  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at, videos } = req.body;
+app.post('/api/admin/products', adminAuth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }, { name: 'videos', maxCount: 2 }]), async (req, res) => {
+  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at } = req.body;
   if (!name || !name.trim()) return res.status(400).json({ error: 'Product name is required' });
   const parsedPrice = parseFloat(price);
   if (isNaN(parsedPrice) || parsedPrice < 0) return res.status(400).json({ error: 'Valid non-negative price is required' });
@@ -635,19 +635,22 @@ app.post('/api/admin/products', adminAuth, upload.fields([{ name: 'image', maxCo
   if (isNaN(parsedStock) || parsedStock < 0) return res.status(400).json({ error: 'Valid non-negative stock is required' });
   let image = null;
   if (req.files?.image?.[0]) {
-    const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv');
+    const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv', 'image');
     image = result.url;
   }
   let imagesArr = [];
   if (req.files?.images) {
     for (const f of req.files.images) {
-      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv');
+      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'image');
       imagesArr.push(result.url);
     }
   }
   let videosArr = [];
-  if (videos) {
-    try { videosArr = JSON.parse(videos); } catch {}
+  if (req.files?.videos) {
+    for (const f of req.files.videos) {
+      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'video');
+      videosArr.push(result.url);
+    }
   }
   const imagesJson = JSON.stringify(imagesArr);
   const videosJson = JSON.stringify(videosArr);
@@ -658,8 +661,8 @@ app.post('/api/admin/products', adminAuth, upload.fields([{ name: 'image', maxCo
   res.json({ success: true, product: await queryOne('SELECT * FROM products WHERE id = $1', [result.lastInsertRowid]) });
 });
 
-app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }]), async (req, res) => {
-  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at, existing_images, videos } = req.body;
+app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }, { name: 'videos', maxCount: 2 }]), async (req, res) => {
+  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at, existing_images, existing_videos } = req.body;
   if (!name || !name.trim()) return res.status(400).json({ error: 'Product name is required' });
   const parsedPrice = parseFloat(price);
   if (isNaN(parsedPrice) || parsedPrice < 0) return res.status(400).json({ error: 'Valid non-negative price is required' });
@@ -669,7 +672,7 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
   if (!product) return res.status(404).json({ error: 'Product not found' });
   let image = product.image;
   if (req.files?.image?.[0]) {
-    const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv');
+    const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv', 'image');
     image = result.url;
   }
   let imagesArr = [];
@@ -678,13 +681,19 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
   }
   if (req.files?.images) {
     for (const f of req.files.images) {
-      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv');
+      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'image');
       imagesArr.push(result.url);
     }
   }
   let videosArr = [];
-  if (videos) {
-    try { videosArr = JSON.parse(videos); } catch {}
+  if (existing_videos) {
+    try { videosArr = JSON.parse(existing_videos); } catch {}
+  }
+  if (req.files?.videos) {
+    for (const f of req.files.videos) {
+      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'video');
+      videosArr.push(result.url);
+    }
   }
   const imagesJson = JSON.stringify(imagesArr);
   const videosJson = JSON.stringify(videosArr);
