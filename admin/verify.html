@@ -137,7 +137,7 @@
                 <span class="badge-paid">Paid</span>
               </div>
               <div class="detail-row"><span class="label">📞 Phone</span><span class="value">${o.phone || '-'}</span></div>
-              <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram ? '<a href="https://www.instagram.com/' + o.instagram.replace('@', '') + '/" target="_blank" style="color:#e8a0b4;font-weight:600;text-decoration:underline;">' + o.instagram + '</a> <a href="https://www.instagram.com/' + o.instagram.replace('@', '') + '/" target="_blank" style="display:inline-block;padding:2px 8px;background:linear-gradient(135deg,#f58529,#dd2a7b);color:white;border-radius:6px;font-size:10px;font-weight:600;text-decoration:none;margin-left:4px;">📷 DM</a>' : '-'}</span></div>
+              <div class="detail-row"><span class="label">📸 Instagram</span><span class="value">${o.instagram ? '<a href="https://ig.me/m/' + o.instagram.replace('@', '') + '" target="_blank" style="display:inline-block;padding:2px 8px;background:linear-gradient(135deg,#f58529,#dd2a7b);color:white;border-radius:6px;font-size:10px;font-weight:600;text-decoration:none;">📷 DM</a>' : '-'}</span></div>
               <div class="detail-row"><span class="label">🛒 Product</span><span class="value">${catIcon} ${o.product_name}</span></div>
               <div class="detail-row"><span class="label">🔢 Quantity</span><span class="value">${o.quantity || 1}</span></div>
               <div class="detail-row"><span class="label">💰 Amount</span><span class="value">₹${o.total}</span></div>
