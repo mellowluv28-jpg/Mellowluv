@@ -577,6 +577,9 @@ app.post('/api/admin/orders/bulk-verify', adminAuth, async (req, res) => {
       await execute("UPDATE orders SET payment_status = 'verified', tracking_status = 'verified', status = 'confirmed' WHERE id = $1", [id]);
       await ensureCustomer(order.phone);
       await execute('UPDATE customers SET loyalty_points = loyalty_points + 1 WHERE phone = $1', [order.phone]);
+      if (order.payment_screenshot) {
+        try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+      }
       verifiedCount++;
     }
   }
@@ -706,8 +709,14 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
 
 app.delete('/api/admin/products/:id', adminAuth, async (req, res) => {
   const product = await queryOne('SELECT * FROM products WHERE id = $1', [req.params.id]);
-  if (product && product.image) {
-    try { const m = product.image.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+  if (product) {
+    const allUrls = [];
+    if (product.image) allUrls.push(product.image);
+    try { const imgs = JSON.parse(product.images || '[]'); if (Array.isArray(imgs)) allUrls.push(...imgs); } catch {}
+    try { const vids = JSON.parse(product.videos || '[]'); if (Array.isArray(vids)) allUrls.push(...vids); } catch {}
+    for (const url of allUrls) {
+      try { const m = url.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+    }
   }
   await execute('DELETE FROM products WHERE id = $1', [req.params.id]);
   res.json({ success: true });
