@@ -33,9 +33,12 @@ function renderProducts(containerId, products) {
     const dropText = isScheduled ? formatDropTime(p.scheduled_at) : '';
     const dropBadge = isScheduled ? `<div class="drop-badge">📅 DROPPING SOON</div>` : '';
     const scheduledOn = isScheduled ? `<div class="drop-time">${dropText}</div>` : '';
+    const stockLabel = isScheduled ? '🔒 Coming Soon' : (inStock ? `In Stock (${p.stock} available)` : 'Out of Stock');
+    const stockClass = inStock && isLive ? 'stock-in' : 'stock-out';
     return `
       <div class="product-card${hasOffer && isLive ? ' on-offer' : ''}${isScheduled ? ' scheduled' : ''}">
-        <div class="product-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}" onclick="${p.image ? `openZoom('${p.image}')` : ''}">${p.image ? '' : '📷'}</div>
+        <a href="/public/product.html?id=${p.id}" style="text-decoration:none;color:inherit;">
+        <div class="product-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}">${p.image ? '' : '📷'}</div>
         ${offerBadge}${dropBadge}
         <div class="product-info">
           <div class="product-name">${p.name}</div>
@@ -43,11 +46,13 @@ function renderProducts(containerId, products) {
           ${offerNote}
           ${scheduledOn}
           <div class="product-shipping">* Shipping charged separately</div>
-          <div class="product-stock ${inStock && isLive ? 'stock-in' : 'stock-out'}">${isScheduled ? '🔒 Coming Soon' : (inStock ? `In Stock (${p.stock} available)` : 'Out of Stock')}</div>
+          <div class="product-stock ${stockClass}">${stockLabel}</div>
+        </a>
           <div style="display:flex;gap:6px;">
-            <button class="btn-buy" onclick="${isLive ? `buyProduct(${p.id})` : ''}" ${isLive && inStock ? '' : 'disabled'} style="flex:1;">${isScheduled ? '🔒 Not Available Yet' : (inStock ? (hasOffer ? 'Grab Offer 🎉' : 'Buy Now') : 'Sold Out')}</button>
-            ${isLive && inStock ? `<button class="btn-add-cart" onclick="addToCart(${p.id},'${p.name.replace(/'/g,"\\'")}',${p.offer_price||p.price},${p.price},'${(p.image||'').replace(/'/g,"\\'")}','${p.category}')" title="Add to Cart">🛒</button>` : ''}
-            ${isScheduled ? `<button class="btn-buy" onclick="location.href='/public/prebook.html?product=${p.id}'" style="flex:1;background:linear-gradient(135deg,#f3e5f5,#fce4ec);border-color:#ce93d8;color:#7b1fa2;">📅 Pre-Book</button>` : ''}
+            ${isLive && inStock ? `<button class="btn-buy" onclick="event.stopPropagation();buyProduct(${p.id})" style="flex:1;">${hasOffer ? 'Grab Offer 🎉' : 'Buy Now'}</button>` : ''}
+            ${isLive && inStock ? `<button class="btn-add-cart" onclick="event.stopPropagation();addToCart(${p.id},'${p.name.replace(/'/g,"\\'")}',${p.offer_price||p.price},${p.price},'${(p.image||'').replace(/'/g,"\\'")}','${p.category}')" title="Add to Cart">🛒</button>` : ''}
+            ${isScheduled ? `<button class="btn-buy" onclick="event.stopPropagation();location.href='/public/prebook.html?product=${p.id}'" style="flex:1;background:linear-gradient(135deg,#f3e5f5,#fce4ec);border-color:#ce93d8;color:#7b1fa2;">📅 Pre-Book</button>` : ''}
+            ${!isLive && !inStock && !isScheduled ? `<button class="btn-buy" disabled style="flex:1;">Sold Out</button>` : ''}
           </div>
         </div>
       </div>

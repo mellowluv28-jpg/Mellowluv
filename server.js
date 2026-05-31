@@ -626,27 +626,40 @@ app.get('/api/admin/products/:id', adminAuth, async (req, res) => {
   res.json(product);
 });
 
-app.post('/api/admin/products', adminAuth, upload.single('image'), async (req, res) => {
-  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at } = req.body;
+app.post('/api/admin/products', adminAuth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }]), async (req, res) => {
+  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at, videos } = req.body;
   if (!name || !name.trim()) return res.status(400).json({ error: 'Product name is required' });
   const parsedPrice = parseFloat(price);
   if (isNaN(parsedPrice) || parsedPrice < 0) return res.status(400).json({ error: 'Valid non-negative price is required' });
   const parsedStock = parseInt(stock);
   if (isNaN(parsedStock) || parsedStock < 0) return res.status(400).json({ error: 'Valid non-negative stock is required' });
   let image = null;
-  if (req.file) {
-    const result = await cloudinary.uploadBuffer(req.file.buffer, 'mellowluv');
+  if (req.files?.image?.[0]) {
+    const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv');
     image = result.url;
   }
+  let imagesArr = [];
+  if (req.files?.images) {
+    for (const f of req.files.images) {
+      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv');
+      imagesArr.push(result.url);
+    }
+  }
+  let videosArr = [];
+  if (videos) {
+    try { videosArr = JSON.parse(videos); } catch {}
+  }
+  const imagesJson = JSON.stringify(imagesArr);
+  const videosJson = JSON.stringify(videosArr);
   const result = await execute(
-    'INSERT INTO products (name, description, price, offer_price, offer_note, category, stock, image, scheduled_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-    [name.trim(), description || '', parsedPrice, offer_price || null, offer_note || '', category, parsedStock, image, scheduled_at || null]
+    'INSERT INTO products (name, description, price, offer_price, offer_note, category, stock, image, images, videos, scheduled_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+    [name.trim(), description || '', parsedPrice, offer_price || null, offer_note || '', category, parsedStock, image, imagesJson, videosJson, scheduled_at || null]
   );
   res.json({ success: true, product: await queryOne('SELECT * FROM products WHERE id = $1', [result.lastInsertRowid]) });
 });
 
-app.put('/api/admin/products/:id', adminAuth, upload.single('image'), async (req, res) => {
-  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at } = req.body;
+app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }]), async (req, res) => {
+  const { name, description, price, offer_price, offer_note, category, stock, scheduled_at, existing_images, videos } = req.body;
   if (!name || !name.trim()) return res.status(400).json({ error: 'Product name is required' });
   const parsedPrice = parseFloat(price);
   if (isNaN(parsedPrice) || parsedPrice < 0) return res.status(400).json({ error: 'Valid non-negative price is required' });
@@ -655,13 +668,29 @@ app.put('/api/admin/products/:id', adminAuth, upload.single('image'), async (req
   const product = await queryOne('SELECT * FROM products WHERE id = $1', [req.params.id]);
   if (!product) return res.status(404).json({ error: 'Product not found' });
   let image = product.image;
-  if (req.file) {
-    const result = await cloudinary.uploadBuffer(req.file.buffer, 'mellowluv');
+  if (req.files?.image?.[0]) {
+    const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv');
     image = result.url;
   }
+  let imagesArr = [];
+  if (existing_images) {
+    try { imagesArr = JSON.parse(existing_images); } catch {}
+  }
+  if (req.files?.images) {
+    for (const f of req.files.images) {
+      const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv');
+      imagesArr.push(result.url);
+    }
+  }
+  let videosArr = [];
+  if (videos) {
+    try { videosArr = JSON.parse(videos); } catch {}
+  }
+  const imagesJson = JSON.stringify(imagesArr);
+  const videosJson = JSON.stringify(videosArr);
   await execute(
-    'UPDATE products SET name=$1, description=$2, price=$3, offer_price=$4, offer_note=$5, category=$6, stock=$7, image=$8, scheduled_at=$9 WHERE id=$10',
-    [name.trim(), description || '', parsedPrice, offer_price || null, offer_note || '', category, parsedStock, image, scheduled_at || null, req.params.id]
+    'UPDATE products SET name=$1, description=$2, price=$3, offer_price=$4, offer_note=$5, category=$6, stock=$7, image=$8, images=$9, videos=$10, scheduled_at=$11 WHERE id=$12',
+    [name.trim(), description || '', parsedPrice, offer_price || null, offer_note || '', category, parsedStock, image, imagesJson, videosJson, scheduled_at || null, req.params.id]
   );
   res.json({ success: true, product: await queryOne('SELECT * FROM products WHERE id = $1', [req.params.id]) });
 });
@@ -702,10 +731,9 @@ app.get('/api/products', async (req, res) => {
   let sql = 'SELECT * FROM products';
   const params = [];
   const conditions = [];
-  conditions.push('stock > 0');
   let pIdx = 1;
   if (category) { conditions.push(`category = $${pIdx++}`); params.push(category); }
-  sql += ' WHERE ' + conditions.join(' AND ');
+  if (conditions.length > 0) sql += ' WHERE ' + conditions.join(' AND ');
   if (sort === 'price_asc') sql += ' ORDER BY price ASC';
   else if (sort === 'price_desc') sql += ' ORDER BY price DESC';
   else if (sort === 'newest') sql += ' ORDER BY created_at DESC';
@@ -715,7 +743,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 app.get('/api/products/upcoming', async (req, res) => {
-  res.json(await query("SELECT * FROM products WHERE scheduled_at IS NOT NULL AND scheduled_at > NOW() AND stock > 0 ORDER BY scheduled_at ASC LIMIT 10"));
+  res.json(await query("SELECT * FROM products WHERE scheduled_at IS NOT NULL AND scheduled_at > NOW() ORDER BY scheduled_at ASC LIMIT 10"));
 });
 
 app.get('/api/products/:id', async (req, res) => {

@@ -131,8 +131,17 @@
           <input type="number" id="prod-stock" value="1" min="0">
         </div>
         <div class="form-group">
-          <label>🖼️ Image</label>
+          <label>🖼️ Cover Image</label>
           <input type="file" id="prod-image" accept="image/*" style="padding:8px;">
+        </div>
+        <div class="form-group">
+          <label>🖼️ Extra Images (up to 5 total)</label>
+          <input type="file" id="prod-images" accept="image/*" multiple style="padding:8px;">
+          <div id="image-previews" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
+        </div>
+        <div class="form-group">
+          <label>🎥 Video URLs (one per line)</label>
+          <textarea id="prod-videos" placeholder="https://...&#10;https://..." style="min-height:50px;"></textarea>
         </div>
         <hr style="border:none;border-top:2px dashed #ffe4e1;margin:18px 0;">
         <div style="font-size:13px;color:#7fb87f;font-weight:700;margin-bottom:12px;">📅 Schedule Drop</div>
@@ -181,6 +190,7 @@
                 ${offerTag}
                 <div class="inv-stock">📦 Stock: ${p.stock}</div>
                 <div class="inv-actions">
+                  <a href="/public/product.html?id=${p.id}" target="_blank" class="btn-sm" style="background:#e8f5e9;color:#2e7d32;display:inline-block;padding:5px 14px;border-radius:10px;text-decoration:none;font-size:12px;font-weight:600;">👁️ View</a>
                   <button class="btn-sm btn-edit" onclick="openEditModal(${p.id})">Edit</button>
                   <button class="btn-sm btn-delete" onclick="deleteProduct(${p.id})">Delete</button>
                 </div>
@@ -213,6 +223,14 @@
       document.getElementById('prod-offer-note').value = p.offer_note || '';
       document.getElementById('prod-scheduled-at').value = p.scheduled_at ? p.scheduled_at.slice(0, 16) : '';
       document.getElementById('prod-image').value = '';
+      document.getElementById('prod-images').value = '';
+      let videosStr = '';
+      try { const v = JSON.parse(p.videos || '[]'); if (Array.isArray(v)) videosStr = v.join('\n'); } catch {}
+      document.getElementById('prod-videos').value = videosStr;
+      let existingImgs = [];
+      try { const parsed = JSON.parse(p.images || '[]'); if (Array.isArray(parsed)) existingImgs = parsed; } catch {}
+      const previews = document.getElementById('image-previews');
+      previews.innerHTML = existingImgs.map(img => '<div style="position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;"><img src="' + img + '" style="width:100%;height:100%;object-fit:cover;"></div>').join('');
       document.getElementById('product-modal').classList.add('show');
     }
 
@@ -237,6 +255,18 @@
       formData.append('scheduled_at', schedVal ? new Date(schedVal).toISOString() : '');
       const imgFile = document.getElementById('prod-image').files[0];
       if (imgFile) formData.append('image', imgFile);
+      const imgFiles = document.getElementById('prod-images').files;
+      for (const f of imgFiles) formData.append('images', f);
+      const videosRaw = document.getElementById('prod-videos').value.trim();
+      const videosArr = videosRaw ? videosRaw.split('\n').map(v => v.trim()).filter(v => v) : [];
+      formData.append('videos', JSON.stringify(videosArr));
+
+      if (id) {
+        const previews = document.getElementById('image-previews');
+        const existingUrls = [];
+        previews.querySelectorAll('img').forEach(img => existingUrls.push(img.src));
+        formData.append('existing_images', JSON.stringify(existingUrls));
+      }
 
       const url = id ? '/api/admin/products/' + id : '/api/admin/products';
       const method = id ? 'PUT' : 'POST';

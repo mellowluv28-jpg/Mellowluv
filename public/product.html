@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/public/icons/icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .product-page { padding: 40px 0; }
+    .product-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+    .product-gallery { position: sticky; top: 20px; }
+    .gallery-main {
+      width: 100%; aspect-ratio: 1; border-radius: 18px; overflow: hidden;
+      border: 2px solid #f5d6de; background: #fffdfc; margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .gallery-main img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; transition: transform 0.3s; }
+    .gallery-main img:hover { transform: scale(1.05); }
+    .gallery-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .gallery-thumbs .thumb {
+      width: 64px; height: 64px; border-radius: 10px; border: 2px solid #f5d6de; cursor: pointer;
+      flex-shrink: 0; overflow: hidden; background: #fff; transition: all 0.3s;
+    }
+    .gallery-thumbs .thumb:hover { border-color: #e8a0b4; }
+    .gallery-thumbs .thumb.active { border-color: #d4808a; box-shadow: 0 0 0 2px #d4808a; }
+    .gallery-thumbs .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-thumbs .thumb.video-thumb { position: relative; }
+    .gallery-thumbs .thumb.video-thumb::after {
+      content: '▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      font-size: 20px; color: white; text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .product-info { padding-top: 0; }
+    .product-info h1 { font-size: 28px; color: #5a4a4a; margin-bottom: 6px; }
+    .product-info .price-row { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .product-info .price-row .current-price { font-size: 26px; font-weight: 800; color: #d4808a; }
+    .product-info .price-row .original-price { font-size: 18px; color: #b0878f; text-decoration: line-through; }
+    .product-info .price-row .offer-badge-page { display: inline-block; padding: 3px 12px; background: linear-gradient(135deg,#fce4ec,#fef4f6); color: #d4808a; border-radius: 10px; font-size: 12px; font-weight: 700; }
+    .product-info .description { font-size: 15px; line-height: 1.7; color: #5a4a4a; margin-bottom: 20px; white-space: pre-wrap; }
+    .product-info .stock-status { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+    .product-info .stock-status.in-stock { color: #2e7d32; }
+    .product-info .stock-status.out-of-stock { color: #c62828; }
+    .product-info .product-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .product-info .product-actions .btn { padding: 14px 28px; font-size: 15px; border-radius: 12px; font-weight: 700; }
+    .product-info .product-actions .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .reviews-section { margin-top: 50px; padding-top: 30px; border-top: 2px solid #f5d6de; text-align: center; }
+    .reviews-section h2 { font-size: 22px; color: #5a4a4a; margin-bottom: 12px; }
+    .reviews-section .insta-link { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg,#f58529,#dd2a7b); color: white; border-radius: 14px; font-size: 15px; font-weight: 700; text-decoration: none; margin-top: 8px; transition: all 0.3s; }
+    .reviews-section .insta-link:hover { transform: scale(1.05); box-shadow: 0 4px 16px rgba(221,42,123,0.3); }
+    .breadcrumb { font-size: 13px; color: #b0878f; margin-bottom: 20px; }
+    .breadcrumb a { color: #e8a0b4; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      .product-layout { grid-template-columns: 1fr; gap: 24px; }
+      .product-gallery { position: static; }
+      .product-info h1 { font-size: 22px; }
+      .product-info .price-row .current-price { font-size: 22px; }
+      .product-page { padding: 20px 0; }
+      .gallery-thumbs .thumb { width: 52px; height: 52px; }
+    }
+  </style>
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
+      </ul>
+    </div>
+    <div id="nav-overlay" onclick="toggleNav()"></div>
+  </nav>
+
+  <section class="product-page">
+    <div class="container">
+      <div class="breadcrumb" id="breadcrumb">
+        <a href="/">Home</a> / <span id="breadcrumb-cat"></span> / <span id="breadcrumb-name"></span>
+      </div>
+      <div id="product-content">
+        <div class="loading" style="text-align:center;padding:60px 0;color:#b0878f;"><div class="spinner"></div>Loading product...</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()">
+    <span class="zoom-close">&times;</span>
+    <img id="zoom-img" src="" alt="Zoom">
+  </div>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    if (!productId) { document.getElementById('product-content').innerHTML = '<div style="text-align:center;padding:60px 0;color:#b0878f;">No product selected.</div>'; }
+
+    async function loadProduct() {
+      try {
+        const res = await fetch('/api/products/' + productId);
+        if (!res.ok) { document.getElementById('product-content').innerHTML = '<div style="text-align:center;padding:60px 0;color:#b0878f;">Product not found 🐱</div>'; return; }
+        const p = await res.json();
+
+        const images = [];
+        try { const parsed = JSON.parse(p.images || '[]'); if (Array.isArray(parsed)) images.push(...parsed); } catch {}
+        const videos = [];
+        try { const parsed = JSON.parse(p.videos || '[]'); if (Array.isArray(parsed)) videos.push(...parsed); } catch {}
+        if (p.image) images.unshift(p.image);
+
+        const isScheduled = p.scheduled_at && new Date(p.scheduled_at) > new Date();
+        const inStock = p.stock > 0 && !isScheduled;
+        const hasOffer = p.offer_price && p.offer_price > 0;
+        const catName = p.category === 'jewelry' ? 'Mellowluv' : 'Thrift Store';
+        const catPage = p.category === 'jewelry' ? '/public/jewelry.html' : '/public/thrift.html';
+        const catIcon = p.category === 'jewelry' ? '💎' : '🛍️';
+
+        document.getElementById('breadcrumb-cat').innerHTML = '<a href="' + catPage + '">' + catIcon + ' ' + catName + '</a>';
+        document.getElementById('breadcrumb-name').textContent = p.name;
+        document.title = p.name + ' - Mellowluv';
+
+        let galleryHtml = '<div class="gallery-main" id="gallery-main">';
+        if (images.length > 0) {
+          galleryHtml += '<img id="main-img" src="' + images[0] + '" alt="' + p.name + '" onclick="openZoom(\'' + images[0] + '\')">';
+        } else {
+          galleryHtml += '<div style="font-size:64px;color:#f5d6de;">📷</div>';
+        }
+        galleryHtml += '</div>';
+
+        if (images.length > 1 || videos.length > 0) {
+          galleryHtml += '<div class="gallery-thumbs">';
+          images.forEach((img, i) => {
+            galleryHtml += '<div class="thumb ' + (i === 0 ? 'active' : '') + '" onclick="switchImage(' + i + ', this)"><img src="' + img + '" alt=""></div>';
+          });
+          videos.forEach((vid, i) => {
+            galleryHtml += '<div class="thumb video-thumb" onclick="playVideo(' + (images.length + i) + ', this)"><img src="' + vid + '" alt=""></div>';
+          });
+          galleryHtml += '</div>';
+        }
+
+        let infoHtml = '<div class="product-info">';
+        infoHtml += '<h1>' + p.name + '</h1>';
+        infoHtml += '<div class="price-row">';
+        if (hasOffer) {
+          infoHtml += '<span class="current-price">₹' + p.offer_price + '</span>';
+          infoHtml += '<span class="original-price">₹' + p.price + '</span>';
+          const disc = Math.round((1 - p.offer_price / p.price) * 100);
+          infoHtml += '<span class="offer-badge-page">🔥 ' + disc + '% OFF</span>';
+        } else {
+          infoHtml += '<span class="current-price">₹' + p.price + '</span>';
+        }
+        infoHtml += '</div>';
+
+        if (p.description) {
+          infoHtml += '<div class="description">' + p.description + '</div>';
+        }
+
+        infoHtml += '<div class="stock-status ' + (inStock ? 'in-stock' : 'out-of-stock') + '">';
+        if (isScheduled) {
+          infoHtml += '🔒 Coming Soon';
+        } else if (inStock) {
+          infoHtml += '✅ In Stock (' + p.stock + ' available)';
+        } else {
+          infoHtml += '❌ Out of Stock';
+        }
+        infoHtml += '</div>';
+
+        infoHtml += '<div class="product-actions">';
+        if (isScheduled) {
+          infoHtml += '<a href="/public/prebook.html?product=' + p.id + '" class="btn">📅 Pre-Book Now</a>';
+        } else if (inStock) {
+          infoHtml += '<button class="btn" onclick="buyProduct(' + p.id + ')">Buy Now 🛒</button>';
+          infoHtml += '<button class="btn" onclick="addToCart(' + p.id + ',\'' + p.name.replace(/'/g,"\\'") + '\',' + (p.offer_price || p.price) + ',' + p.price + ',\'' + (p.image || '').replace(/'/g,"\\'") + '\',\'' + p.category + '\')" style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border-color:#e8a0b4;color:#d4808a;">Add to Cart 🛒</button>';
+        } else {
+          infoHtml += '<button class="btn" disabled>Sold Out</button>';
+        }
+        infoHtml += '</div></div>';
+
+        document.getElementById('product-content').innerHTML = '<div class="product-layout"><div class="product-gallery">' + galleryHtml + '</div>' + infoHtml + '</div>';
+
+        const reviewsHtml = '<div class="reviews-section"><h2>⭐ What Our Customers Say</h2><p style="color:#b0878f;font-size:14px;">See real reviews and customer photos on our Instagram highlights!</p><a href="https://www.instagram.com/mellowluvv_" target="_blank" class="insta-link">📸 Check Reviews on Instagram</a></div>';
+        document.getElementById('product-content').insertAdjacentHTML('afterend', reviewsHtml);
+
+        window._productImages = images;
+        window._productVideos = videos;
+        window._currentImageIndex = 0;
+      } catch {
+        document.getElementById('product-content').innerHTML = '<div style="text-align:center;padding:60px 0;color:#b0878f;">Failed to load product. Try again.</div>';
+      }
+    }
+
+    function switchImage(index, thumb) {
+      const imgs = window._productImages || [];
+      if (index < 0 || index >= imgs.length) return;
+      document.getElementById('main-img').src = imgs[index];
+      document.getElementById('main-img').onclick = function() { openZoom(imgs[index]); };
+      document.querySelectorAll('.gallery-thumbs .thumb').forEach(t => t.classList.remove('active'));
+      if (thumb) thumb.classList.add('active');
+      window._currentImageIndex = index;
+    }
+
+    function playVideo(index, thumb) {
+      const videos = window._productVideos || [];
+      const images = window._productImages || [];
+      const vidIndex = index - images.length;
+      if (vidIndex < 0 || vidIndex >= videos.length) return;
+      document.querySelectorAll('.gallery-thumbs .thumb').forEach(t => t.classList.remove('active'));
+      if (thumb) thumb.classList.add('active');
+      const main = document.getElementById('gallery-main');
+      main.innerHTML = '<video controls autoplay style="width:100%;height:100%;object-fit:contain;border-radius:18px;" src="' + videos[vidIndex] + '"></video>';
+    }
+
+    function openZoom(src) {
+      if (!src) return;
+      document.getElementById('zoom-img').src = src;
+      document.getElementById('zoom-overlay').classList.add('show');
+    }
+
+    function closeZoom() {
+      document.getElementById('zoom-overlay').classList.remove('show');
+    }
+
+    if (productId) loadProduct();
+  </script>
+<script>function toggleNav(){document.querySelector('.navbar').classList.toggle('active')}</script>
+</body>
+</html>
