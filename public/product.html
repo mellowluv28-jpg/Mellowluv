@@ -51,6 +51,50 @@
     .breadcrumb { font-size: 13px; color: #b0878f; margin-bottom: 20px; }
     .breadcrumb a { color: #e8a0b4; text-decoration: none; }
     .breadcrumb a:hover { text-decoration: underline; }
+    .qty-modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+    }
+    .qty-modal-overlay.show { display: flex; }
+    .qty-modal-box {
+      background: white; border-radius: 20px; padding: 28px;
+      width: 320px; max-width: 90vw;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      text-align: center; animation: fadeUp 0.3s ease;
+    }
+    .qty-modal-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .qty-modal-header h3 { font-size: 18px; color: #5a4a4a; margin: 0; text-align: left; }
+    .qty-modal-close {
+      font-size: 28px; color: #b0878f; cursor: pointer; line-height: 1;
+      background: none; border: none; padding: 0;
+    }
+    .qty-modal-close:hover { color: #5a4a4a; }
+    .qty-modal-price { font-size: 22px; font-weight: 800; color: #d4808a; margin-bottom: 20px; }
+    .qty-selector {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      margin-bottom: 24px;
+    }
+    .qty-selector button {
+      width: 44px; height: 44px; border-radius: 50%; border: 2px solid #f5d6de;
+      background: #fff; font-size: 22px; font-weight: 700; color: #5a4a4a;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .qty-selector button:hover { background: #fce4ec; border-color: #e8a0b4; }
+    .qty-selector span {
+      font-size: 24px; font-weight: 700; color: #5a4a4a; min-width: 40px;
+    }
+    .qty-modal-confirm {
+      width: 100%; padding: 14px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, #e8a0b4, #d4808a); color: white;
+      font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+    }
+    .qty-modal-confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(212,128,138,0.3); }
+    .qty-modal-confirm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
     @media (max-width: 768px) {
       .product-layout { grid-template-columns: 1fr; gap: 24px; }
       .product-gallery { position: static; }
@@ -106,6 +150,22 @@
   <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()">
     <span class="zoom-close">&times;</span>
     <img id="zoom-img" src="" alt="Zoom">
+  </div>
+
+  <div id="qty-modal" class="qty-modal-overlay">
+    <div class="qty-modal-box">
+      <div class="qty-modal-header">
+        <h3 id="qty-modal-name"></h3>
+        <button class="qty-modal-close" onclick="closeQtyModal()">&times;</button>
+      </div>
+      <div class="qty-modal-price" id="qty-modal-price"></div>
+      <div class="qty-selector">
+        <button onclick="changeQty(-1)">−</button>
+        <span id="qty-value">1</span>
+        <button onclick="changeQty(1)">+</button>
+      </div>
+      <button class="qty-modal-confirm" id="qty-confirm-btn" onclick="confirmAddToCart()">Add to Cart 🛒</button>
+    </div>
   </div>
 
   <script src="/public/js/main.js"></script>
@@ -188,7 +248,7 @@
           infoHtml += '<a href="/public/prebook.html?product=' + p.id + '" class="btn">📅 Pre-Book Now</a>';
         } else if (inStock) {
           infoHtml += '<button class="btn" onclick="buyProduct(' + p.id + ')">Buy Now 🛒</button>';
-          infoHtml += '<button class="btn" onclick="addToCart(' + p.id + ',\'' + p.name.replace(/'/g,"\\'") + '\',' + (p.offer_price || p.price) + ',' + p.price + ',\'' + (p.image || '').replace(/'/g,"\\'") + '\',\'' + p.category + '\')" style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border-color:#e8a0b4;color:#d4808a;">Add to Cart 🛒</button>';
+          infoHtml += '<button class="btn" onclick="showQtyModal(' + p.id + ',\'' + p.name.replace(/'/g,"\\'") + '\',' + (p.offer_price || p.price) + ',' + p.price + ',\'' + (p.image || '').replace(/'/g,"\\'") + '\',\'' + p.category + '\', ' + p.stock + ')" style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border-color:#e8a0b4;color:#d4808a;">Add to Cart 🛒</button>';
         } else {
           infoHtml += '<button class="btn" disabled>Sold Out</button>';
         }
@@ -236,6 +296,40 @@
 
     function closeZoom() {
       document.getElementById('zoom-overlay').classList.remove('show');
+    }
+
+    let _qtyData = {};
+
+    function showQtyModal(id, name, offerPrice, price, image, category, maxStock) {
+      _qtyData = { id, name, offerPrice, price, image, category };
+      document.getElementById('qty-modal-name').textContent = name;
+      document.getElementById('qty-modal-price').textContent = '₹' + offerPrice;
+      document.getElementById('qty-value').textContent = '1';
+      const confirmBtn = document.getElementById('qty-confirm-btn');
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Add to Cart 🛒';
+      document.getElementById('qty-modal').classList.add('show');
+    }
+
+    function closeQtyModal() {
+      document.getElementById('qty-modal').classList.remove('show');
+    }
+
+    function changeQty(delta) {
+      const el = document.getElementById('qty-value');
+      let qty = parseInt(el.textContent) + delta;
+      if (qty < 1) qty = 1;
+      el.textContent = qty;
+    }
+
+    function confirmAddToCart() {
+      const qty = parseInt(document.getElementById('qty-value').textContent);
+      const d = _qtyData;
+      const confirmBtn = document.getElementById('qty-confirm-btn');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Adding...';
+      addToCart(d.id, d.name, d.offerPrice, d.price, d.image, d.category, qty);
+      closeQtyModal();
     }
 
     if (productId) loadProduct();

@@ -89,7 +89,7 @@ function buyProduct(productId) {
   window.location.href = `/public/checkout.html?product=${productId}`;
 }
 
-async function addToCart(id, name, offerPrice, price, image, category) {
+async function addToCart(id, name, offerPrice, price, image, category, qty) {
   try {
     const res = await fetch('/api/products/' + id);
     const product = await res.json();
@@ -97,12 +97,17 @@ async function addToCart(id, name, offerPrice, price, image, category) {
     if (product.stock < 1) return alert('Out of stock!');
     if (!product.is_live) return alert('This product is not available yet!');
 
+    qty = qty || 1;
     let cart = JSON.parse(localStorage.getItem('mellowluv_cart') || '{"items":[]}');
     const existing = cart.items.find(i => i.id === id);
     const currentQty = existing ? existing.qty : 0;
-    if (currentQty >= product.stock) return alert('Only ' + product.stock + ' in stock!');
+    if (currentQty + qty > product.stock) {
+      const avail = product.stock - currentQty;
+      if (avail <= 0) return alert('Only ' + product.stock + ' in stock!');
+      return alert('Only ' + avail + ' more in stock!');
+    }
 
-    if (existing) { existing.qty += 1; } else { cart.items.push({ id, name, offer_price: offerPrice, price, image, category, qty: 1 }); }
+    if (existing) { existing.qty += qty; } else { cart.items.push({ id, name, offer_price: offerPrice, price, image, category, qty }); }
     localStorage.setItem('mellowluv_cart', JSON.stringify(cart));
     updateCartBadge();
     const btn = event?.target || document.querySelector('[onclick*="addToCart(' + id + '"]');
