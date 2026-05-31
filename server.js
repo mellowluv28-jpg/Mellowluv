@@ -163,7 +163,6 @@ app.post('/api/prebook', async (req, res) => {
   const prebookCharge = 50;
   const total = unitPrice + prebookCharge + shipping;
   const category = product.category === 'jewelry' ? 'mellowluv' : 'thrift';
-  await execute('UPDATE products SET stock = stock - 1 WHERE id = $1 AND stock >= 1', [product_id]);
   const result = await execute(
     "INSERT INTO orders (customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied, is_prebook, loyalty_award, whatsapp_optin) VALUES ($1, $2, $3, $4, $5, $6, '', '', 1, $7, $8, $9, $10, $11, $12, 'unpaid', 'unverified', 0, 1, 2, $13)",
     [customer_name, phone, instagram || '', address, pincode, urgency || '', product_id, product.name, product.price, category, shipping, Math.round(total), whatsapp_optin ? 1 : 0]
@@ -226,13 +225,9 @@ app.post('/api/orders', async (req, res) => {
 
     const grandTotal = totalBeforeExtra + shipping + extraCharge - discountAmount;
 
-    for (let idx = 0; idx < allItems.length; idx++) {
-      const item = allItems[idx];
-      const decResult = await execute('UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1', [item.qty, item.product.id]);
-      if (decResult.changes === 0) {
-        for (let j = 0; j < idx; j++) {
-          await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [allItems[j].qty, allItems[j].product.id]);
-        }
+    for (const item of allItems) {
+      const product = await queryOne('SELECT stock FROM products WHERE id = $1', [item.product.id]);
+      if (!product || product.stock < item.qty) {
         return res.status(400).json({ error: `Not enough stock for ${item.product.name}` });
       }
     }
@@ -278,8 +273,8 @@ app.post('/api/orders', async (req, res) => {
     return res.status(400).json({ error: 'This product is not available yet.' });
   }
 
-  const decResult = await execute('UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1', [qty, product_id]);
-  if (decResult.changes === 0) return res.status(400).json({ error: 'Not enough stock' });
+  const productCheck = await queryOne('SELECT stock FROM products WHERE id = $1', [product_id]);
+  if (!productCheck || productCheck.stock < qty) return res.status(400).json({ error: 'Not enough stock' });
 
   let extraCharge = 0;
   if (urgency === 'urgent') extraCharge += 30;
@@ -389,9 +384,6 @@ app.post('/api/orders/:id/reject-proof', async (req, res) => {
   if (!order) return res.status(404).json({ error: 'Order not found' });
   if (order.payment_screenshot) {
     try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
-  }
-  if (order.product_id && order.quantity) {
-    await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [order.quantity, order.product_id]);
   }
   await execute("UPDATE orders SET payment_screenshot = '', screenshot_uploaded_at = NULL, payment_status = 'unpaid' WHERE id = $1", [req.params.id]);
   res.json({ success: true, message: 'Screenshot rejected, order reverted to unpaid' });
@@ -532,14 +524,14 @@ app.put('/api/admin/orders/:id/verify', adminAuth, async (req, res) => {
     if (order.payment_screenshot) {
       try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
     }
-    if (order.product_id && order.quantity) {
-      await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [order.quantity, order.product_id]);
-    }
     await execute('DELETE FROM orders WHERE id = $1', [req.params.id]);
     return res.json({ success: true, message: 'Order deleted' });
   }
   if (payment_status === 'verified') {
     if (order.payment_status === 'verified') return res.status(400).json({ error: 'Order already verified' });
+    if (order.product_id && order.quantity) {
+      await execute('UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1', [order.quantity, order.product_id]);
+    }
     await execute("UPDATE orders SET payment_status = 'verified', tracking_status = 'verified', status = 'confirmed' WHERE id = $1", [req.params.id]);
     await ensureCustomer(order.phone);
     await execute('UPDATE customers SET loyalty_points = loyalty_points + 1 WHERE phone = $1', [order.phone]);
