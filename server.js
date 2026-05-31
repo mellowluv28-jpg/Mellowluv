@@ -170,7 +170,7 @@ app.post('/api/prebook', async (req, res) => {
   );
   const upiId = await getSetting('upi_id');
   const upiName = await getSetting('upi_name');
-  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(total)}&cu=INR`;
+  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(total)}&tn=Order%20%23${result.lastInsertRowid}&cu=INR`;
   const qrDataUrl = await QRCode.toDataURL(upiLink);
   const contactInsta = await getSetting('contact_instagram');
   res.json({
@@ -256,7 +256,7 @@ app.post('/api/orders', async (req, res) => {
 
     const upiId = await getSetting('upi_id');
     const upiName = await getSetting('upi_name');
-    const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(grandTotal)}&cu=INR`;
+    const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(grandTotal)}&tn=Order%20%23${firstOrderId}&cu=INR`;
     const qrDataUrl = await QRCode.toDataURL(upiLink);
     const contactInsta = await getSetting('contact_instagram');
 
@@ -307,7 +307,7 @@ app.post('/api/orders', async (req, res) => {
 
   const upiId = await getSetting('upi_id');
   const upiName = await getSetting('upi_name');
-  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(total)}&cu=INR`;
+  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(total)}&tn=Order%20%23${result.lastInsertRowid}&cu=INR`;
   const qrDataUrl = await QRCode.toDataURL(upiLink);
   const contactInsta = await getSetting('contact_instagram');
 
