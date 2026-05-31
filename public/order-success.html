@@ -43,9 +43,8 @@
           Pay to UPI ID: <strong id="display-upi"></strong>
         </div>
 
-        <div style="background:#d4808a;color:white;border-radius:12px;padding:10px 12px;margin:12px 0;text-align:center;border:2px solid #bf6d7a;font-size:13px;line-height:1.5;">
-          <strong>⚠️ Put Order <span style="background:white;color:#bf6d7a;padding:1px 10px;border-radius:6px;" id="note-order-id"></span> in the "Note" box of Google Pay / PhonePe / Paytm</strong>
-          <br><span style="opacity:0.9;">✅ Fast verification in minutes!</span>
+        <div style="background:#e8f5e9;color:#2e7d32;border:2px solid #a5d6a7;border-radius:12px;padding:10px 12px;margin:12px 0;text-align:center;font-size:13px;font-weight:500;">
+          📱 Scan & pay — your Order <strong>#<span id="note-order-id2"></span></strong> is already in the note. Then upload screenshot below!
         </div>
 
         <div style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border:3px solid #e8a0b4;border-radius:16px;padding:20px;margin:12px 0;box-shadow:0 4px 20px rgba(232,160,180,0.15);">
@@ -94,7 +93,7 @@
     document.getElementById('display-upi').textContent = decodeURIComponent(params.get('upi') || '');
     document.getElementById('display-amount').textContent = '₹' + (params.get('amount') || '0');
     document.getElementById('display-order-id').textContent = params.get('order') || 'N/A';
-    document.getElementById('note-order-id').textContent = '#' + (params.get('order') || 'N/A');
+    document.getElementById('note-order-id2').textContent = params.get('order') || 'N/A';
 
     const loyaltyPts = parseInt(params.get('lp') || '0');
     const loyaltyWillEarn = parseInt(params.get('lw') || '0');
