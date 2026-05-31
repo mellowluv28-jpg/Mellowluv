@@ -330,7 +330,6 @@
 
     async function saveTrackId(orderId) {
       const sel = document.getElementById('track-status-' + orderId);
-      const sel = document.getElementById('track-status-' + orderId);
       const trackId = document.getElementById('track-id-input-' + orderId).value.trim();
       if (!trackId) { alert('Please enter a India Post tracking ID'); return; }
       await updateTracking(orderId, 'dispatched', trackId);
