@@ -1,0 +1,129 @@
+/* Admin PWA App-like Styles */
+
+/* Bottom Tab Bar - Mobile Only */
+.admin-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  border-top: 2px solid #f5d6de;
+  z-index: 999;
+  justify-content: space-around;
+  align-items: center;
+  padding: 4px 0 env(safe-area-inset-bottom, 4px);
+  box-shadow: 0 -4px 20px rgba(232,160,180,0.1);
+}
+.admin-bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  font-size: 10px;
+  color: #b0878f;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 12px;
+  min-width: 48px;
+}
+.admin-bottom-nav a .nav-icon { font-size: 20px; line-height: 1; }
+.admin-bottom-nav a.active { color: #d4808a; background: #fce4ec; }
+.admin-bottom-nav a:active { transform: scale(0.92); }
+
+/* App shell - fixed header + scrollable content */
+.admin-app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.admin-app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #fef4f6, #fce4ec);
+  padding: 14px 20px;
+  border-bottom: 2px solid #f5d6de;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.admin-app-header h1 { font-size: 18px; color: #5a4a4a; margin: 0; }
+.admin-app-header .header-back { font-size: 20px; color: #d4808a; text-decoration: none; padding: 6px; border-radius: 10px; }
+.admin-app-header .header-back:active { background: #fce4ec; }
+.admin-app-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 80px;
+}
+
+/* Touch-friendly targets */
+.admin-app-content button,
+.admin-app-content .btn,
+.admin-app-content select,
+.admin-app-content input,
+.admin-app-content a { min-height: 44px; }
+
+/* Toast notifications */
+.admin-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #323232;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  max-width: 90vw;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.admin-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.admin-toast.success { background: #2e7d32; }
+.admin-toast.error { background: #c62828; }
+
+/* Pull to refresh hint */
+.pull-hint {
+  text-align: center;
+  color: #d4a0a0;
+  font-size: 12px;
+  padding: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.pull-hint.show { opacity: 1; }
+
+/* Native momentum scroll */
+.admin-app-content { -webkit-overflow-scrolling: touch; }
+
+/* Mobile: hide sidebar, show bottom nav */
+@media (max-width: 768px) {
+  .sidebar { display: none !important; }
+  .admin-bottom-nav { display: flex !important; }
+  .main-content { margin-left: 0 !important; padding: 12px !important; padding-bottom: 80px !important; }
+  .admin-layout { flex-direction: column !important; }
+  .admin-app-header { display: flex !important; }
+}
+
+/* Desktop: hide bottom nav, show sidebar */
+@media (min-width: 769px) {
+  .admin-bottom-nav { display: none !important; }
+  .admin-app-header { display: none !important; }
+}
+
+/* Splash screen bg color matches manifest */
+body { background: #fffbfb; }

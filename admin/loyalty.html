@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loyalty - Mellowluv Admin</title>
   <link rel="stylesheet" href="/public/css/style.css">
+  <link rel="stylesheet" href="/admin/admin-app.css">
   <style>
     .admin-layout { display: flex; }
     .sidebar { width: 240px; background: linear-gradient(180deg, #fef4f6, #fce4ec); min-height: 100vh; padding: 30px 0; border-right: 2px solid #f5d6de; }
@@ -120,5 +121,15 @@
     loadAll();
   </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/service-worker.js')}</script>
+  <nav class="admin-bottom-nav">
+    <a href="/admin/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/admin/verify.html"><span class="nav-icon">✅</span> Verify</a>
+    <a href="/admin/orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a href="/admin/inventory.html"><span class="nav-icon">🏷️</span> Inventory</a>
+    <a href="/admin/loyalty.html" class="active"><span class="nav-icon">⭐</span> Loyalty</a>
+    <a href="/admin/settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="pull-hint">Pull down to refresh</div>
+  <script src="/admin/admin-app.js"></script>
 </body>
 </html>

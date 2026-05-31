@@ -5,8 +5,11 @@
   "start_url": "/admin/verify.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#fffbfb",
+  "background_color": "#fce4ec",
   "theme_color": "#d4808a",
+  "categories": ["business", "shopping"],
+  "prefer_related_applications": false,
+  "scope": "/admin/",
   "icons": [
     {
       "src": "/public/icons/icon.svg",
