@@ -608,6 +608,13 @@ app.delete('/api/admin/orders/:id', adminAuth, async (req, res) => {
   res.json({ success: true });
 });
 
+app.post('/api/admin/orders/batch-delete', adminAuth, async (req, res) => {
+  const ids = req.body.ids;
+  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'No IDs provided' });
+  await execute('DELETE FROM orders WHERE id = ANY($1::int[])', [ids]);
+  res.json({ success: true, deleted: ids.length });
+});
+
 app.get('/api/admin/products', adminAuth, async (req, res) => {
   res.json(await query('SELECT * FROM products ORDER BY created_at DESC'));
 });
