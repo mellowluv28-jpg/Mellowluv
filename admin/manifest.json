@@ -12,15 +12,15 @@
   "scope": "/admin/",
   "icons": [
     {
-      "src": "/public/icons/icon.svg",
+      "src": "/public/icons/icon.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/public/icons/icon.svg",
+      "src": "/public/icons/icon.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
