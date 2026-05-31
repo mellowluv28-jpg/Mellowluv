@@ -370,6 +370,7 @@ app.put('/api/orders/:id/pay', async (req, res) => {
 app.post('/api/orders/:id/upload-proof', async (req, res) => {
   const order = await queryOne('SELECT * FROM orders WHERE id = $1', [req.params.id]);
   if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (order.payment_status !== 'unpaid') return res.status(400).json({ error: 'Payment already submitted' });
   const { screenshot } = req.body;
   if (!screenshot) return res.status(400).json({ error: 'No screenshot provided' });
   const matches = screenshot.match(/^data:image\/(\w+);base64,(.+)$/);

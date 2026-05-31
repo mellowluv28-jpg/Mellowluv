@@ -120,6 +120,7 @@
       if (!orderId) { alert('Order ID not found.'); return; }
       const file = input.files[0];
       if (!file) { status.innerHTML = '<span style="color:#d4808a;">Please select a screenshot first</span>'; return; }
+      if (!file.type.startsWith('image/')) { status.innerHTML = '<span style="color:#d4808a;">Only image files allowed (JPEG, PNG, etc.)</span>'; return; }
       if (file.size > 5 * 1024 * 1024) { status.innerHTML = '<span style="color:#d4808a;">File too large. Max 5MB</span>'; return; }
       btn.disabled = true;
       btn.textContent = 'Uploading...';
