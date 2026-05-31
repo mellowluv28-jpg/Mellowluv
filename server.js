@@ -59,6 +59,16 @@ async function notifyNewOrder(order) {
   sseClients.forEach(c => c.write('data: ' + data + '\n\n'));
 }
 
+function parseOrderItems(order) {
+  const note = order.extra_note || '';
+  const itemsMatch = note.match(/Items:\s*(\[.*\])$/);
+  if (itemsMatch) {
+    try { return JSON.parse(itemsMatch[1]); } catch {}
+  }
+  if (order.product_id && order.quantity) return [{ id: order.product_id, qty: order.quantity }];
+  return [];
+}
+
 function adminAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized' });
@@ -366,9 +376,16 @@ app.post('/api/orders/:id/upload-proof', async (req, res) => {
   if (!matches) return res.status(400).json({ error: 'Invalid image format' });
   const buffer = Buffer.from(matches[2], 'base64');
   const result = await cloudinary.uploadBuffer(buffer, 'payment_proofs');
-  if (order.product_id && order.quantity) {
-    const dec = await execute('UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1', [order.quantity, order.product_id]);
-    if (dec.changes === 0) return res.status(400).json({ error: 'Not enough stock' });
+  const items = parseOrderItems(order);
+  for (const item of items) {
+    const dec = await execute('UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1', [item.qty, item.id]);
+    if (dec.changes === 0) {
+      for (const restored of items) {
+        if (restored.id === item.id) break;
+        await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [restored.qty, restored.id]);
+      }
+      return res.status(400).json({ error: 'Not enough stock' });
+    }
   }
   await execute("UPDATE orders SET payment_screenshot = $1, payment_status = 'paid', screenshot_uploaded_at = NOW() WHERE id = $2", [result.url, req.params.id]);
   const topic = await getSetting('ntfy_topic');
@@ -389,8 +406,9 @@ app.post('/api/orders/:id/reject-proof', async (req, res) => {
   if (order.payment_screenshot) {
     try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
   }
-  if (order.product_id && order.quantity) {
-    await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [order.quantity, order.product_id]);
+  const items = parseOrderItems(order);
+  for (const item of items) {
+    await execute('UPDATE products SET stock = stock + $1 WHERE id = $2', [item.qty, item.id]);
   }
   await execute("UPDATE orders SET payment_screenshot = '', screenshot_uploaded_at = NULL, payment_status = 'unpaid' WHERE id = $1", [req.params.id]);
   res.json({ success: true, message: 'Screenshot rejected, order reverted to unpaid' });
