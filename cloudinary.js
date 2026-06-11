@@ -9,7 +9,7 @@ cloudinary.config({
 
 function uploadBuffer(buffer, folder, resourceType) {
   return new Promise((resolve, reject) => {
-    const opts = { resource_type: resourceType || 'image' };
+    const opts = { resource_type: resourceType || 'image', format: 'auto', quality: 'auto' };
     if (folder) opts.folder = folder;
     const stream = cloudinary.uploader.upload_stream(
       opts,

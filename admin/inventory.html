@@ -244,6 +244,25 @@
       document.getElementById('product-modal').classList.remove('show');
     }
 
+    function compressImage(file, maxW, quality) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = h * maxW / w; w = maxW; }
+            const c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            c.getContext('2d').drawImage(img, 0, 0, w, h);
+            c.toBlob(resolve, 'image/jpeg', quality);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     async function saveProduct(event) {
       event.preventDefault();
       const btn = event.target.querySelector('.btn-submit');
@@ -262,7 +281,10 @@
       const imgFile = document.getElementById('prod-image').files[0];
       if (imgFile) formData.append('image', imgFile);
       const imgFiles = document.getElementById('prod-images').files;
-      for (const f of imgFiles) formData.append('images', f);
+      for (const f of imgFiles) {
+        const compressed = await compressImage(f, 1600, 0.82);
+        formData.append('images', compressed, f.name.replace(/\.[^.]+$/, '.jpg'));
+      }
       const vidFiles = document.getElementById('prod-videos').files;
       for (const f of vidFiles) formData.append('videos', f);
 
