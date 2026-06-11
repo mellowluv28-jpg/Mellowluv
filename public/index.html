@@ -20,7 +20,8 @@
         <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
         <li><a href="/public/tracking.html">📦 Track</a></li>
         <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
-        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
+                    <li><a href="/public/policy.html">📜 Policy</a></li>
+<li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -75,6 +76,24 @@
         <a href="/public/loyalty.html" class="btn" style="margin-right:10px;">⭐ Check Loyalty</a>
         <a href="/public/thrift.html" class="btn">📅 Pre-Book Drops</a>
       </div>
+
+      <div id="policy-popup-overlay" class="guide-overlay" onclick="dismissPolicy()"></div>
+  <div id="policy-popup" class="guide-popup">
+    <button class="guide-close" onclick="dismissPolicy()">✕</button>
+    <h2>📜 Store Policies</h2>
+    <p class="guide-sub">Please read before ordering 💕</p>
+    <div class="guide-steps">
+      <div class="guide-step" style="background:#fff5f5;border-color:#ffcdd2;"><div class="g-num" style="background:#ef9a9a;">❌</div><div class="g-body"><strong>NO COD</strong> — Full prepayment via UPI required. Orders confirmed only after payment verification.</div></div>
+      <div class="guide-step"><div class="g-num" style="background:#e8a0b4;">⏱️</div><div class="g-body"><strong>Processing Time:</strong> 10–15 days. Handmade jewellery takes time — please don't rush unless you opt for urgent delivery.</div></div>
+      <div class="guide-step" style="background:#fffbf0;border-color:#ffe0b2;"><div class="g-num" style="background:#ffb74d;">⚡</div><div class="g-body"><strong>Urgent Order:</strong> ₹50 extra at checkout. We'll make it in 2–3 days + ship it out.</div></div>
+      <div class="guide-step dont"><div class="g-num" style="background:#ef9a9a;">🚫</div><div class="g-body"><strong>No Cancellations / Refunds / Returns</strong> — unless the mistake is from our side. Choose carefully.</div></div>
+      <div class="guide-step dont"><div class="g-num" style="background:#ef9a9a;">💬</div><div class="g-body"><strong>Please Be Patient</strong> — I have a life outside this business. Don't complain about dispatch time.</div></div>
+      <div class="guide-step"><div class="g-num" style="background:#b0878f;">📦</div><div class="g-body"><strong>After Dispatch:</strong> Courier handles delivery. We're not responsible for damage or delays after shipping.</div></div>
+      <div class="guide-step"><div class="g-num" style="background:#b0878f;">🎥</div><div class="g-body"><strong>Record Unboxing Video</strong> — This is the <strong>only proof</strong> accepted for damage claims.</div></div>
+    </div>
+    <p class="guide-footer">Full policies at <a href="/public/policy.html" style="color:#e8a0b4;font-weight:700;">📜 Policy Page</a></p>
+    <button class="guide-gotit" onclick="dismissPolicy()">✅ I Understand</button>
+  </div>
 
       <div id="guide-popup-overlay" class="guide-overlay" onclick="dismissGuide()"></div>
   <div id="guide-popup" class="guide-popup">
@@ -233,13 +252,34 @@
       document.getElementById('offer-popup').classList.remove('show');
     }
 
+    function dismissPolicy() {
+      sessionStorage.setItem('policy_seen', '1');
+      document.getElementById('policy-popup').classList.remove('show');
+      document.getElementById('policy-popup-overlay').classList.remove('show');
+      if (!sessionStorage.getItem('guide_seen')) {
+        setTimeout(() => {
+          document.getElementById('guide-popup').classList.add('show');
+          document.getElementById('guide-popup-overlay').classList.add('show');
+        }, 500);
+      }
+    }
+
     loadUpcomingDrops();
     loadOfferPopup();
-    if (!sessionStorage.getItem('guide_seen')) {
+    if (!sessionStorage.getItem('policy_seen')) {
+      setTimeout(() => {
+        document.getElementById('policy-popup').classList.add('show');
+        document.getElementById('policy-popup-overlay').classList.add('show');
+      }, 800);
+    } else if (!sessionStorage.getItem('guide_seen')) {
       setTimeout(() => {
         document.getElementById('guide-popup').classList.add('show');
         document.getElementById('guide-popup-overlay').classList.add('show');
       }, 1500);
+    }
+      sessionStorage.setItem('guide_seen', '1');
+      document.getElementById('guide-popup').classList.remove('show');
+      document.getElementById('guide-popup-overlay').classList.remove('show');
     }
     function dismissGuide() {
       sessionStorage.setItem('guide_seen', '1');

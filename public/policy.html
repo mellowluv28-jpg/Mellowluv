@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/public/icons/icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Policies - Mellowluv</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .policy-highlight {
+      background: linear-gradient(135deg, #fef4f6, #fce4ec);
+      border: 2px solid #f5d6de;
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .policy-highlight .policy-icon { font-size: 28px; margin-bottom: 4px; }
+    .policy-highlight h3 { font-size: 18px; color: #5a4a4a; margin-bottom: 4px; }
+    .policy-highlight p { font-size: 14px; color: #5a4a4a; line-height: 1.6; }
+    .policy-section {
+      background: white;
+      border: 2px solid #f5d6de;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+    .policy-section:hover { box-shadow: 0 2px 12px rgba(232,160,180,0.1); }
+    .policy-section .p-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .policy-section .p-head .p-icon { font-size: 20px; }
+    .policy-section .p-head h4 { font-size: 15px; color: #5a4a4a; margin: 0; }
+    .policy-section p { font-size: 13px; color: #6a5a5a; line-height: 1.5; margin: 0; }
+    .policy-section.warning { border-color: #ffcdd2; background: #fff5f5; }
+    .policy-section.warning .p-head h4 { color: #c62828; }
+  </style>
+</head>
+<body class="page-enter">
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><img src="/public/icons/logo.png" class="cat-icon" alt="Mellowluv" style="height:32px;width:auto;vertical-align:middle;border-radius:6px;"> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/public/thrift.html">Thrift Store</a></li>
+        <li><a href="/public/jewelry.html">Mellowluv</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+        <li><a href="/public/policy.html" class="active">📜 Policy</a></li>
+                    <li><a href="/public/policy.html">📜 Policy</a></li>
+<li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
+      </ul>
+    </div>
+    <div id="nav-overlay" onclick="toggleNav()"></div>
+  </nav>
+
+  <section class="guide-page">
+    <div class="container">
+      <div class="guide-hero">
+        <h1>📜 Store Policies</h1>
+        <p>Please read carefully before placing an order 💕</p>
+      </div>
+
+      <div class="policy-highlight">
+        <div class="policy-icon">⚠️</div>
+        <h3>By placing an order, you agree to all policies below.</h3>
+        <p>If you have any questions, DM us on <strong>Instagram @mellowluvv_</strong> before ordering.</p>
+      </div>
+
+      <div class="policy-highlight" style="border-color:#ffcdd2;background:#fff5f5;">
+        <div class="policy-icon">❌</div>
+        <h3>NO COD — Full Prepayment Required</h3>
+        <p>All orders must be paid in advance via UPI. Orders are confirmed only after payment is verified.</p>
+      </div>
+
+      <div class="policy-highlight">
+        <div class="policy-icon">⏱️</div>
+        <h3>Processing Time: 10–15 Days</h3>
+        <p>Handmade jewellery takes time and care. Please allow 10–15 days for making + dispatch. We do not rush orders unless you opt for urgent delivery.</p>
+      </div>
+
+      <div class="policy-highlight" style="border-color:#fff3e0;background:#fffbf0;">
+        <div class="policy-icon">⚡</div>
+        <h3>Urgent Order: ₹50 Extra</h3>
+        <p>Need it fast? Select "Urgent" at checkout for ₹50 extra. We'll make it in 2–3 days and ship it out. This covers priority making and faster dispatch.</p>
+      </div>
+
+      <div class="policy-section warning">
+        <div class="p-head"><span class="p-icon">🚫</span><h4>No Cancellations / Refunds / Returns</h4></div>
+        <p>We do not accept cancellations, refunds, or returns unless the mistake is from our side (wrong product, wrong size shipped, etc.). Please choose carefully before ordering.</p>
+      </div>
+
+      <div class="policy-section warning">
+        <div class="p-head"><span class="p-icon">💬</span><h4>Please Be Patient</h4></div>
+        <p>I have a life outside this business too. Please don't complain about dispatch time — each piece is handmade with love and takes its own time. If you want it early, place an urgent order.</p>
+      </div>
+
+      <div class="policy-section">
+        <div class="p-head"><span class="p-icon">📦</span><h4>After Dispatch: Courier Responsibility</h4></div>
+        <p>Once the package is handed over to the courier, we are not responsible for delays, lost packages, or damage during transit. The courier company handles all delivery-related issues after dispatch.</p>
+      </div>
+
+      <div class="policy-section">
+        <div class="p-head"><span class="p-icon">🎥</span><h4>Unboxing Video Required for Damage Claims</h4></div>
+        <p>If your package arrives damaged, you <strong>must</strong> have a clear unboxing video showing the damage. This is the only proof we accept. Without it, we cannot process a claim with the courier.</p>
+      </div>
+
+      <div class="policy-section">
+        <div class="p-head"><span class="p-icon">✅</span><h4>Order Confirmation</h4></div>
+        <p>Your order is confirmed only after we verify your payment. Until then, the order stays in "unpaid" status. We will notify you once it's confirmed.</p>
+      </div>
+
+      <div class="policy-section">
+        <div class="p-head"><span class="p-icon">🛡️</span><h4>Mistake From Our Side</h4></div>
+        <p>If we send the wrong product, wrong size, or a defective item, we will replace it or issue a refund. Please reach out to us on Instagram within 48 hours of delivery with your unboxing video.</p>
+      </div>
+
+      <div class="guide-outro">
+        <h3>🌸 Questions?</h3>
+        <p>DM us on <strong>Instagram @mellowluvv_</strong> or email <strong>nishthapanchal287@gmail.com</strong></p>
+        <a href="https://instagram.com/mellowluvv_" target="_blank" class="btn-submit" style="display:inline-block;margin-top:12px;text-decoration:none;">📸 Message on Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="cat">🐱</div>
+      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="email">nishthapanchal287@gmail.com</div>
+      <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    document.querySelectorAll('.btn, .btn-buy, .btn-submit').forEach(el => {
+      el.addEventListener('click', function(e) {
+        this.style.transform = 'scale(0.97)';
+        setTimeout(() => { this.style.transform = ''; }, 150);
+      });
+    });
+  </script>
+<script>function toggleNav(){document.querySelector('.navbar').classList.toggle('active')}</script>
+</body>
+</html>

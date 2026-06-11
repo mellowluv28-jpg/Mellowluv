@@ -1,4 +1,4 @@
-require('express-async-errors');
+﻿require('express-async-errors');
 require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
@@ -217,7 +217,7 @@ app.post('/api/orders', async (req, res) => {
       allItems.push({ product, qty: item.qty, unitPrice, lineTotal, category });
     }
 
-    if (urgency === 'urgent') extraCharge += 30;
+    if (urgency === 'urgent') extraCharge += 50;
 
     const loyaltyInfo = await getLoyaltyInfo(phone);
     let discountAmount = 0;
@@ -287,7 +287,7 @@ app.post('/api/orders', async (req, res) => {
   if (!productCheck || productCheck.stock < qty) return res.status(400).json({ error: 'Not enough stock' });
 
   let extraCharge = 0;
-  if (urgency === 'urgent') extraCharge += 30;
+  if (urgency === 'urgent') extraCharge += 50;
 
   const shipping = parseFloat(await getSetting('shipping_charge'));
   const unitPrice = (product.offer_price && product.offer_price > 0) ? product.offer_price : product.price;

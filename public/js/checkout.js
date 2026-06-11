@@ -1,4 +1,4 @@
-let currentProduct = null;
+﻿let currentProduct = null;
 let cartData = null;
 let loyaltyData = null;
 
@@ -61,7 +61,7 @@ function updateCartSummary(shipping) {
     return;
   }
   const urgency = document.querySelector('[name="urgency"]')?.value || '';
-  const extra = urgency === 'urgent' ? 30 : 0;
+  const extra = urgency === 'urgent' ? 50 : 0;
   let subtotal = 0;
   let maxItemValue = 0;
   cartData.items.forEach(item => {
@@ -76,7 +76,7 @@ function updateCartSummary(shipping) {
     <div class="total-line"><span>Subtotal</span><span>₹${subtotal}</span></div>
     ${discountAmt > 0 ? `<div class="total-line" style="color:#2e7d32;"><span>🎉 50% Loyalty Discount</span><span>-₹${discountAmt}</span></div>` : ''}
     <div class="total-line"><span>Shipping</span><span>₹${shipping}</span></div>
-    ${extra ? `<div class="total-line"><span>⚡ Urgent Surcharge</span><span>+₹30</span></div>` : ''}
+    ${extra ? `<div class="total-line"><span>⚡ Urgent Surcharge</span><span>+₹50</span></div>` : ''}
     <div class="total-line grand"><span>Total</span><span>₹${total}</span></div>`;
 }
 
@@ -84,7 +84,7 @@ function updateSummary() {
   if (!currentProduct) return;
   const qty = parseInt(document.querySelector('[name="quantity"]')?.value) || 1;
   const urgency = document.querySelector('[name="urgency"]')?.value || '';
-  const extra = urgency === 'urgent' ? 30 : 0;
+  const extra = urgency === 'urgent' ? 50 : 0;
   const unitPrice = (currentProduct.offer_price && currentProduct.offer_price > 0) ? currentProduct.offer_price : currentProduct.price;
   const hasOffer = currentProduct.offer_price && currentProduct.offer_price > 0;
   let shipping = 50;
@@ -103,7 +103,7 @@ function updateSummary() {
       <div class="total-line"><span>Subtotal</span><span>₹${subtotal}</span></div>
       ${discountAmt > 0 ? `<div class="total-line" style="color:#2e7d32;"><span>🎉 50% Loyalty Discount</span><span>-₹${discountAmt}</span></div>` : ''}
       <div class="total-line"><span>Shipping</span><span>₹${shipping}</span></div>
-      ${extra ? `<div class="total-line"><span>⚡ Urgent Surcharge</span><span>+₹30</span></div>` : ''}
+      ${extra ? `<div class="total-line"><span>⚡ Urgent Surcharge</span><span>+₹50</span></div>` : ''}
       <div class="total-line grand"><span>Total</span><span>₹${total}</span></div>`;
   });
 }
