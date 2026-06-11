@@ -1077,6 +1077,8 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
   .product-card .btn, .btn-primary { font-size: 12px; padding: 10px 16px; }
 
   .upcoming-banner .upcoming-grid { grid-template-columns: 1fr; }
+  .countdown-hero-timer { font-size: 26px; letter-spacing: 1px; }
+  .countdown-hero-inner { padding: 20px 16px; }
   .offer-popup { width: 260px; right: 6px; bottom: 6px; font-size: 12px; padding: 14px; }
   .hero-btns { flex-direction: column; gap: 8px; align-items: stretch; text-align: center; }
   .sort-bar { flex-direction: column; gap: 8px; align-items: stretch; }
@@ -1084,6 +1086,8 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
   footer .phone { font-size: 18px; }
 }
 @media (max-width: 360px) {
+  .countdown-hero-timer { font-size: 22px; letter-spacing: 0; }
+  .countdown-hero-inner { padding: 16px 12px; }
   .products-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: 20px; }
   .navbar .logo { font-size: 16px; }
