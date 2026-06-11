@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -29,7 +29,7 @@
 </head>
 <body>
   <header class="header">
-    <a href="index.html" class="logo">ðŸŒ¸ Mellowluv</a>
+    <a href="index.html" class="logo">🌸 Mellowluv</a>
     <nav>
       <a href="thrift.html">Thrift</a>
       <a href="jewelry.html">Jewelry</a>
@@ -43,7 +43,7 @@
 
   <div class="login-page">
     <div class="login-box" id="loginBox">
-      <h2 id="formTitle">Welcome Back ðŸ’•</h2>
+      <h2 id="formTitle">Welcome Back 💕</h2>
       <p class="subtitle" id="formSubtitle">Sign in to access your account</p>
       <div id="successMsg" class="success-msg"></div>
       <div class="form-group">
@@ -63,20 +63,20 @@
       <button class="btn btn-pink" id="submitBtn" onclick="handleSubmit()">Sign In</button>
       <p class="toggle-text" id="toggleText">Don't have an account? <a onclick="toggleForm()">Sign Up</a></p>
       <div id="pointsPreview" class="points-preview" style="display:none;">
-        <p>ðŸ† Your Loyalty Points: <strong id="displayPoints">0</strong>/2</p>
+        <p>🏆 Your Loyalty Points: <strong id="displayPoints">0</strong>/2</p>
         <p id="displayNextDiscount"></p>
       </div>
-      <a href="index.html" class="back-link">â† Continue Browsing</a>
+      <a href="index.html" class="back-link">← Continue Browsing</a>
     </div>
   </div>
 
   <footer>
     <div class="footer-content">
-      <div class="footer-col"><h4>ðŸŒ¸ Mellowluv</h4><p>Your aesthetic thrift & jewelry store</p></div>
+      <div class="footer-col"><h4>🌸 Mellowluv</h4><p>Your aesthetic thrift & jewelry store</p></div>
       <div class="footer-col"><h4>Quick Links</h4><a href="thrift.html">Thrift</a><a href="jewelry.html">Jewelry</a><a href="tracking.html">Track Order</a><a href="cart.html">Cart</a></div>
-      <div class="footer-col"><h4>Contact</h4><p>Instagram - @mellowluvv_</p><p>âœ‰ï¸ nishthapanchal287@gmail.com</p><p>Store ran by <strong>Nishtha Panchal</strong></p></div>
+      <div class="footer-col"><h4>Contact</h4><p>Instagram - @mellowluvv_</p><p>✉️ nishthapanchal287@gmail.com</p><p>Store ran by <strong>Nishtha Panchal</strong></p></div>
     </div>
-    <p class="footer-bottom">Â© 2026 Mellowluv. All rights reserved.</p>
+    <p class="footer-bottom">© 2026 Mellowluv. All rights reserved.</p>
   </footer>
 
   <script src="js/main.js"></script>
@@ -87,7 +87,7 @@
 
     function toggleForm() {
       isLogin = !isLogin;
-      document.getElementById('formTitle').textContent = isLogin ? 'Welcome Back ðŸ’•' : 'Create Account ðŸ’•';
+      document.getElementById('formTitle').textContent = isLogin ? 'Welcome Back 💕' : 'Create Account 💕';
       document.getElementById('formSubtitle').textContent = isLogin ? 'Sign in to access your account' : 'Join Mellowluv family!';
       document.getElementById('submitBtn').textContent = isLogin ? 'Sign In' : 'Sign Up';
       document.getElementById('toggleText').innerHTML = isLogin
@@ -142,8 +142,8 @@
           document.getElementById('displayPoints').textContent = data.customer.points;
           document.getElementById('displayNextDiscount').textContent =
             data.customer.can_use_50_off
-              ? 'ðŸŽ‰ You qualify for 50% off on your next order!'
-              : `ðŸ“¦ ${data.customer.points_to_50} more order(s) for 50% off`;
+              ? '🎉 You qualify for 50% off on your next order!'
+              : `📦 ${data.customer.points_to_50} more order(s) for 50% off`;
         }
       } catch {}
     }

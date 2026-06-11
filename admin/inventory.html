@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -82,19 +82,19 @@
 <body>
   <div class="admin-layout">
     <div class="sidebar">
-      <h3>ðŸŒ¸ Mellowluv</h3>
-      <a href="/admin/dashboard.html">ðŸ“Š Dashboard</a>
-      <a href="/admin/verify.html">âœ… Verify Payments</a>
-      <a href="/admin/orders.html">ðŸ“¦ Orders</a>
-      <a href="/admin/inventory.html" class="active">ðŸ·ï¸ Inventory</a>
-      <a href="/admin/loyalty.html">â­ Loyalty</a>
-      <a href="/admin/settings.html">âš™ï¸ Settings</a>
+      <h3>🌸 Mellowluv</h3>
+      <a href="/admin/dashboard.html">📊 Dashboard</a>
+      <a href="/admin/verify.html">✅ Verify Payments</a>
+      <a href="/admin/orders.html">📦 Orders</a>
+      <a href="/admin/inventory.html" class="active">🏷️ Inventory</a>
+      <a href="/admin/loyalty.html">⭐ Loyalty</a>
+      <a href="/admin/settings.html">⚙️ Settings</a>
 
-      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">ðŸª Back to Store</a>
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
     </div>
     <div class="main-content">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
-        <h1>ðŸ·ï¸ Inventory</h1>
+        <h1>🏷️ Inventory</h1>
         <button class="btn-add" onclick="openAddModal()">+ Add Product</button>
       </div>
       <div class="inventory-grid" id="inventory-grid"></div>
@@ -108,61 +108,61 @@
       <form id="product-form" onsubmit="saveProduct(event)">
         <input type="hidden" id="edit-id">
         <div class="form-group">
-          <label>ðŸŒ¸ Product Name *</label>
+          <label>🌸 Product Name *</label>
           <input type="text" id="prod-name" required>
         </div>
         <div class="form-group">
-          <label>ðŸ“ Description</label>
+          <label>📝 Description</label>
           <textarea id="prod-desc"></textarea>
         </div>
         <div class="form-group">
-          <label>ðŸ’° Price (â‚¹) *</label>
+          <label>💰 Price (₹) *</label>
           <input type="number" id="prod-price" step="0.01" required>
         </div>
         <div class="form-group">
-          <label>ðŸ“‚ Category *</label>
+          <label>📂 Category *</label>
           <select id="prod-category" required>
-            <option value="thrift">ðŸ›ï¸ Thrift Store</option>
-            <option value="jewelry">ðŸ’Ž Mellowluv Jewelry</option>
+            <option value="thrift">🛍️ Thrift Store</option>
+            <option value="jewelry">💎 Mellowluv Jewelry</option>
           </select>
         </div>
         <div class="form-group">
-          <label>ðŸ“¦ Stock *</label>
+          <label>📦 Stock *</label>
           <input type="number" id="prod-stock" value="1" min="0">
         </div>
         <div class="form-group">
-          <label>ðŸ–¼ï¸ Cover Image</label>
+          <label>🖼️ Cover Image</label>
           <input type="file" id="prod-image" accept="image/*" style="padding:8px;">
         </div>
         <div class="form-group">
-          <label>ðŸ–¼ï¸ Extra Images (up to 5 total)</label>
+          <label>🖼️ Extra Images (up to 5 total)</label>
           <input type="file" id="prod-images" accept="image/*" multiple style="padding:8px;">
           <div id="image-previews" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
         </div>
         <div class="form-group">
-          <label>ðŸŽ¥ Videos (up to 2)</label>
+          <label>🎥 Videos (up to 2)</label>
           <input type="hidden" id="existing-videos-json" value="[]">
           <input type="file" id="prod-videos" accept="video/*" multiple style="padding:8px;">
           <div id="video-previews" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
           <small style="color:#b0878f;font-size:11px;">Upload video files directly. Max 2 videos.</small>
         </div>
         <hr style="border:none;border-top:2px dashed #ffe4e1;margin:18px 0;">
-        <div style="font-size:13px;color:#7fb87f;font-weight:700;margin-bottom:12px;">ðŸ“… Schedule Drop</div>
+        <div style="font-size:13px;color:#7fb87f;font-weight:700;margin-bottom:12px;">📅 Schedule Drop</div>
         <div class="form-group">
-          <label>Schedule Drop Date/Time (IST) â€” leave blank for immediate</label>
+          <label>Schedule Drop Date/Time (IST) — leave blank for immediate</label>
           <input type="datetime-local" id="prod-scheduled-at">
         </div>
         <hr style="border:none;border-top:2px dashed #ffe4e1;margin:18px 0;">
-        <div style="font-size:13px;color:#e8a0b4;font-weight:700;margin-bottom:12px;">ðŸ”¥ Offer Settings</div>
+        <div style="font-size:13px;color:#e8a0b4;font-weight:700;margin-bottom:12px;">🔥 Offer Settings</div>
         <div class="form-group">
-          <label>Offer Price (â‚¹) â€” leave blank for no offer</label>
+          <label>Offer Price (₹) — leave blank for no offer</label>
           <input type="number" id="prod-offer-price" step="0.01" min="0" placeholder="e.g. 299">
         </div>
         <div class="form-group">
           <label>Offer Note (shown under product)</label>
           <input type="text" id="prod-offer-note" placeholder="e.g. Limited time deal!">
         </div>
-        <button type="submit" class="btn-submit">Save Product ðŸŒ¸</button>
+        <button type="submit" class="btn-submit">Save Product 🌸</button>
       </form>
     </div>
   </div>
@@ -177,23 +177,23 @@
         const products = await res.json();
         const grid = document.getElementById('inventory-grid');
         grid.innerHTML = products.map(p => {
-          const catLabel = p.category === 'thrift' ? 'ðŸ›ï¸ Thrift' : 'ðŸ’Ž Mellowluv';
+          const catLabel = p.category === 'thrift' ? '🛍️ Thrift' : '💎 Mellowluv';
           const hasOffer = p.offer_price && p.offer_price > 0;
-          const offerTag = hasOffer ? `<div style="font-size:11px;color:#d84315;font-weight:700;">ðŸ”¥ Offer: â‚¹${p.offer_price}${p.offer_note ? ' â€” ' + p.offer_note : ''}</div>` : '';
+          const offerTag = hasOffer ? `<div style="font-size:11px;color:#d84315;font-weight:700;">🔥 Offer: ₹${p.offer_price}${p.offer_note ? ' — ' + p.offer_note : ''}</div>` : '';
           const isScheduled = p.scheduled_at && new Date(p.scheduled_at) > new Date();
-          const schedTag = isScheduled ? `<div style="font-size:11px;color:#7fb87f;font-weight:700;">ðŸ“… Scheduled: ${new Date(p.scheduled_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>` : (p.scheduled_at ? `<div style="font-size:11px;color:#b5838d;font-weight:600;">âœ… Drop live</div>` : '');
+          const schedTag = isScheduled ? `<div style="font-size:11px;color:#7fb87f;font-weight:700;">📅 Scheduled: ${new Date(p.scheduled_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>` : (p.scheduled_at ? `<div style="font-size:11px;color:#b5838d;font-weight:600;">✅ Drop live</div>` : '');
           return `
             <div class="inv-card">
-              <div class="inv-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}">${p.image ? '' : 'ðŸ“·'}</div>
+              <div class="inv-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}">${p.image ? '' : '📷'}</div>
               <div class="inv-body">
                 <div class="inv-category">${catLabel}</div>
                 <div class="inv-name">${p.name}</div>
-                <div class="inv-price">â‚¹${p.price}</div>
+                <div class="inv-price">₹${p.price}</div>
                 ${schedTag}
                 ${offerTag}
-                <div class="inv-stock">ðŸ“¦ Stock: ${p.stock}</div>
+                <div class="inv-stock">📦 Stock: ${p.stock}</div>
                 <div class="inv-actions">
-                  <a href="/public/product.html?id=${p.id}" target="_blank" class="btn-sm" style="background:#e8f5e9;color:#2e7d32;display:inline-block;padding:5px 14px;border-radius:10px;text-decoration:none;font-size:12px;font-weight:600;">ðŸ‘ï¸ View</a>
+                  <a href="/public/product.html?id=${p.id}" target="_blank" class="btn-sm" style="background:#e8f5e9;color:#2e7d32;display:inline-block;padding:5px 14px;border-radius:10px;text-decoration:none;font-size:12px;font-weight:600;">👁️ View</a>
                   <button class="btn-sm btn-edit" onclick="openEditModal(${p.id})">Edit</button>
                   <button class="btn-sm btn-delete" onclick="deleteProduct(${p.id})">Delete</button>
                 </div>
@@ -205,7 +205,7 @@
     }
 
     function openAddModal() {
-      document.getElementById('modal-title').textContent = 'Add Product ðŸŒ¸';
+      document.getElementById('modal-title').textContent = 'Add Product 🌸';
       document.getElementById('product-form').reset();
       document.getElementById('edit-id').value = '';
       document.getElementById('prod-scheduled-at').value = '';
@@ -215,7 +215,7 @@
     async function openEditModal(id) {
       const res = await fetch('/api/products/' + id);
       const p = await res.json();
-      document.getElementById('modal-title').textContent = 'Edit Product âœï¸';
+      document.getElementById('modal-title').textContent = 'Edit Product ✏️';
       document.getElementById('edit-id').value = p.id;
       document.getElementById('prod-name').value = p.name;
       document.getElementById('prod-desc').value = p.description || '';
@@ -232,7 +232,7 @@
       document.getElementById('prod-videos').value = '';
       document.getElementById('existing-videos-json').value = JSON.stringify(videosArr);
       const vidPreviews = document.getElementById('video-previews');
-      vidPreviews.innerHTML = videosArr.map(v => '<div style="position:relative;width:80px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;background:#000;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;">â–¶</div>').join('');
+      vidPreviews.innerHTML = videosArr.map(v => '<div style="position:relative;width:80px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;background:#000;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;">▶</div>').join('');
       let existingImgs = [];
       try { const parsed = JSON.parse(p.images || '[]'); if (Array.isArray(parsed)) existingImgs = parsed; } catch {}
       const previews = document.getElementById('image-previews');
@@ -286,7 +286,7 @@
     }
 
     async function deleteProduct(id) {
-      if (!confirm('Delete this product? ðŸŒ¸')) return;
+      if (!confirm('Delete this product? 🌸')) return;
       await fetch('/api/admin/products/' + id, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
@@ -298,12 +298,12 @@
   </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/service-worker.js')}</script>
   <nav class="admin-bottom-nav">
-    <a href="/admin/dashboard.html"><span class="nav-icon">ðŸ“Š</span> Dashboard</a>
-    <a href="/admin/verify.html"><span class="nav-icon">âœ…</span> Verify</a>
-    <a href="/admin/orders.html"><span class="nav-icon">ðŸ“¦</span> Orders</a>
-    <a href="/admin/inventory.html" class="active"><span class="nav-icon">ðŸ·ï¸</span> Inventory</a>
-    <a href="/admin/loyalty.html"><span class="nav-icon">â­</span> Loyalty</a>
-    <a href="/admin/settings.html"><span class="nav-icon">âš™ï¸</span> Settings</a>
+    <a href="/admin/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/admin/verify.html"><span class="nav-icon">✅</span> Verify</a>
+    <a href="/admin/orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a href="/admin/inventory.html" class="active"><span class="nav-icon">🏷️</span> Inventory</a>
+    <a href="/admin/loyalty.html"><span class="nav-icon">⭐</span> Loyalty</a>
+    <a href="/admin/settings.html"><span class="nav-icon">⚙️</span> Settings</a>
   </nav>
   <div class="pull-hint">Pull down to refresh</div>
   <script src="/admin/admin-app.js"></script>

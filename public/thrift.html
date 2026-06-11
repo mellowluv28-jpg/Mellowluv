@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -11,16 +11,16 @@
 <body class="page-enter">
   <nav class="navbar">
     <div class="container">
-      <a href="/" class="logo"><img src="/public/icons/logo.png" class="cat-icon" alt="Mellowluv" style="height:32px;width:auto;vertical-align:middle;border-radius:6px;"> Mellowluv</a>
-      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">â˜°</button>
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/public/thrift.html" class="active">Thrift Store</a></li>
         <li><a href="/public/jewelry.html">Mellowluv</a></li>
-        <li><a href="/public/cart.html">ðŸ›’ Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
-        <li><a href="/public/tracking.html">ðŸ“¦ Track</a></li>
-        <li><a href="/public/loyalty.html">â­ Loyalty</a></li>
-        <li><a href="/public/how-to-purchase.html">ðŸ“– How to Buy</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -28,39 +28,39 @@
 
   <section class="page-header">
     <div class="container">
-      <h1>ðŸ›ï¸ <span>Thrift</span> Store</h1>
+      <h1>🛍️ <span>Thrift</span> Store</h1>
       <p>Your dream wardrobe but on a budget.</p>
     </div>
   </section>
 
-  <div class="cat-deco">ðŸŒ¸ ðŸ± ðŸŒ¸ ðŸ± ðŸŒ¸</div>
+  <div class="cat-deco">🌸 🐱 🌸 🐱 🌸</div>
 
   <section class="products-section">
     <div class="container">
       <div class="sort-bar" style="margin-bottom:8px;">
-        <input type="text" id="search-thrift" placeholder="ðŸ” Search products..." oninput="searchProducts('search-thrift','thrift-products')" style="flex:1;min-width:140px;padding:9px 14px;border:2px solid #f5d6de;border-radius:12px;font-size:14px;background:white;color:#5a4a4a;font-family:inherit;">
+        <input type="text" id="search-thrift" placeholder="🔍 Search products..." oninput="searchProducts('search-thrift','thrift-products')" style="flex:1;min-width:140px;padding:9px 14px;border:2px solid #f5d6de;border-radius:12px;font-size:14px;background:white;color:#5a4a4a;font-family:inherit;">
       </div>
       <div class="sort-bar">
         <label for="sort-thrift">Sort by:</label>
         <select id="sort-thrift" onchange="updateSort('thrift', 'thrift-products', this)">
           <option value="">Newest First</option>
-          <option value="price_asc">Price: Low â†’ High</option>
-          <option value="price_desc">Price: High â†’ Low</option>
+          <option value="price_asc">Price: Low → High</option>
+          <option value="price_desc">Price: High → Low</option>
         </select>
-        <button class="btn-sizechart" onclick="openSizeChart()" style="margin-left:auto;">ðŸ“ Size Guide</button>
+        <button class="btn-sizechart" onclick="openSizeChart()" style="margin-left:auto;">📏 Size Guide</button>
       </div>
       <div class="products-grid" id="thrift-products"></div>
     </div>
   </section>
 
-  <div class="cat-deco">ðŸ± âœ¨ ðŸ± âœ¨ ðŸ±</div>
+  <div class="cat-deco">🐱 ✨ 🐱 ✨ 🐱</div>
 
   <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()"><img id="zoom-img" src="" alt="Zoom"></div>
 
   <div id="sizechart-overlay" class="sizechart-overlay" onclick="closeSizeChart()"></div>
   <div id="sizechart-popup" class="sizechart-popup">
-    <button class="size-close" onclick="closeSizeChart()">âœ•</button>
-    <h2>ðŸ“ Thrift Size Guide</h2>
+    <button class="size-close" onclick="closeSizeChart()">✕</button>
+    <h2>📏 Thrift Size Guide</h2>
     <table class="sizechart-table">
       <tr><th>Size</th><th>Chest</th><th>Length</th><th>Waist</th></tr>
       <tr><td>XS</td><td>32-34"</td><td>24-26"</td><td>26-28"</td></tr>
@@ -70,16 +70,16 @@
       <tr><td>XL</td><td>40-42"</td><td>32-34"</td><td>34-36"</td></tr>
       <tr><td>XXL</td><td>42-44"</td><td>34-36"</td><td>36-38"</td></tr>
     </table>
-    <p class="sizechart-note">ðŸ’¡ Measurements are approximate. Fit varies by brand/style. DM us for exact measurements of specific pieces!</p>
+    <p class="sizechart-note">💡 Measurements are approximate. Fit varies by brand/style. DM us for exact measurements of specific pieces!</p>
   </div>
 
   <footer class="footer">
     <div class="container">
-      <div class="cat">ðŸ±</div>
+      <div class="cat">🐱</div>
       <div class="instagram">Instagram - @mellowluvv_</div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
-      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">ðŸ“¦ Track Order</a></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
       <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
     </div>
   </footer>

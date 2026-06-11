@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -11,16 +11,16 @@
 <body class="page-enter">
   <nav class="navbar">
     <div class="container">
-      <a href="/" class="logo"><img src="/public/icons/logo.png" class="cat-icon" alt="Mellowluv" style="height:32px;width:auto;vertical-align:middle;border-radius:6px;"> Mellowluv</a>
-      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">â˜°</button>
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/public/thrift.html">Thrift Store</a></li>
         <li><a href="/public/jewelry.html">Mellowluv</a></li>
-        <li><a href="/public/cart.html">ðŸ›’ Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
-        <li><a href="/public/tracking.html">ðŸ“¦ Track</a></li>
-        <li><a href="/public/loyalty.html">â­ Loyalty</a></li>
-        <li><a href="/public/how-to-purchase.html">ðŸ“– How to Buy</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -28,8 +28,8 @@
 
   <section class="page-header">
     <div class="container">
-      <h1>Checkout ðŸ±</h1>
-      <p>Complete your order âœ¨</p>
+      <h1>Checkout 🐱</h1>
+      <p>Complete your order ✨</p>
     </div>
   </section>
 
@@ -39,58 +39,58 @@
         <div>
           <form id="order-form" onsubmit="placeOrder(event)" novalidate>
             <div class="form-group">
-              <label>ðŸŒ¸ Full Name *</label>
+              <label>🌸 Full Name *</label>
               <input type="text" name="customer_name" required placeholder="Your full name" minlength="2">
             </div>
             <div class="form-group">
-              <label>ðŸ“ž Phone Number *</label>
+              <label>📞 Phone Number *</label>
               <input type="tel" name="phone" required placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')" title="Enter exactly 10 digits">
               <small style="color:#b5838d; font-size:11px;">Enter exactly 10 digits</small>
               <div id="loyalty-info" style="display:none;margin-top:6px;"></div>
             </div>
             <div class="form-group">
-              <label>ðŸ“¸ Instagram Handle *</label>
+              <label>📸 Instagram Handle *</label>
               <input type="text" name="instagram" required placeholder="@yourhandle">
             </div>
             <div class="form-group">
-              <label>ðŸ“ Address *</label>
+              <label>📍 Address *</label>
               <textarea name="address" required placeholder="Street, area, landmark, city" minlength="5"></textarea>
             </div>
             <div class="form-group">
-              <label>ðŸ“® Pincode *</label>
+              <label>📮 Pincode *</label>
               <input type="text" name="pincode" required placeholder="6-digit pincode" pattern="[0-9]{6}" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')" title="Enter exactly 6 digits">
               <small style="color:#b5838d; font-size:11px;">Enter exactly 6 digits</small>
             </div>
             <div class="form-group">
-              <label>ðŸ”¢ Quantity *</label>
+              <label>🔢 Quantity *</label>
               <input type="number" name="quantity" min="1" max="99" value="1" required>
             </div>
             <div class="form-group" id="urgency-group">
-              <label>â° Delivery Speed <span style="font-weight:400;color:#b0878f;font-size:11px;">(Only for Jewelry)</span></label>
+              <label>⏰ Delivery Speed <span style="font-weight:400;color:#b0878f;font-size:11px;">(Only for Jewelry)</span></label>
               <select name="urgency">
-                <option value="">Normal â€” 5-7 days making + 4-6 days shipping (depending on location) â€” Free</option>
-                <option value="urgent">âš¡ Urgent â€” 2-3 days making + shipping (depending on location) â€” â‚¹30 extra</option>
+                <option value="">Normal — 5-7 days making + 4-6 days shipping (depending on location) — Free</option>
+                <option value="urgent">⚡ Urgent — 2-3 days making + shipping (depending on location) — ₹30 extra</option>
               </select>
             </div>
             <div class="form-group">
-              <label>ðŸŽ¨ Aesthetics Preference <span style="font-weight:400;color:#b0878f;font-size:11px;">(Only for Jewelry)</span></label>
-              <textarea name="aesthetics" placeholder="Tell us your style preferences â€” colors, vibes, occasion..."></textarea>
+              <label>🎨 Aesthetics Preference <span style="font-weight:400;color:#b0878f;font-size:11px;">(Only for Jewelry)</span></label>
+              <textarea name="aesthetics" placeholder="Tell us your style preferences — colors, vibes, occasion..."></textarea>
             </div>
             <div class="form-group">
-              <label>ðŸ’¬ Extra Note</label>
+              <label>💬 Extra Note</label>
               <textarea name="extra_note" placeholder="Anything else you'd like us to know?"></textarea>
             </div>
             <label style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;background:linear-gradient(135deg,#fce4ec,#fef4f6);border:2px solid #e8a0b4;border-radius:12px;cursor:pointer;font-size:14px;color:#d4808a;font-weight:600;">
               <input type="checkbox" name="whatsapp_optin" value="1" checked style="width:18px;height:18px;accent-color:#d4808a;">
-              ðŸ“· Get Instagram DM Updates â€” we'll DM you on Instagram when your order is verified & shipped!
+              📷 Get Instagram DM Updates — we'll DM you on Instagram when your order is verified & shipped!
             </label>
             <div style="background:#fff8e1;border:2px solid #ffe082;border-radius:12px;padding:12px 14px;font-size:13px;color:#5a4a4a;margin-bottom:14px;">
-              ðŸ“¢ <strong>Note:</strong> We will contact you on <strong>Instagram</strong> if the shipping charges are higher depending on your order quantity.
+              📢 <strong>Note:</strong> We will contact you on <strong>Instagram</strong> if the shipping charges are higher depending on your order quantity.
             </div>
             <div style="background:#e8f5e9;color:#2e7d32;border:2px solid #a5d6a7;border-radius:12px;padding:10px 14px;margin-bottom:14px;text-align:center;font-size:13px;font-weight:500;">
-              ðŸ“± Scan QR â†’ Amount & Order # auto-filled â†’ Pay â†’ Then upload screenshot âœ…
+              📱 Scan QR → Amount & Order # auto-filled → Pay → Then upload screenshot ✅
             </div>
-            <button type="submit" class="btn-submit">Place Order ðŸŒ¸</button>
+            <button type="submit" class="btn-submit">Place Order 🌸</button>
           </form>
         </div>
         <div id="checkout-form">
@@ -102,15 +102,15 @@
     </div>
   </section>
 
-  <div class="cat-deco">ðŸ± ðŸŒ¸ ðŸ± ðŸŒ¸ ðŸ±</div>
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
 
   <footer class="footer">
     <div class="container">
-      <div class="cat">ðŸ±</div>
+      <div class="cat">🐱</div>
       <div class="instagram">Instagram - @mellowluvv_</div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
-      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">ðŸ“¦ Track Order</a></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
       <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
     </div>
   </footer>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -39,16 +39,16 @@
 <body class="page-enter">
   <nav class="navbar">
     <div class="container">
-      <a href="/" class="logo"><img src="/public/icons/logo.png" class="cat-icon" alt="Mellowluv" style="height:32px;width:auto;vertical-align:middle;border-radius:6px;"> Mellowluv</a>
-      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">â˜°</button>
+      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/public/thrift.html">Thrift Store</a></li>
         <li><a href="/public/jewelry.html">Mellowluv</a></li>
-        <li><a href="/public/cart.html">ðŸ›’ Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
-        <li><a href="/public/tracking.html">ðŸ“¦ Track</a></li>
-        <li><a href="/public/loyalty.html" class="active">â­ Loyalty</a></li>
-        <li><a href="/public/how-to-purchase.html">ðŸ“– How to Buy</a></li>
+        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">📦 Track</a></li>
+        <li><a href="/public/loyalty.html" class="active">⭐ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -57,11 +57,11 @@
   <section class="loyalty-section">
     <div class="container">
       <div class="loyalty-box animate-pop">
-        <h1>â­ Loyalty <span>Rewards</span></h1>
-        <p class="sub">Enter your phone number to check your loyalty score ðŸ±</p>
+        <h1>⭐ Loyalty <span>Rewards</span></h1>
+        <p class="sub">Enter your phone number to check your loyalty score 🐱</p>
         <div class="track-form">
           <input type="tel" id="loyalty-phone" placeholder="Phone Number (10 digits)" maxlength="10" inputmode="numeric" pattern="[0-9]{10}">
-          <button class="btn-track" onclick="checkLoyalty()">â­ Check My Score</button>
+          <button class="btn-track" onclick="checkLoyalty()">⭐ Check My Score</button>
         </div>
         <div class="loyalty-result" id="loyalty-result"></div>
         <div class="loyalty-error" id="loyalty-error"></div>
@@ -69,15 +69,15 @@
     </div>
   </section>
 
-  <div class="cat-deco">ðŸ± ðŸŒ¸ ðŸ± ðŸŒ¸ ðŸ±</div>
+  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
 
   <footer class="footer">
     <div class="container">
-      <div class="cat">ðŸ±</div>
+      <div class="cat">🐱</div>
       <div class="instagram">Instagram - @mellowluvv_</div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
-      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">ðŸ“¦ Track Order</a></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
       <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
     </div>
   </footer>
@@ -99,8 +99,8 @@
         if (!res.ok) { errorDiv.textContent = 'Could not fetch loyalty info. Try again later.'; errorDiv.classList.add('show'); return; }
         const d = await res.json();
         const pct = d.discount_eligible ? 100 : ((d.points_toward_next_discount / 4) * 100);
-        const badge = d.discount_eligible ? '<span class="loyalty-badge badge-ready">ðŸŽ‰ Discount Ready!</span>' : (d.total_loyalty_score > 5 ? '<span class="loyalty-badge badge-premium">ðŸ’Ž Premium Member</span>' : '<span class="loyalty-badge badge-soon">' + d.orders_until_discount + ' order(s) to discount</span>');
-        const prebookTag = d.prebook_eligible ? '<span class="loyalty-badge badge-ready" style="margin-left:6px;">âœ… Pre-Booking Eligible</span>' : '<span class="loyalty-badge badge-soon" style="margin-left:6px;">ðŸ”’ Pre-Book at ' + Math.max(0, 2 - d.total_loyalty_score) + ' more purchase(s)</span>';
+        const badge = d.discount_eligible ? '<span class="loyalty-badge badge-ready">🎉 Discount Ready!</span>' : (d.total_loyalty_score > 5 ? '<span class="loyalty-badge badge-premium">💎 Premium Member</span>' : '<span class="loyalty-badge badge-soon">' + d.orders_until_discount + ' order(s) to discount</span>');
+        const prebookTag = d.prebook_eligible ? '<span class="loyalty-badge badge-ready" style="margin-left:6px;">✅ Pre-Booking Eligible</span>' : '<span class="loyalty-badge badge-soon" style="margin-left:6px;">🔒 Pre-Book at ' + Math.max(0, 2 - d.total_loyalty_score) + ' more purchase(s)</span>';
 
         resultDiv.innerHTML = '<div class="loyalty-card">' +
           '<div class="loyalty-score">' +
@@ -110,8 +110,8 @@
           '</div>' +
           '<div class="loyalty-bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
           '<div class="loyalty-detail"><span>Orders Until Next 50% Discount</span><span class="val">' + d.orders_until_discount + '</span></div>' +
-          '<div class="loyalty-detail"><span>Pre-Booking Access</span><span class="val">' + (d.prebook_eligible ? 'âœ… Eligible' : 'ðŸ”’ Need ' + Math.max(0, 2 - d.total_loyalty_score) + ' more') + '</span></div>' +
-          '<div style="margin-top:14px;padding:12px;background:#fef4f6;border-radius:12px;font-size:13px;color:#b0878f;text-align:center;">ðŸŽ <strong>Higher loyalty score = higher chances of winning freebies!</strong> Keep shopping to unlock more rewards ðŸŒ¸</div>' +
+          '<div class="loyalty-detail"><span>Pre-Booking Access</span><span class="val">' + (d.prebook_eligible ? '✅ Eligible' : '🔒 Need ' + Math.max(0, 2 - d.total_loyalty_score) + ' more') + '</span></div>' +
+          '<div style="margin-top:14px;padding:12px;background:#fef4f6;border-radius:12px;font-size:13px;color:#b0878f;text-align:center;">🎁 <strong>Higher loyalty score = higher chances of winning freebies!</strong> Keep shopping to unlock more rewards 🌸</div>' +
         '</div>';
         resultDiv.classList.add('show');
       } catch {
