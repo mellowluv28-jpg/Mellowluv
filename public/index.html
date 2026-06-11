@@ -77,55 +77,6 @@
         <a href="/public/thrift.html" class="btn">📅 Pre-Book Drops</a>
       </div>
 
-      <div id="policy-popup-overlay" class="guide-overlay" onclick="dismissPolicy()"></div>
-  <div id="policy-popup" class="guide-popup">
-    <button class="guide-close" onclick="dismissPolicy()">✕</button>
-    <h2>📜 Store Policies</h2>
-    <p class="guide-sub">Please read before ordering 💕</p>
-    <div class="guide-steps">
-      <div class="guide-step" style="background:#fff5f5;border-color:#ffcdd2;"><div class="g-num" style="background:#ef9a9a;">❌</div><div class="g-body"><strong>NO COD</strong> — Full prepayment via UPI required. Orders confirmed only after payment verification.</div></div>
-      <div class="guide-step"><div class="g-num" style="background:#e8a0b4;">⏱️</div><div class="g-body"><strong>Processing Time:</strong> 10–15 days. Handmade jewellery takes time — please don't rush unless you opt for urgent delivery.</div></div>
-      <div class="guide-step" style="background:#fffbf0;border-color:#ffe0b2;"><div class="g-num" style="background:#ffb74d;">⚡</div><div class="g-body"><strong>Urgent Order:</strong> ₹50 extra at checkout. We'll make it in 2–3 days + ship it out.</div></div>
-      <div class="guide-step dont"><div class="g-num" style="background:#ef9a9a;">🚫</div><div class="g-body"><strong>No Cancellations / Refunds / Returns</strong> — unless the mistake is from our side. Choose carefully.</div></div>
-      <div class="guide-step dont"><div class="g-num" style="background:#ef9a9a;">💬</div><div class="g-body"><strong>Please Be Patient</strong> — I have a life outside this business. Don't complain about dispatch time.</div></div>
-      <div class="guide-step"><div class="g-num" style="background:#b0878f;">📦</div><div class="g-body"><strong>After Dispatch:</strong> Courier handles delivery. We're not responsible for damage or delays after shipping.</div></div>
-      <div class="guide-step"><div class="g-num" style="background:#b0878f;">🎥</div><div class="g-body"><strong>Record Unboxing Video</strong> — This is the <strong>only proof</strong> accepted for damage claims.</div></div>
-    </div>
-    <p class="guide-footer">Full policies at <a href="/public/policy.html" style="color:#e8a0b4;font-weight:700;">📜 Policy Page</a></p>
-    <button class="guide-gotit" onclick="dismissPolicy()">✅ I Understand</button>
-  </div>
-
-      <div id="guide-popup-overlay" class="guide-overlay" onclick="dismissGuide()"></div>
-  <div id="guide-popup" class="guide-popup">
-    <button class="guide-close" onclick="dismissGuide()">✕</button>
-    <h2>📖 How to Shop on Mellowluv</h2>
-    <p class="guide-sub">Follow these steps for a smooth purchase 💕</p>
-    <div class="guide-steps">
-      <div class="guide-step"><div class="g-num">1</div><div class="g-body"><strong>Browse & Select</strong> — Pick your favourite thrift pieces or handmade jewellery.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> rush — check size, description and price carefully before adding to cart.</div></div>
-      <div class="guide-step"><div class="g-num">2</div><div class="g-body"><strong>Add to Cart</strong> — Click "Add to Cart" or pre-book upcoming drops.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> add duplicate items — check your cart before checkout.</div></div>
-      <div class="guide-step"><div class="g-num">3</div><div class="g-body"><strong>Checkout</strong> — Fill in your name, phone, Instagram ID and delivery address correctly.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> enter wrong Instagram ID — we may need to contact you about shipping charges.</div></div>
-      <div class="guide-step"><div class="g-num">4</div><div class="g-body"><strong>Pay via UPI</strong> — Scan the QR code or pay to the UPI ID shown. Include your order number in the note.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> pay to a different UPI ID or send incomplete amount — it will delay verification.</div></div>
-      <div class="guide-step"><div class="g-num">5</div><div class="g-body"><strong>Upload Screenshot</strong> — On the order success page, upload your payment screenshot. We will verify it shortly.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> upload a fake or edited screenshot — your order will be rejected.</div></div>
-      <div class="guide-step"><div class="g-num">6</div><div class="g-body"><strong>Wait for Verification</strong> — Once verified, we will ship your order. You'll get a notification.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> message repeatedly for status — check tracking page or wait for our confirmation.</div></div>
-      <div class="guide-step"><div class="g-num">7</div><div class="g-body"><strong>Track Your Order</strong> — Use the Track page with your order number to see real-time updates.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> forget to save your order ID — you'll need it for tracking and support.</div></div>
-    </div>
-    <p class="guide-footer">For custom orders, DM us on <strong>Instagram @mellowluvv_</strong> 🌸</p>
-    <button class="guide-gotit" onclick="dismissGuide()">✅ Got it!</button>
-  </div>
-
-      <div id="offer-popup" class="offer-popup">
-    <div class="offer-popup-header">🔥 OFFER ALERT!</div>
-    <div id="offer-popup-body"></div>
-    <button class="offer-popup-close" onclick="dismissOffer()">✕</button>
-  </div>
-
   <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
 
   <footer class="footer">
@@ -284,5 +235,49 @@
     }
   </script>
 <script>function toggleNav(){document.querySelector('.navbar').classList.toggle('active')}</script>
+
+<div id="policy-popup-overlay" class="guide-overlay" onclick="dismissPolicy()"></div>
+<div id="policy-popup" class="guide-popup">
+  <button class="guide-close" onclick="dismissPolicy()">✕</button>
+  <h2>📜 Store Policies</h2>
+  <p class="guide-sub">Please read before ordering 💕</p>
+  <div class="guide-steps">
+    <div class="guide-step" style="background:#fff5f5;border-color:#ffcdd2;"><div class="g-num" style="background:#ef9a9a;">❌</div><div class="g-body"><strong>NO COD</strong> — Full prepayment via UPI required. Orders confirmed only after payment verification.</div></div>
+    <div class="guide-step"><div class="g-num" style="background:#e8a0b4;">⏱️</div><div class="g-body"><strong>Processing Time:</strong> 10–15 days. Handmade jewellery takes time — please don't rush unless you opt for urgent delivery.</div></div>
+    <div class="guide-step" style="background:#fffbf0;border-color:#ffe0b2;"><div class="g-num" style="background:#ffb74d;">⚡</div><div class="g-body"><strong>Urgent Order:</strong> ₹50 extra at checkout. We'll make it in 2–3 days + ship it out.</div></div>
+    <div class="guide-step dont"><div class="g-num" style="background:#ef9a9a;">🚫</div><div class="g-body"><strong>No Cancellations / Refunds / Returns</strong> — unless the mistake is from our side. Choose carefully.</div></div>
+    <div class="guide-step dont"><div class="g-num" style="background:#ef9a9a;">💬</div><div class="g-body"><strong>Please Be Patient</strong> — I have a life outside this business. Don't complain about dispatch time.</div></div>
+    <div class="guide-step"><div class="g-num" style="background:#b0878f;">📦</div><div class="g-body"><strong>After Dispatch:</strong> Courier handles delivery. We're not responsible for damage or delays after shipping.</div></div>
+    <div class="guide-step"><div class="g-num" style="background:#b0878f;">🎥</div><div class="g-body"><strong>Record Unboxing Video</strong> — This is the <strong>only proof</strong> accepted for damage claims.</div></div>
+  </div>
+  <p class="guide-footer">Full policies at <a href="/public/policy.html" style="color:#e8a0b4;font-weight:700;">📜 Policy Page</a></p>
+  <button class="guide-gotit" onclick="dismissPolicy()">✅ I Understand</button>
+</div>
+
+<div id="guide-popup-overlay" class="guide-overlay" onclick="dismissGuide()"></div>
+<div id="guide-popup" class="guide-popup">
+  <button class="guide-close" onclick="dismissGuide()">✕</button>
+  <h2>📖 How to Shop on Mellowluv</h2>
+  <p class="guide-sub">Follow these steps for a smooth purchase 💕</p>
+  <div class="guide-steps">
+    <div class="guide-step"><div class="g-num">1</div><div class="g-body"><strong>Browse & Select</strong> — Pick your favourite thrift pieces or handmade jewellery.</div></div>
+    <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> rush — check size, description and price carefully before adding to cart.</div></div>
+    <div class="guide-step"><div class="g-num">2</div><div class="g-body"><strong>Add to Cart</strong> — Click "Add to Cart" or pre-book upcoming drops.</div></div>
+    <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> add duplicate items — check your cart before checkout.</div></div>
+    <div class="guide-step"><div class="g-num">3</div><div class="g-body"><strong>Checkout</strong> — Fill in your name, phone, Instagram ID and delivery address correctly.</div></div>
+    <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> enter wrong Instagram ID — we may need to contact you about shipping charges.</div></div>
+    <div class="guide-step"><div class="g-num">4</div><div class="g-body"><strong>Pay via UPI</strong> — Scan the QR code or pay to the UPI ID shown. Include your order number in the note.</div></div>
+    <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> pay to a different UPI ID or send incomplete amount — it will delay verification.</div></div>
+    <div class="guide-step"><div class="g-num">5</div><div class="g-body"><strong>Upload Screenshot</strong> — On the order success page, upload your payment screenshot. We will verify it shortly.</div></div>
+    <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> upload a fake or edited screenshot — your order will be rejected.</div></div>
+    <div class="guide-step"><div class="g-num">6</div><div class="g-body"><strong>Wait for Verification</strong> — Once verified, we will ship your order. You'll get a notification.</div></div>
+    <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> message repeatedly for status — check tracking page or wait for our confirmation.</div></div>
+    <div class="guide-step"><div class="g-num">7</div><div class="g-body"><strong>Track Your Order</strong> — Use the Track page with your order number to see real-time updates.</div></div>
+    <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> forget to save your order ID — you'll need it for tracking and support.</div></div>
+  </div>
+  <p class="guide-footer">For custom orders, DM us on <strong>Instagram @mellowluvv_</strong> 🌸</p>
+  <button class="guide-gotit" onclick="dismissGuide()">✅ Got it!</button>
+</div>
+
 </body>
 </html>

@@ -888,10 +888,10 @@ a { text-decoration: none; color: inherit; }
   z-index: 998;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-.guide-overlay.show { visibility: visible; opacity: 1; }
+.guide-overlay.show { visibility: visible !important; opacity: 1 !important; }
 .guide-popup {
-  visibility: hidden;
-  opacity: 0;
+  visibility: hidden !important;
+  opacity: 0 !important;
   position: fixed;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
@@ -907,7 +907,7 @@ a { text-decoration: none; color: inherit; }
   border: 3px solid #f2c4ce;
   transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
 }
-.guide-popup.show { visibility: visible; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.guide-popup.show { visibility: visible !important; opacity: 1 !important; transform: translate(-50%, -50%) scale(1) !important; }
 .guide-popup h2 { font-size: 22px; color: #5a4a4a; text-align: center; margin-bottom: 4px; }
 .guide-sub { text-align: center; color: #b0878f; font-size: 13px; margin-bottom: 18px; }
 .guide-close {
