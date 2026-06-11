@@ -1,6 +1,5 @@
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
-const sharp = require('sharp');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,6 +11,7 @@ async function uploadBuffer(buffer, folder, resourceType) {
   let buf = buffer;
   if (!resourceType || resourceType === 'image') {
     try {
+      const sharp = require('sharp');
       buf = await sharp(buffer).jpeg({ quality: 85, mozjpeg: true }).toBuffer();
     } catch (e) {
       console.error('Sharp conversion failed, using original buffer:', e.message);
