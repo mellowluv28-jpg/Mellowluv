@@ -254,12 +254,12 @@
 
     function dismissPolicy() {
       sessionStorage.setItem('policy_seen', '1');
-      document.getElementById('policy-popup').style.display = 'none';
-      document.getElementById('policy-popup-overlay').style.display = 'none';
+      document.getElementById('policy-popup').classList.remove('show');
+      document.getElementById('policy-popup-overlay').classList.remove('show');
       if (!sessionStorage.getItem('guide_seen')) {
         setTimeout(() => {
-          document.getElementById('guide-popup').style.display = 'block';
-          document.getElementById('guide-popup-overlay').style.display = 'block';
+          document.getElementById('guide-popup').classList.add('show');
+          document.getElementById('guide-popup-overlay').classList.add('show');
         }, 500);
       }
     }
@@ -268,19 +268,19 @@
     loadOfferPopup();
     if (!sessionStorage.getItem('policy_seen')) {
       setTimeout(() => {
-        document.getElementById('policy-popup').style.display = 'block';
-        document.getElementById('policy-popup-overlay').style.display = 'block';
+        document.getElementById('policy-popup').classList.add('show');
+        document.getElementById('policy-popup-overlay').classList.add('show');
       }, 800);
     } else if (!sessionStorage.getItem('guide_seen')) {
       setTimeout(() => {
-        document.getElementById('guide-popup').style.display = 'block';
-        document.getElementById('guide-popup-overlay').style.display = 'block';
+        document.getElementById('guide-popup').classList.add('show');
+        document.getElementById('guide-popup-overlay').classList.add('show');
       }, 1500);
     }
     function dismissGuide() {
       sessionStorage.setItem('guide_seen', '1');
-      document.getElementById('guide-popup').style.display = 'none';
-      document.getElementById('guide-popup-overlay').style.display = 'none';
+      document.getElementById('guide-popup').classList.remove('show');
+      document.getElementById('guide-popup-overlay').classList.remove('show');
     }
   </script>
 <script>function toggleNav(){document.querySelector('.navbar').classList.toggle('active')}</script>
