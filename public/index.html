@@ -258,8 +258,8 @@
       document.getElementById('policy-popup-overlay').style.display = 'none';
       if (!sessionStorage.getItem('guide_seen')) {
         setTimeout(() => {
-          document.getElementById('guide-popup').classList.add('show');
-          document.getElementById('guide-popup-overlay').classList.add('show');
+          document.getElementById('guide-popup').style.display = 'block';
+          document.getElementById('guide-popup-overlay').style.display = 'block';
         }, 500);
       }
     }
