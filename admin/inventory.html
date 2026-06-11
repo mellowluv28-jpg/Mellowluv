@@ -246,9 +246,6 @@
 
     function compressImage(file) {
       return new Promise(resolve => {
-        if (file.type === 'image/heic' || file.type === 'image/heif' || /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name)) {
-          return resolve(null);
-        }
         const reader = new FileReader();
         reader.onload = function(e) {
           const img = new Image();

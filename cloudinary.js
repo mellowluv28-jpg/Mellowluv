@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
-const heicConvert = require('heic-convert');
+const sharp = require('sharp');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,16 +8,13 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-function isHeic(buf) {
-  const magic = buf.slice(4, 12).toString();
-  return magic.startsWith('ftyp') && (magic.includes('heic') || magic.includes('heix') || magic.includes('mif1') || magic.includes('hevc'));
-}
-
 async function uploadBuffer(buffer, folder, resourceType) {
   let buf = buffer;
   if (!resourceType || resourceType === 'image') {
-    if (isHeic(buf)) {
-      buf = await heicConvert({ buffer: buf, format: 'JPEG', quality: 0.85 });
+    try {
+      buf = await sharp(buffer).jpeg({ quality: 85, mozjpeg: true }).toBuffer();
+    } catch (e) {
+      console.error('Sharp conversion failed, using original buffer:', e.message);
     }
   }
   return new Promise((resolve, reject) => {
