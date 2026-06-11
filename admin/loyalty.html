@@ -78,7 +78,7 @@
         if (!res.ok) { resultDiv.innerHTML = '<div class="empty-state">No customer found with this phone</div>'; return; }
         const d = await res.json();
         const badge = d.discount_eligible ? '<span class="badge badge-ready">🎉 Discount Ready!</span>' : '<span class="badge badge-soon">' + d.orders_until_discount + ' order(s) to discount</span>';
-        const prebook = d.prebook_eligible ? '<span class="badge badge-ready">✅ Eligible</span>' : '<span class="badge badge-soon">🔒 Need ' + (3 - d.total_loyalty_score) + ' more</span>';
+        const prebook = d.prebook_eligible ? '<span class="badge badge-ready">✅ Eligible</span>' : '<span class="badge badge-soon">🔒 Need ' + Math.max(0, 2 - d.total_loyalty_score) + ' more</span>';
         resultDiv.innerHTML = '<div class="loyalty-card">' +
           '<h3 style="margin:0 0 14px;color:#5a4a4a;">👤 ' + (d.name || 'Unknown') + '</h3>' +
           '<div class="row"><span class="l">📞 Phone</span><span class="r">' + d.phone + '</span></div>' +

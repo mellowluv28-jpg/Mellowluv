@@ -1,6 +1,7 @@
 ﻿let currentProduct = null;
 let cartData = null;
 let loyaltyData = null;
+let cachedShipping = null;
 
 async function initCheckout() {
   const params = new URLSearchParams(window.location.search);
@@ -32,8 +33,7 @@ async function initCheckout() {
       return;
     }
     const shippingRes = await fetch('/api/admin/settings');
-    let shipping = 50;
-    try { const s = await shippingRes.json(); shipping = parseFloat(s.shipping_charge) || 50; } catch {}
+    try { const s = await shippingRes.json(); cachedShipping = parseFloat(s.shipping_charge) || 50; } catch { cachedShipping = 50; }
     updateSummary();
     document.querySelector('[name="quantity"]').addEventListener('input', () => updateSummary());
     document.querySelector('[name="urgency"]').addEventListener('change', () => updateSummary());
@@ -43,8 +43,10 @@ async function initCheckout() {
 }
 
 async function renderCartCheckout() {
-  let shipping = 50;
-  try { const r = await fetch('/api/admin/settings'); const s = await r.json(); shipping = parseFloat(s.shipping_charge) || 50; } catch {}
+  if (cachedShipping === null) {
+    try { const r = await fetch('/api/admin/settings'); const s = await r.json(); cachedShipping = parseFloat(s.shipping_charge) || 50; } catch { cachedShipping = 50; }
+  }
+  let shipping = cachedShipping;
 
   document.getElementById('order-form').querySelector('[name="quantity"]')?.remove();
   const html = cartData.items.map((item, i) => `<div style="margin-bottom:8px;padding:8px 12px;background:#fff8f9;border-radius:10px;border:1px solid #f5d6de;"><strong>${item.name}</strong> × ${item.qty} — ₹${(item.offer_price || item.price) * item.qty}</div>`).join('');
@@ -57,7 +59,8 @@ async function renderCartCheckout() {
 function updateCartSummary(shipping) {
   if (!cartData) return;
   if (shipping === undefined) {
-    fetch('/api/admin/settings').then(r => r.json()).then(s => { updateCartSummary(parseFloat(s.shipping_charge) || 50); });
+    if (cachedShipping !== null) { updateCartSummary(cachedShipping); return; }
+    fetch('/api/admin/settings').then(r => r.json()).then(s => { cachedShipping = parseFloat(s.shipping_charge) || 50; updateCartSummary(cachedShipping); });
     return;
   }
   const urgency = document.querySelector('[name="urgency"]')?.value || '';
@@ -87,25 +90,29 @@ function updateSummary() {
   const extra = urgency === 'urgent' ? 50 : 0;
   const unitPrice = (currentProduct.offer_price && currentProduct.offer_price > 0) ? currentProduct.offer_price : currentProduct.price;
   const hasOffer = currentProduct.offer_price && currentProduct.offer_price > 0;
-  let shipping = 50;
 
-  fetch('/api/admin/settings').then(r => r.json()).then(s => {
-    shipping = parseFloat(s.shipping_charge) || 50;
-    const subtotal = unitPrice * qty;
-    const discountAmt = (loyaltyData && loyaltyData.discount_eligible) ? Math.round(subtotal * 0.5) : 0;
-    const total = subtotal + shipping + extra - discountAmt;
-    document.getElementById('order-summary').innerHTML = `
-      <h3>Order Summary</h3>
-      <div style="margin-bottom:12px;">
-        <div style="font-weight:600;color:#5a4a4a;">${currentProduct.name}</div>
-        <div style="color:#b5838d;font-size:13px;">${hasOffer ? `<span style="text-decoration:line-through;">₹${currentProduct.price}</span> <strong style="color:#d84315;">₹${unitPrice}</strong>` : `₹${unitPrice}`} × ${qty}</div>
-      </div>
-      <div class="total-line"><span>Subtotal</span><span>₹${subtotal}</span></div>
-      ${discountAmt > 0 ? `<div class="total-line" style="color:#2e7d32;"><span>🎉 50% Loyalty Discount</span><span>-₹${discountAmt}</span></div>` : ''}
-      <div class="total-line"><span>Shipping</span><span>₹${shipping}</span></div>
-      ${extra ? `<div class="total-line"><span>⚡ Urgent Surcharge</span><span>+₹50</span></div>` : ''}
-      <div class="total-line grand"><span>Total</span><span>₹${total}</span></div>`;
-  });
+  if (cachedShipping === null) {
+    fetch('/api/admin/settings').then(r => r.json()).then(s => {
+      cachedShipping = parseFloat(s.shipping_charge) || 50;
+      updateSummary();
+    });
+    return;
+  }
+  const shipping = cachedShipping;
+  const subtotal = unitPrice * qty;
+  const discountAmt = (loyaltyData && loyaltyData.discount_eligible) ? Math.round(subtotal * 0.5) : 0;
+  const total = subtotal + shipping + extra - discountAmt;
+  document.getElementById('order-summary').innerHTML = `
+    <h3>Order Summary</h3>
+    <div style="margin-bottom:12px;">
+      <div style="font-weight:600;color:#5a4a4a;">${currentProduct.name}</div>
+      <div style="color:#b5838d;font-size:13px;">${hasOffer ? `<span style="text-decoration:line-through;">₹${currentProduct.price}</span> <strong style="color:#d84315;">₹${unitPrice}</strong>` : `₹${unitPrice}`} × ${qty}</div>
+    </div>
+    <div class="total-line"><span>Subtotal</span><span>₹${subtotal}</span></div>
+    ${discountAmt > 0 ? `<div class="total-line" style="color:#2e7d32;"><span>🎉 50% Loyalty Discount</span><span>-₹${discountAmt}</span></div>` : ''}
+    <div class="total-line"><span>Shipping</span><span>₹${shipping}</span></div>
+    ${extra ? `<div class="total-line"><span>⚡ Urgent Surcharge</span><span>+₹50</span></div>` : ''}
+    <div class="total-line grand"><span>Total</span><span>₹${total}</span></div>`;
 }
 
 async function checkLoyalty(phone) {

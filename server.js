@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const QRCode = require('qrcode');
 const { query, queryOne, execute } = require('./database');
 const cloudinary = require('./cloudinary');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -63,7 +64,7 @@ function parseOrderItems(order) {
   const note = order.extra_note || '';
   const itemsMatch = note.match(/Items:\s*(\[.*\])$/);
   if (itemsMatch) {
-    try { return JSON.parse(itemsMatch[1]); } catch {}
+    try { return JSON.parse(itemsMatch[1]); } catch (e) { console.error('Parse items error:', e); }
   }
   if (order.product_id && order.quantity) return [{ id: order.product_id, qty: order.quantity }];
   return [];
@@ -104,15 +105,18 @@ app.post('/api/customer/signup', async (req, res) => {
   const existing = await queryOne('SELECT * FROM customers WHERE phone = $1', [phone]);
   if (existing) return res.status(400).json({ error: 'Phone already registered. Login instead.' });
   const token = 'cust_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-  await execute('INSERT INTO customers (phone, name, password, token, loyalty_points, discount_used) VALUES ($1, $2, $3, $4, 0, 0)', [phone, name, password, token]);
+  const hashed = await bcrypt.hash(password, 10);
+  await execute('INSERT INTO customers (phone, name, password, token, loyalty_points, discount_used) VALUES ($1, $2, $3, $4, 0, 0)', [phone, name, hashed, token]);
   res.json({ success: true, token, customer: { phone, name } });
 });
 
 app.post('/api/customer/login', async (req, res) => {
   const { phone, password } = req.body;
   if (!phone || !password) return res.status(400).json({ error: 'Phone and password required' });
-  const customer = await queryOne('SELECT * FROM customers WHERE phone = $1 AND password = $2', [phone, password]);
+  const customer = await queryOne('SELECT * FROM customers WHERE phone = $1', [phone]);
   if (!customer) return res.status(401).json({ error: 'Invalid phone or password' });
+  const valid = await bcrypt.compare(password, customer.password);
+  if (!valid) return res.status(401).json({ error: 'Invalid phone or password' });
   const token = 'cust_' + Date.now() + '_' + Math.random().toString(36).slice(2);
   await execute('UPDATE customers SET token = $1 WHERE phone = $2', [token, phone]);
   res.json({ success: true, token, customer: { phone: customer.phone, name: customer.name } });
@@ -141,13 +145,13 @@ async function ensureCustomer(phone, name) {
 
 async function getLoyaltyInfo(phone) {
   const result = await queryOne("SELECT COALESCE(SUM(loyalty_award), 0) as total FROM orders WHERE phone = $1 AND payment_status = 'verified'", [phone]);
-  const totalScore = result?.total || 0;
+  const totalScore = Number(result?.total) || 0;
   return {
     total_loyalty_score: totalScore,
     points_toward_next_discount: totalScore % 4,
     orders_until_discount: 3 - (totalScore % 4),
     discount_eligible: totalScore > 0 && totalScore % 4 === 3,
-    prebook_eligible: totalScore > 1
+    prebook_eligible: totalScore >= 2
   };
 }
 
@@ -156,13 +160,15 @@ app.get('/api/loyalty/check', async (req, res) => {
   if (!phone) return res.status(400).json({ error: 'Phone number required' });
   await ensureCustomer(phone);
   const info = await getLoyaltyInfo(phone);
-  const customer = await queryOne('SELECT name, loyalty_points FROM customers WHERE phone = $1', [phone]);
-  res.json({ ...info, name: customer?.name || '' });
+  const customer = await queryOne('SELECT name, loyalty_points, discount_used FROM customers WHERE phone = $1', [phone]);
+  res.json({ ...info, name: customer?.name || '', discount_used: Number(customer?.discount_used) || 0 });
 });
 
 app.post('/api/prebook', async (req, res) => {
   const { customer_name, phone, instagram, address, pincode, product_id, urgency, whatsapp_optin } = req.body;
   if (!customer_name || !phone || !address || !pincode || !product_id) return res.status(400).json({ error: 'Missing required fields' });
+  if (!/^[0-9]{10}$/.test(phone)) return res.status(400).json({ error: 'Invalid phone number (must be 10 digits)' });
+  if (!/^[0-9]{6}$/.test(pincode)) return res.status(400).json({ error: 'Invalid pincode (must be 6 digits)' });
   const info = await getLoyaltyInfo(phone);
   if (!info.prebook_eligible) return res.status(403).json({ error: `Not eligible for pre-booking. You need ${Math.max(0, 2 - info.total_loyalty_score)} more purchase(s) to unlock pre-booking.`, loyalty: info });
   const product = await queryOne('SELECT * FROM products WHERE id = $1', [product_id]);
@@ -198,6 +204,8 @@ app.post('/api/prebook', async (req, res) => {
 app.post('/api/orders', async (req, res) => {
   const { customer_name, phone, instagram, address, pincode, urgency, aesthetics, extra_note, product_id, quantity, is_cart, cart_items, whatsapp_optin } = req.body;
   if (!customer_name || !phone || !address || !pincode) return res.status(400).json({ error: 'Missing required fields' });
+  if (!/^[0-9]{10}$/.test(phone)) return res.status(400).json({ error: 'Invalid phone number (must be 10 digits)' });
+  if (!/^[0-9]{6}$/.test(pincode)) return res.status(400).json({ error: 'Invalid pincode (must be 6 digits)' });
   await ensureCustomer(phone, customer_name);
 
   if (is_cart && cart_items && cart_items.length > 0) {
@@ -362,7 +370,7 @@ app.put('/api/orders/:id/pay', async (req, res) => {
       const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'text/plain' } });
       req2.write(body);
       req2.end();
-    } catch {}
+    } catch (e) { console.error('ntfy mark payment error:', e); }
   }
   res.json({ success: true });
 });
@@ -396,16 +404,16 @@ app.post('/api/orders/:id/upload-proof', async (req, res) => {
       const req2 = https.request('https://ntfy.sh/' + encodeURIComponent(topic), { method: 'POST', headers: { 'Content-Type': 'text/plain' } });
       req2.write(body);
       req2.end();
-    } catch {}
+    } catch (e) { console.error('ntfy upload proof error:', e); }
   }
   res.json({ success: true });
 });
 
-app.post('/api/orders/:id/reject-proof', async (req, res) => {
+app.post('/api/orders/:id/reject-proof', adminAuth, async (req, res) => {
   const order = await queryOne('SELECT * FROM orders WHERE id = $1', [req.params.id]);
   if (!order) return res.status(404).json({ error: 'Order not found' });
   if (order.payment_screenshot) {
-    try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+    try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch (e) { console.error('Cloudinary delete error:', e); }
   }
   const items = parseOrderItems(order);
   for (const item of items) {
@@ -503,7 +511,7 @@ app.get('/api/admin/stats/most-sold', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/orders', adminAuth, async (req, res) => {
-  try { await execute("DELETE FROM orders WHERE dispatched_at IS NOT NULL AND dispatched_at < NOW() - INTERVAL '28 days'"); } catch {}
+  try { await execute("DELETE FROM orders WHERE dispatched_at IS NOT NULL AND dispatched_at < NOW() - INTERVAL '28 days'"); } catch (e) { console.error('Cleanup error:', e); }
   let sql = 'SELECT * FROM orders WHERE 1=1';
   const params = [];
   let pIdx = 1;
@@ -551,7 +559,7 @@ app.put('/api/admin/orders/:id/verify', adminAuth, async (req, res) => {
   if (unverify) {
     if (order.payment_status !== 'verified') return res.status(400).json({ error: 'Order is not verified' });
     if (order.payment_screenshot) {
-      try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+      try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch (e) { console.error('Cloudinary delete error:', e); }
     }
     await execute('DELETE FROM orders WHERE id = $1', [req.params.id]);
     return res.json({ success: true, message: 'Order deleted' });
@@ -562,7 +570,7 @@ app.put('/api/admin/orders/:id/verify', adminAuth, async (req, res) => {
     await ensureCustomer(order.phone);
     await execute('UPDATE customers SET loyalty_points = loyalty_points + 1 WHERE phone = $1', [order.phone]);
     if (order.payment_screenshot) {
-      try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+      try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch (e) { console.error('Cloudinary delete error:', e); }
     }
   } else {
     await execute('UPDATE orders SET payment_status = $1 WHERE id = $2', [payment_status, req.params.id]);
@@ -581,7 +589,7 @@ app.post('/api/admin/orders/bulk-verify', adminAuth, async (req, res) => {
       await ensureCustomer(order.phone);
       await execute('UPDATE customers SET loyalty_points = loyalty_points + 1 WHERE phone = $1', [order.phone]);
       if (order.payment_screenshot) {
-        try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+        try { const m = order.payment_screenshot.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch (e) { console.error('Cloudinary delete error:', e); }
       }
       verifiedCount++;
     }
@@ -593,12 +601,12 @@ app.get('/api/admin/loyalty', adminAuth, async (req, res) => {
   const { phone } = req.query;
   if (!phone) {
     const allCustomers = await query('SELECT phone, name, loyalty_points, discount_used FROM customers ORDER BY loyalty_points DESC');
-    return res.json(allCustomers);
+    return res.json(allCustomers.map(c => ({ ...c, loyalty_points: Number(c.loyalty_points) || 0, discount_used: Number(c.discount_used) || 0 })));
   }
   const customer = await queryOne('SELECT * FROM customers WHERE phone = $1', [phone]);
   if (!customer) return res.status(404).json({ error: 'No customer found with this phone' });
   const info = await getLoyaltyInfo(phone);
-  res.json({ ...customer, ...info });
+  res.json({ ...customer, ...info, loyalty_points: Number(customer.loyalty_points) || 0, discount_used: Number(customer.discount_used) || 0 });
 });
 
 app.put('/api/admin/orders/:id/tracking', adminAuth, async (req, res) => {
@@ -687,7 +695,7 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
   }
   let imagesArr = [];
   if (existing_images) {
-    try { imagesArr = JSON.parse(existing_images); } catch {}
+    try { imagesArr = JSON.parse(existing_images); } catch (e) { console.error('Parse existing_images error:', e); }
   }
   if (req.files?.images) {
     for (const f of req.files.images) {
@@ -697,7 +705,7 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
   }
   let videosArr = [];
   if (existing_videos) {
-    try { videosArr = JSON.parse(existing_videos); } catch {}
+    try { videosArr = JSON.parse(existing_videos); } catch (e) { console.error('Parse existing_videos error:', e); }
   }
   if (req.files?.videos) {
     for (const f of req.files.videos) {
@@ -719,10 +727,10 @@ app.delete('/api/admin/products/:id', adminAuth, async (req, res) => {
   if (product) {
     const allUrls = [];
     if (product.image) allUrls.push(product.image);
-    try { const imgs = JSON.parse(product.images || '[]'); if (Array.isArray(imgs)) allUrls.push(...imgs); } catch {}
-    try { const vids = JSON.parse(product.videos || '[]'); if (Array.isArray(vids)) allUrls.push(...vids); } catch {}
+    try { const imgs = JSON.parse(product.images || '[]'); if (Array.isArray(imgs)) allUrls.push(...imgs); } catch (e) { console.error('Parse imgs error:', e); }
+    try { const vids = JSON.parse(product.videos || '[]'); if (Array.isArray(vids)) allUrls.push(...vids); } catch (e) { console.error('Parse vids error:', e); }
     for (const url of allUrls) {
-      try { const m = url.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch {}
+      try { const m = url.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/); if (m) await cloudinary.deleteImage(m[1]); } catch (e) { console.error('Cloudinary delete url error:', e); }
     }
   }
   await execute('DELETE FROM products WHERE id = $1', [req.params.id]);
@@ -776,6 +784,12 @@ app.get('/api/products/:id', async (req, res) => {
   if (!product) return res.status(404).json({ error: 'Product not found' });
   const isScheduled = product.scheduled_at && new Date(product.scheduled_at) > new Date();
   res.json({ ...product, is_live: !isScheduled });
+});
+
+// --- Error handler ---
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err?.message || err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // --- Start ---

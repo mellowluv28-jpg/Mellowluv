@@ -79,7 +79,7 @@
   <footer class="footer">
     <div class="container">
       <div class="cat">🐱</div>
-      <div class="instagram">Instagram - @mellowluvv_</div>
+      <div class="instagram"><span id="footer-insta">Instagram - @mellowluvv_</span></div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
       <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
@@ -111,6 +111,8 @@
     const contactInsta = decodeURIComponent(params.get('ci') || '');
     if (contactInsta) {
       document.getElementById('contact-insta').textContent = 'Instagram - ' + contactInsta;
+      const fi = document.getElementById('footer-insta');
+      if (fi) fi.textContent = 'Instagram - ' + contactInsta;
     }
 
     async function uploadScreenshot() {

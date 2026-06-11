@@ -136,7 +136,7 @@ async function addToCart(id, name, offerPrice, price, image, category, qty) {
     if (existing) { existing.qty += qty; } else { cart.items.push({ id, name, offer_price: offerPrice, price, image, category, qty }); }
     localStorage.setItem('mellowluv_cart', JSON.stringify(cart));
     updateCartBadge();
-    const btn = event?.target || document.querySelector('[onclick*="addToCart(' + id + '"]');
+    const btn = event?.target || document.querySelector('[onclick*="addToCart(' + id + ')"]');
     if (btn) { btn.textContent = '✅'; setTimeout(() => btn.textContent = '🛒', 1000); }
   } catch { alert('Network error. Try again.'); }
 }
@@ -150,6 +150,10 @@ function updateCartBadge() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.cat-icon').forEach(function(img) {
+    img.onerror = function() { this.style.display = 'none'; };
+  });
+
   updateCartBadge();
   if (!document.querySelector('.cart-fab')) {
     const hidePages = ['/public/cart.html', '/public/checkout.html', '/public/order-success.html'];
