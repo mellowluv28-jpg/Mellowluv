@@ -22,6 +22,7 @@ function renderProducts(containerId, products) {
     container.innerHTML = '<div class="loading" style="grid-column: 1/-1;">No products available yet. Check back soon!</div>';
     return;
   }
+  clearAllCountdowns();
   container.innerHTML = products.map(p => {
     const inStock = p.stock > 0;
     const hasOffer = p.offer_price && p.offer_price > 0;
@@ -30,7 +31,7 @@ function renderProducts(containerId, products) {
     const displayPrice = hasOffer ? `<span class="product-price-original">₹${p.price}</span> <span class="product-price-offer">₹${p.offer_price}</span>` : `<span class="product-price">₹${p.price}</span>`;
     const offerBadge = hasOffer && isLive ? `<div class="offer-badge">🔥 OFFER</div>` : '';
     const offerNote = hasOffer && isLive && p.offer_note ? `<div class="offer-note">${p.offer_note}</div>` : '';
-    const dropText = isScheduled ? formatDropTime(p.scheduled_at) : '';
+    const dropText = isScheduled ? formatDropTime(p.scheduled_at, p.id) : '';
     const dropBadge = isScheduled ? `<div class="drop-badge">📅 DROPPING SOON</div>` : '';
     const scheduledOn = isScheduled ? `<div class="drop-time">${dropText}</div>` : '';
     const stockLabel = isScheduled ? '🔒 Coming Soon' : (inStock ? `In Stock (${p.stock} available)` : 'Out of Stock');
@@ -58,6 +59,8 @@ function renderProducts(containerId, products) {
       </div>
     `;
   }).join('');
+  const scheduled = products.filter(p => p.scheduled_at && new Date(p.scheduled_at) > new Date());
+  scheduled.forEach(p => startLiveCountdown('cd-' + p.id, p.scheduled_at));
 }
 
 function searchProducts(inputId, containerId) {
@@ -72,17 +75,40 @@ function searchProducts(inputId, containerId) {
   }
 }
 
-function formatDropTime(isoStr) {
+let _countdownIntervals = [];
+
+function clearAllCountdowns() {
+  _countdownIntervals.forEach(id => clearInterval(id));
+  _countdownIntervals = [];
+}
+
+function startLiveCountdown(elementId, targetIso) {
+  const target = new Date(targetIso);
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  function tick() {
+    const diff = target - new Date();
+    if (diff <= 0) { el.textContent = '📦 Live Now!'; el.style.color = '#2e7d32'; return; }
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    let text = '';
+    if (days > 0) text += days + 'd ';
+    text += String(hours).padStart(2, '0') + 'h ' + String(mins).padStart(2, '0') + 'm ' + String(secs).padStart(2, '0') + 's';
+    el.textContent = text;
+  }
+  tick();
+  const id = setInterval(tick, 1000);
+  _countdownIntervals.push(id);
+  return id;
+}
+
+function formatDropTime(isoStr, productId) {
   const d = new Date(isoStr);
-  const now = new Date();
-  const diff = d - now;
-  if (diff <= 0) return 'Live now!';
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  if (days > 0) return `Dropping on ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })} at ${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST`;
-  if (hours > 0) return `Dropping in ${hours}h ${mins}m`;
-  return `Dropping in ${mins}m`;
+  const diff = d - new Date();
+  if (diff <= 0) return '📦 Live now!';
+  return `<span class="live-countdown" id="cd-${productId}">--d --h --m --s</span>`;
 }
 
 function buyProduct(productId) {

@@ -664,6 +664,49 @@ a { text-decoration: none; color: inherit; }
   border-radius: 6px;
 }
 
+.countdown-hero {
+  background: linear-gradient(135deg, #fef4f6, #fce4ec);
+  border-radius: 20px;
+  border: 2px solid #f5d6de;
+  margin-bottom: 20px;
+  overflow: hidden;
+  animation: fadeUp 0.5s ease;
+}
+.countdown-hero-inner {
+  padding: 28px 24px;
+  text-align: center;
+}
+.countdown-hero-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #b0878f;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.countdown-hero-timer {
+  font-size: 48px;
+  font-weight: 900;
+  color: #d4808a;
+  letter-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.countdown-hero-product {
+  font-size: 16px;
+  font-weight: 700;
+  color: #5a4a4a;
+}
+
+/* Live countdown in product cards */
+.live-countdown {
+  font-weight: 700;
+  font-size: 12px;
+  color: #c62828;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Loading */
 .loading { text-align: center; padding: 50px; color: #d4a0a0; }
 .loading .spinner {
@@ -1022,6 +1065,7 @@ a:active, button:active, .btn:active, .btn-track:active, .btn-primary:active, .b
   .track-result .order-info .value { text-align: left; }
   .upcoming-banner .upcoming-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .offer-popup { width: 280px; right: 10px; bottom: 10px; font-size: 13px; padding: 16px; }
+  .countdown-hero-timer { font-size: 32px; letter-spacing: 2px; }
 }
 @media (max-width: 480px) {
   .products-grid { grid-template-columns: 1fr 1fr; gap: 10px; }

@@ -41,6 +41,14 @@
     <div class="container">
       <div id="upcoming-banner" class="upcoming-banner">
         <div class="upcoming-title"><span>📅</span> UPCOMING DROPS</div>
+        <div id="countdown-hero" class="countdown-hero" style="display:none;">
+          <div class="countdown-hero-inner">
+            <div class="countdown-hero-label">⏳ Next drop in</div>
+            <div class="countdown-hero-timer" id="hero-timer">--d --h --m --s</div>
+            <div class="countdown-hero-product" id="hero-product"></div>
+            <a id="hero-prebook-btn" class="btn" style="margin-top:12px;">📅 Pre-Book Now</a>
+          </div>
+        </div>
         <div id="upcoming-list"></div>
       </div>
       <div class="grid" style="margin-top:30px;">
@@ -123,6 +131,57 @@
       });
     });
 
+    let _upcomingCountdowns = [];
+
+    function clearUpcomingCountdowns() {
+      _upcomingCountdowns.forEach(id => clearInterval(id));
+      _upcomingCountdowns = [];
+    }
+
+    function startHeroCountdown(targetIso, name, priceText, prebookUrl) {
+      clearUpcomingCountdowns();
+      const hero = document.getElementById('countdown-hero');
+      hero.style.display = 'block';
+      document.getElementById('hero-product').textContent = '🔥 ' + name + ' — ' + priceText;
+      document.getElementById('hero-prebook-btn').href = prebookUrl;
+      const el = document.getElementById('hero-timer');
+      const target = new Date(targetIso);
+      function tick() {
+        const diff = target - new Date();
+        if (diff <= 0) { el.textContent = '📦 LIVE NOW!'; return; }
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        let text = '';
+        if (days > 0) text += days + 'd ';
+        text += String(hours).padStart(2, '0') + 'h ' + String(mins).padStart(2, '0') + 'm ' + String(secs).padStart(2, '0') + 's';
+        el.textContent = text;
+      }
+      tick();
+      _upcomingCountdowns.push(setInterval(tick, 1000));
+    }
+
+    function startUpcomingCountdown(elementId, targetIso) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const target = new Date(targetIso);
+      function tick() {
+        const diff = target - new Date();
+        if (diff <= 0) { el.textContent = '📦 Live Now!'; return; }
+        const days = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        let text = '';
+        if (days > 0) text += days + 'd ';
+        text += String(hours).padStart(2, '0') + 'h ' + String(mins).padStart(2, '0') + 'm ' + String(secs).padStart(2, '0') + 's';
+        el.textContent = text;
+      }
+      tick();
+      _upcomingCountdowns.push(setInterval(tick, 1000));
+    }
+
     async function loadUpcomingDrops() {
       try {
         const res = await fetch('/api/products/upcoming');
@@ -131,18 +190,25 @@
         const list = document.getElementById('upcoming-list');
         if (upcoming.length === 0) { banner.style.display = 'none'; return; }
         banner.classList.add('show');
-        list.innerHTML = '<div class="upcoming-grid">' + upcoming.map(p => {
-          const d = new Date(p.scheduled_at);
-          const timeStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ' at ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST';
+
+        // Hero countdown — nearest drop
+        const first = upcoming[0];
+        const firstPrice = first.offer_price ? '<s>₹' + first.price + '</s> ₹' + first.offer_price : '₹' + first.price;
+        startHeroCountdown(first.scheduled_at, first.name, firstPrice, '/public/prebook.html?product=' + first.id);
+
+        // Grid of all upcoming products with live countdowns
+        list.innerHTML = '<div class="upcoming-grid">' + upcoming.map((p, i) => {
           return '<div class="upcoming-item" style="cursor:default;">' +
             '<div class="upcoming-img" style="' + (p.image ? "background-image: url(\'" + p.image + "\'); background-size: cover; background-position: center;" : "") + '">' + (p.image ? '' : '📷') + '</div>' +
             '<div class="upcoming-body">' +
             '<span class="upcoming-name">' + p.name + '</span>' +
             '<span class="upcoming-price">' + (p.offer_price ? '<s>₹' + p.price + '</s> <strong>₹' + p.offer_price + '</strong>' : '₹' + p.price) + '</span>' +
-            '<span class="upcoming-when">📅 ' + timeStr + '</span>' +
+            '<span class="upcoming-when" id="ucd-' + p.id + '">--d --h --m --s</span>' +
             '<a href="/public/prebook.html?product=' + p.id + '" class="btn" style="margin-top:8px;display:inline-block;padding:8px 16px;font-size:13px;">📅 Pre-Book Now</a>' +
             '</div></div>';
         }).join('') + '</div>';
+
+        upcoming.forEach(p => startUpcomingCountdown('ucd-' + p.id, p.scheduled_at));
       } catch {}
     }
 
