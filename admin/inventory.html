@@ -244,21 +244,27 @@
       document.getElementById('product-modal').classList.remove('show');
     }
 
-    function compressImage(file, maxW, quality) {
+    function compressImage(file) {
       return new Promise(resolve => {
+        if (file.type === 'image/heic' || file.type === 'image/heif' || /\.heic$/i.test(file.name) || /\.heif$/i.test(file.name)) {
+          return resolve(null);
+        }
         const reader = new FileReader();
         reader.onload = function(e) {
           const img = new Image();
+          img.onerror = () => resolve(null);
           img.onload = function() {
             let w = img.width, h = img.height;
-            if (w > maxW) { h = h * maxW / w; w = maxW; }
+            if (w > 1600) { h = h * 1600 / w; w = 1600; }
             const c = document.createElement('canvas');
             c.width = w; c.height = h;
-            c.getContext('2d').drawImage(img, 0, 0, w, h);
-            c.toBlob(resolve, 'image/jpeg', quality);
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            ctx.canvas.toBlob(resolve, 'image/jpeg', 0.82);
           };
           img.src = e.target.result;
         };
+        reader.onerror = () => resolve(null);
         reader.readAsDataURL(file);
       });
     }
@@ -282,8 +288,8 @@
       if (imgFile) formData.append('image', imgFile);
       const imgFiles = document.getElementById('prod-images').files;
       for (const f of imgFiles) {
-        const compressed = await compressImage(f, 1600, 0.82);
-        formData.append('images', compressed, f.name.replace(/\.[^.]+$/, '.jpg'));
+        const compressed = await compressImage(f);
+        formData.append('images', compressed || f);
       }
       const vidFiles = document.getElementById('prod-videos').files;
       for (const f of vidFiles) formData.append('videos', f);
