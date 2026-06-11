@@ -133,6 +133,7 @@
             <div class="verify-card" style="animation-delay:${i * 0.05}s" data-order-id="${o.id}">
               <div class="cb-wrap"><input type="checkbox" class="verify-cb" value="${o.id}" onchange="updateBulkBar()"> <span style="font-size:12px;color:#b0878f;">Select</span></div>
               <div style="font-size:22px;font-weight:800;color:#d4808a;margin-bottom:4px;letter-spacing:0.5px;">#${o.id}</div>
+              <div style="font-size:24px;font-weight:900;color:#2e7d32;margin-bottom:8px;">₹${o.total}</div>
               <div class="card-header">
                 <h3>${o.customer_name}</h3>
                 <span class="badge-paid">Paid</span>
