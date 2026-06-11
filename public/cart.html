@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -39,16 +39,16 @@
 <body class="page-enter">
   <nav class="navbar">
     <div class="container">
-      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
-      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
+      <a href="/" class="logo"><img src="/public/icons/logo.png" class="cat-icon" alt="Mellowluv" style="height:32px;width:auto;vertical-align:middle;border-radius:6px;"> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">â˜°</button>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/public/thrift.html">Thrift Store</a></li>
         <li><a href="/public/jewelry.html">Mellowluv</a></li>
-        <li><a href="/public/tracking.html">📦 Track</a></li>
-        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
-        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
-        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">ðŸ“¦ Track</a></li>
+        <li><a href="/public/loyalty.html">â­ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">ðŸ“– How to Buy</a></li>
+        <li><a href="/public/cart.html">ðŸ›’ Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -57,22 +57,22 @@
   <section class="cart-section">
     <div class="container">
       <div class="cart-box">
-        <h1>🛒 Your <span>Cart</span></h1>
-        <p class="sub">Review your items before checking out 🐱</p>
+        <h1>ðŸ›’ Your <span>Cart</span></h1>
+        <p class="sub">Review your items before checking out ðŸ±</p>
         <div id="cart-content"></div>
       </div>
     </div>
   </section>
 
-  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+  <div class="cat-deco">ðŸ± ðŸŒ¸ ðŸ± ðŸŒ¸ ðŸ±</div>
 
   <footer class="footer">
     <div class="container">
-      <div class="cat">🐱</div>
+      <div class="cat">ðŸ±</div>
       <div class="instagram">Instagram - @mellowluvv_</div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
-      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">ðŸ“¦ Track Order</a></p>
       <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
     </div>
   </footer>
@@ -99,7 +99,7 @@
       const content = document.getElementById('cart-content');
 
       if (cart.items.length === 0) {
-        content.innerHTML = '<div class="cart-empty"><div class="big">🛒</div><p>Your cart is empty</p><a href="/" class="btn-submit" style="display:inline-block;margin-top:16px;text-decoration:none;">Browse Store 🐱</a></div>';
+        content.innerHTML = '<div class="cart-empty"><div class="big">ðŸ›’</div><p>Your cart is empty</p><a href="/" class="btn-submit" style="display:inline-block;margin-top:16px;text-decoration:none;">Browse Store ðŸ±</a></div>';
         return;
       }
 
@@ -110,19 +110,19 @@
         subtotal += lineTotal;
         const maxStock = stockCache[item.id] ?? 99;
         const atMax = item.qty >= maxStock;
-        const imgHtml = item.image ? `<img src="${item.image}" alt="${item.name}">` : '📷';
+        const imgHtml = item.image ? `<img src="${item.image}" alt="${item.name}">` : 'ðŸ“·';
         return `<div class="cart-item" data-index="${i}">
           <div class="ci-img">${imgHtml}</div>
           <div class="ci-info">
             <div class="ci-name">${item.name}</div>
-            <div class="ci-price">₹${price} × ${item.qty} = ₹${lineTotal}</div>
-            <div style="font-size:11px;color:#b0878f;">In stock: ${maxStock} ${atMax ? '— max reached' : ''}</div>
+            <div class="ci-price">â‚¹${price} Ã— ${item.qty} = â‚¹${lineTotal}</div>
+            <div style="font-size:11px;color:#b0878f;">In stock: ${maxStock} ${atMax ? 'â€” max reached' : ''}</div>
           </div>
           <div class="ci-actions">
-            <button onclick="changeQty(${i}, -1)">−</button>
+            <button onclick="changeQty(${i}, -1)">âˆ’</button>
             <span class="ci-qty">${item.qty}</span>
             <button onclick="changeQty(${i}, 1)" ${atMax ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>+</button>
-            <button class="ci-remove" onclick="removeItem(${i})">✕</button>
+            <button class="ci-remove" onclick="removeItem(${i})">âœ•</button>
           </div>
         </div>`;
       }).join('');
@@ -132,12 +132,12 @@
 
       content.innerHTML = `<div class="cart-items">${itemsHtml}</div>
         <div class="cart-summary">
-          <div class="total-line"><span>Subtotal</span><span>₹${subtotal}</span></div>
-          <div class="total-line"><span>Shipping</span><span>₹${shipping}</span></div>
-          <div class="total-line grand"><span>Total</span><span>₹${total}</span></div>
-          <button class="btn-submit btn-checkout" onclick="checkoutCart()">Proceed to Checkout 🌸</button>
+          <div class="total-line"><span>Subtotal</span><span>â‚¹${subtotal}</span></div>
+          <div class="total-line"><span>Shipping</span><span>â‚¹${shipping}</span></div>
+          <div class="total-line grand"><span>Total</span><span>â‚¹${total}</span></div>
+          <button class="btn-submit btn-checkout" onclick="checkoutCart()">Proceed to Checkout ðŸŒ¸</button>
         </div>
-        <p style="text-align:center;margin-top:10px;"><a href="javascript:void(0)" onclick="clearCart()" style="color:#d4808a;font-size:13px;">🗑️ Clear Cart</a></p>`;
+        <p style="text-align:center;margin-top:10px;"><a href="javascript:void(0)" onclick="clearCart()" style="color:#d4808a;font-size:13px;">ðŸ—‘ï¸ Clear Cart</a></p>`;
     }
 
     function changeQty(index, delta) {

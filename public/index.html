@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -11,16 +11,16 @@
 <body class="page-enter">
   <nav class="navbar">
     <div class="container">
-      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
-      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
+      <a href="/" class="logo"><img src="/public/icons/logo.png" class="cat-icon" alt="Mellowluv" style="height:32px;width:auto;vertical-align:middle;border-radius:6px;"> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">â˜°</button>
       <ul class="nav-links">
         <li><a href="/" class="active">Home</a></li>
         <li><a href="/public/thrift.html">Thrift Store</a></li>
         <li><a href="/public/jewelry.html">Mellowluv</a></li>
-        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
-        <li><a href="/public/tracking.html">📦 Track</a></li>
-        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
-        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
+        <li><a href="/public/cart.html">ðŸ›’ Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">ðŸ“¦ Track</a></li>
+        <li><a href="/public/loyalty.html">â­ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">ðŸ“– How to Buy</a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -28,11 +28,11 @@
 
   <section class="hero">
     <div class="container">
-      <div class="top-banner">📸 DM us on Instagram <strong>@mellowluvv_</strong> for custom orders! <a href="https://instagram.com/mellowluvv_" target="_blank" class="banner-btn">Message Now</a></div>
+      <div class="top-banner">ðŸ“¸ DM us on Instagram <strong>@mellowluvv_</strong> for custom orders! <a href="https://instagram.com/mellowluvv_" target="_blank" class="banner-btn">Message Now</a></div>
       <div id="deal-banner" class="deal-banner" style="display:none;"></div>
     <div class="subtitle animate-fade-up">Curated Finds & Handcrafted Elegance</div>
-      <h1 class="animate-pop">Welcome to <span>Mellowluv</span> 🐱</h1>
-      <div class="deco">🌸✨🐱✨🌸</div>
+      <h1 class="animate-pop">Welcome to <span>Mellowluv</span> ðŸ±</h1>
+      <div class="deco">ðŸŒ¸âœ¨ðŸ±âœ¨ðŸŒ¸</div>
       <p class="animate-fade-up">Update your style with our curated thrift pieces and handmade jewellery made by love.</p>
     </div>
   </section>
@@ -40,32 +40,32 @@
   <section class="categories">
     <div class="container">
       <div id="upcoming-banner" class="upcoming-banner">
-        <div class="upcoming-title"><span>📅</span> UPCOMING DROPS</div>
+        <div class="upcoming-title"><span>ðŸ“…</span> UPCOMING DROPS</div>
         <div id="countdown-hero" class="countdown-hero" style="display:none;">
           <div class="countdown-hero-inner">
-            <div class="countdown-hero-label">⏳ Next drop in</div>
+            <div class="countdown-hero-label">â³ Next drop in</div>
             <div class="countdown-hero-timer" id="hero-timer">--d --h --m --s</div>
             <div class="countdown-hero-product" id="hero-product"></div>
-            <a id="hero-prebook-btn" class="btn" style="margin-top:12px;">📅 Pre-Book Now</a>
+            <a id="hero-prebook-btn" class="btn" style="margin-top:12px;">ðŸ“… Pre-Book Now</a>
           </div>
         </div>
         <div id="upcoming-list"></div>
       </div>
       <div class="grid" style="margin-top:30px;">
         <a href="/public/jewelry.html" class="category-card animate-fade-up">
-          <div class="card-img">💎</div>
+          <div class="card-img">ðŸ’Ž</div>
           <div class="card-body">
             <h3>Jewelry</h3>
             <p>Handmade adorns made with love just for you. Customs accepted.</p>
-            <span class="btn">Explore Jewelry ✨</span>
+            <span class="btn">Explore Jewelry âœ¨</span>
           </div>
         </a>
         <a href="/public/thrift.html" class="category-card animate-fade-up" style="animation-delay:0.2s">
-          <div class="card-img">🛍️</div>
+          <div class="card-img">ðŸ›ï¸</div>
           <div class="card-body">
             <h3>Thrift</h3>
             <p>Curated pieces, up-cycled fits and imported clothing.</p>
-            <span class="btn">Explore Thrift ✨</span>
+            <span class="btn">Explore Thrift âœ¨</span>
           </div>
         </a>
       </div>
@@ -73,51 +73,51 @@
   </section>
 
       <div style="text-align:center;margin-top:30px;">
-        <a href="/public/tracking.html" class="btn" style="margin-right:10px;">📦 My Orders</a>
-        <a href="/public/loyalty.html" class="btn" style="margin-right:10px;">⭐ Check Loyalty</a>
-        <a href="/public/thrift.html" class="btn">📅 Pre-Book Drops</a>
+        <a href="/public/tracking.html" class="btn" style="margin-right:10px;">ðŸ“¦ My Orders</a>
+        <a href="/public/loyalty.html" class="btn" style="margin-right:10px;">â­ Check Loyalty</a>
+        <a href="/public/thrift.html" class="btn">ðŸ“… Pre-Book Drops</a>
       </div>
 
       <div id="guide-popup-overlay" class="guide-overlay" onclick="dismissGuide()"></div>
   <div id="guide-popup" class="guide-popup">
-    <button class="guide-close" onclick="dismissGuide()">✕</button>
-    <h2>📖 How to Shop on Mellowluv</h2>
-    <p class="guide-sub">Follow these steps for a smooth purchase 💕</p>
+    <button class="guide-close" onclick="dismissGuide()">âœ•</button>
+    <h2>ðŸ“– How to Shop on Mellowluv</h2>
+    <p class="guide-sub">Follow these steps for a smooth purchase ðŸ’•</p>
     <div class="guide-steps">
-      <div class="guide-step"><div class="g-num">1</div><div class="g-body"><strong>Browse & Select</strong> — Pick your favourite thrift pieces or handmade jewellery.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> rush — check size, description and price carefully before adding to cart.</div></div>
-      <div class="guide-step"><div class="g-num">2</div><div class="g-body"><strong>Add to Cart</strong> — Click "Add to Cart" or pre-book upcoming drops.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> add duplicate items — check your cart before checkout.</div></div>
-      <div class="guide-step"><div class="g-num">3</div><div class="g-body"><strong>Checkout</strong> — Fill in your name, phone, Instagram ID and delivery address correctly.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> enter wrong Instagram ID — we may need to contact you about shipping charges.</div></div>
-      <div class="guide-step"><div class="g-num">4</div><div class="g-body"><strong>Pay via UPI</strong> — Scan the QR code or pay to the UPI ID shown. Include your order number in the note.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> pay to a different UPI ID or send incomplete amount — it will delay verification.</div></div>
-      <div class="guide-step"><div class="g-num">5</div><div class="g-body"><strong>Upload Screenshot</strong> — On the order success page, upload your payment screenshot. We will verify it shortly.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> upload a fake or edited screenshot — your order will be rejected.</div></div>
-      <div class="guide-step"><div class="g-num">6</div><div class="g-body"><strong>Wait for Verification</strong> — Once verified, we will ship your order. You'll get a notification.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> message repeatedly for status — check tracking page or wait for our confirmation.</div></div>
-      <div class="guide-step"><div class="g-num">7</div><div class="g-body"><strong>Track Your Order</strong> — Use the Track page with your order number to see real-time updates.</div></div>
-      <div class="guide-step dont"><div class="g-num">🚫</div><div class="g-body"><strong>Don't</strong> forget to save your order ID — you'll need it for tracking and support.</div></div>
+      <div class="guide-step"><div class="g-num">1</div><div class="g-body"><strong>Browse & Select</strong> â€” Pick your favourite thrift pieces or handmade jewellery.</div></div>
+      <div class="guide-step dont"><div class="g-num">ðŸš«</div><div class="g-body"><strong>Don't</strong> rush â€” check size, description and price carefully before adding to cart.</div></div>
+      <div class="guide-step"><div class="g-num">2</div><div class="g-body"><strong>Add to Cart</strong> â€” Click "Add to Cart" or pre-book upcoming drops.</div></div>
+      <div class="guide-step dont"><div class="g-num">ðŸš«</div><div class="g-body"><strong>Don't</strong> add duplicate items â€” check your cart before checkout.</div></div>
+      <div class="guide-step"><div class="g-num">3</div><div class="g-body"><strong>Checkout</strong> â€” Fill in your name, phone, Instagram ID and delivery address correctly.</div></div>
+      <div class="guide-step dont"><div class="g-num">ðŸš«</div><div class="g-body"><strong>Don't</strong> enter wrong Instagram ID â€” we may need to contact you about shipping charges.</div></div>
+      <div class="guide-step"><div class="g-num">4</div><div class="g-body"><strong>Pay via UPI</strong> â€” Scan the QR code or pay to the UPI ID shown. Include your order number in the note.</div></div>
+      <div class="guide-step dont"><div class="g-num">ðŸš«</div><div class="g-body"><strong>Don't</strong> pay to a different UPI ID or send incomplete amount â€” it will delay verification.</div></div>
+      <div class="guide-step"><div class="g-num">5</div><div class="g-body"><strong>Upload Screenshot</strong> â€” On the order success page, upload your payment screenshot. We will verify it shortly.</div></div>
+      <div class="guide-step dont"><div class="g-num">ðŸš«</div><div class="g-body"><strong>Don't</strong> upload a fake or edited screenshot â€” your order will be rejected.</div></div>
+      <div class="guide-step"><div class="g-num">6</div><div class="g-body"><strong>Wait for Verification</strong> â€” Once verified, we will ship your order. You'll get a notification.</div></div>
+      <div class="guide-step dont"><div class="g-num">ðŸš«</div><div class="g-body"><strong>Don't</strong> message repeatedly for status â€” check tracking page or wait for our confirmation.</div></div>
+      <div class="guide-step"><div class="g-num">7</div><div class="g-body"><strong>Track Your Order</strong> â€” Use the Track page with your order number to see real-time updates.</div></div>
+      <div class="guide-step dont"><div class="g-num">ðŸš«</div><div class="g-body"><strong>Don't</strong> forget to save your order ID â€” you'll need it for tracking and support.</div></div>
     </div>
-    <p class="guide-footer">For custom orders, DM us on <strong>Instagram @mellowluvv_</strong> 🌸</p>
-    <button class="guide-gotit" onclick="dismissGuide()">✅ Got it!</button>
+    <p class="guide-footer">For custom orders, DM us on <strong>Instagram @mellowluvv_</strong> ðŸŒ¸</p>
+    <button class="guide-gotit" onclick="dismissGuide()">âœ… Got it!</button>
   </div>
 
       <div id="offer-popup" class="offer-popup">
-    <div class="offer-popup-header">🔥 OFFER ALERT!</div>
+    <div class="offer-popup-header">ðŸ”¥ OFFER ALERT!</div>
     <div id="offer-popup-body"></div>
-    <button class="offer-popup-close" onclick="dismissOffer()">✕</button>
+    <button class="offer-popup-close" onclick="dismissOffer()">âœ•</button>
   </div>
 
-  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+  <div class="cat-deco">ðŸ± ðŸŒ¸ ðŸ± ðŸŒ¸ ðŸ±</div>
 
   <footer class="footer">
     <div class="container">
-      <div class="cat">🐱</div>
+      <div class="cat">ðŸ±</div>
       <div class="instagram">Instagram - @mellowluvv_</div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
-      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">ðŸ“¦ Track Order</a></p>
       <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
     </div>
   </footer>
@@ -142,13 +142,13 @@
       clearUpcomingCountdowns();
       const hero = document.getElementById('countdown-hero');
       hero.style.display = 'block';
-      document.getElementById('hero-product').textContent = '🔥 ' + name + ' — ' + priceText;
+      document.getElementById('hero-product').textContent = 'ðŸ”¥ ' + name + ' â€” ' + priceText;
       document.getElementById('hero-prebook-btn').href = prebookUrl;
       const el = document.getElementById('hero-timer');
       const target = new Date(targetIso);
       function tick() {
         const diff = target - new Date();
-        if (diff <= 0) { el.textContent = '📦 LIVE NOW!'; return; }
+        if (diff <= 0) { el.textContent = 'ðŸ“¦ LIVE NOW!'; return; }
         const days = Math.floor(diff / 86400000);
         const hours = Math.floor((diff % 86400000) / 3600000);
         const mins = Math.floor((diff % 3600000) / 60000);
@@ -168,7 +168,7 @@
       const target = new Date(targetIso);
       function tick() {
         const diff = target - new Date();
-        if (diff <= 0) { el.textContent = '📦 Live Now!'; return; }
+        if (diff <= 0) { el.textContent = 'ðŸ“¦ Live Now!'; return; }
         const days = Math.floor(diff / 86400000);
         const hours = Math.floor((diff % 86400000) / 3600000);
         const mins = Math.floor((diff % 3600000) / 60000);
@@ -191,20 +191,20 @@
         if (upcoming.length === 0) { banner.style.display = 'none'; return; }
         banner.classList.add('show');
 
-        // Hero countdown — nearest drop
+        // Hero countdown â€” nearest drop
         const first = upcoming[0];
-        const firstPrice = first.offer_price ? '<s>₹' + first.price + '</s> ₹' + first.offer_price : '₹' + first.price;
+        const firstPrice = first.offer_price ? '<s>â‚¹' + first.price + '</s> â‚¹' + first.offer_price : 'â‚¹' + first.price;
         startHeroCountdown(first.scheduled_at, first.name, firstPrice, '/public/prebook.html?product=' + first.id);
 
         // Grid of all upcoming products with live countdowns
         list.innerHTML = '<div class="upcoming-grid">' + upcoming.map((p, i) => {
           return '<div class="upcoming-item" style="cursor:default;">' +
-            '<div class="upcoming-img" style="' + (p.image ? "background-image: url(\'" + p.image + "\'); background-size: cover; background-position: center;" : "") + '">' + (p.image ? '' : '📷') + '</div>' +
+            '<div class="upcoming-img" style="' + (p.image ? "background-image: url(\'" + p.image + "\'); background-size: cover; background-position: center;" : "") + '">' + (p.image ? '' : 'ðŸ“·') + '</div>' +
             '<div class="upcoming-body">' +
             '<span class="upcoming-name">' + p.name + '</span>' +
-            '<span class="upcoming-price">' + (p.offer_price ? '<s>₹' + p.price + '</s> <strong>₹' + p.offer_price + '</strong>' : '₹' + p.price) + '</span>' +
+            '<span class="upcoming-price">' + (p.offer_price ? '<s>â‚¹' + p.price + '</s> <strong>â‚¹' + p.offer_price + '</strong>' : 'â‚¹' + p.price) + '</span>' +
             '<span class="upcoming-when" id="ucd-' + p.id + '">--d --h --m --s</span>' +
-            '<a href="/public/prebook.html?product=' + p.id + '" class="btn" style="margin-top:8px;display:inline-block;padding:8px 16px;font-size:13px;">📅 Pre-Book Now</a>' +
+            '<a href="/public/prebook.html?product=' + p.id + '" class="btn" style="margin-top:8px;display:inline-block;padding:8px 16px;font-size:13px;">ðŸ“… Pre-Book Now</a>' +
             '</div></div>';
         }).join('') + '</div>';
 
@@ -223,7 +223,7 @@
         body.innerHTML = offers.map(o => `
           <a href="/public/checkout.html?product=${o.id}" class="offer-popup-item">
             <span class="offer-popup-name">${o.name}</span>
-            <span class="offer-popup-price"><s>₹${o.price}</s> <strong>₹${o.offer_price}</strong></span>
+            <span class="offer-popup-price"><s>â‚¹${o.price}</s> <strong>â‚¹${o.offer_price}</strong></span>
             ${o.offer_note ? `<span class="offer-popup-note">${o.offer_note}</span>` : ''}
           </a>
         `).join('');

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -41,22 +41,22 @@
 <body>
   <div class="admin-layout">
     <div class="sidebar">
-      <h3>🌸 Mellowluv</h3>
-      <a href="/admin/dashboard.html">📊 Dashboard</a>
-      <a href="/admin/verify.html">✅ Verify Payments</a>
-      <a href="/admin/orders.html">📦 Orders</a>
-      <a href="/admin/inventory.html">🏷️ Inventory</a>
-      <a href="/admin/loyalty.html" class="active">⭐ Loyalty</a>
-      <a href="/admin/settings.html">⚙️ Settings</a>
-      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
+      <h3>ðŸŒ¸ Mellowluv</h3>
+      <a href="/admin/dashboard.html">ðŸ“Š Dashboard</a>
+      <a href="/admin/verify.html">âœ… Verify Payments</a>
+      <a href="/admin/orders.html">ðŸ“¦ Orders</a>
+      <a href="/admin/inventory.html">ðŸ·ï¸ Inventory</a>
+      <a href="/admin/loyalty.html" class="active">â­ Loyalty</a>
+      <a href="/admin/settings.html">âš™ï¸ Settings</a>
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">ðŸª Back to Store</a>
     </div>
     <div class="main-content">
-      <h1>⭐ Loyalty <span>Management</span></h1>
+      <h1>â­ Loyalty <span>Management</span></h1>
       <div class="subtitle">Check loyalty scores and discount eligibility by phone number</div>
       <div class="search-box">
         <input type="tel" id="search-phone" placeholder="Enter phone number to search..." maxlength="10" onkeydown="if(event.key==='Enter')searchLoyalty()">
-        <button onclick="searchLoyalty()">🔍 Search</button>
-        <button onclick="loadAll()" style="background:white;border:2px solid #f5d6de;color:#b0878f;">📋 All</button>
+        <button onclick="searchLoyalty()">ðŸ” Search</button>
+        <button onclick="loadAll()" style="background:white;border:2px solid #f5d6de;color:#b0878f;">ðŸ“‹ All</button>
       </div>
       <div id="loyalty-result"></div>
     </div>
@@ -77,17 +77,17 @@
         });
         if (!res.ok) { resultDiv.innerHTML = '<div class="empty-state">No customer found with this phone</div>'; return; }
         const d = await res.json();
-        const badge = d.discount_eligible ? '<span class="badge badge-ready">🎉 Discount Ready!</span>' : '<span class="badge badge-soon">' + d.orders_until_discount + ' order(s) to discount</span>';
-        const prebook = d.prebook_eligible ? '<span class="badge badge-ready">✅ Eligible</span>' : '<span class="badge badge-soon">🔒 Need ' + (3 - d.total_loyalty_score) + ' more</span>';
+        const badge = d.discount_eligible ? '<span class="badge badge-ready">ðŸŽ‰ Discount Ready!</span>' : '<span class="badge badge-soon">' + d.orders_until_discount + ' order(s) to discount</span>';
+        const prebook = d.prebook_eligible ? '<span class="badge badge-ready">âœ… Eligible</span>' : '<span class="badge badge-soon">ðŸ”’ Need ' + (3 - d.total_loyalty_score) + ' more</span>';
         resultDiv.innerHTML = '<div class="loyalty-card">' +
-          '<h3 style="margin:0 0 14px;color:#5a4a4a;">👤 ' + (d.name || 'Unknown') + '</h3>' +
-          '<div class="row"><span class="l">📞 Phone</span><span class="r">' + d.phone + '</span></div>' +
-          '<div class="row"><span class="l">⭐ Total Loyalty Score</span><span class="r">' + d.total_loyalty_score + '</span></div>' +
-          '<div class="row"><span class="l">🔄 Points Toward Next Discount</span><span class="r">' + d.points_toward_next_discount + '/4</span></div>' +
-          '<div class="row"><span class="l">🏷️ 50% Discount Eligibility</span><span class="r">' + badge + '</span></div>' +
-          '<div class="row"><span class="l">📅 Pre-Booking</span><span class="r">' + prebook + '</span></div>' +
-          '<div class="row"><span class="l">💰 Discount Used</span><span class="r">' + (d.discount_used || 0) + ' times</span></div>' +
-          '<div style="margin-top:14px;padding:12px;background:#fef4f6;border-radius:12px;font-size:13px;color:#b0878f;">🎁 Higher loyalty score = higher chances of winning freebies!</div>' +
+          '<h3 style="margin:0 0 14px;color:#5a4a4a;">ðŸ‘¤ ' + (d.name || 'Unknown') + '</h3>' +
+          '<div class="row"><span class="l">ðŸ“ž Phone</span><span class="r">' + d.phone + '</span></div>' +
+          '<div class="row"><span class="l">â­ Total Loyalty Score</span><span class="r">' + d.total_loyalty_score + '</span></div>' +
+          '<div class="row"><span class="l">ðŸ”„ Points Toward Next Discount</span><span class="r">' + d.points_toward_next_discount + '/4</span></div>' +
+          '<div class="row"><span class="l">ðŸ·ï¸ 50% Discount Eligibility</span><span class="r">' + badge + '</span></div>' +
+          '<div class="row"><span class="l">ðŸ“… Pre-Booking</span><span class="r">' + prebook + '</span></div>' +
+          '<div class="row"><span class="l">ðŸ’° Discount Used</span><span class="r">' + (d.discount_used || 0) + ' times</span></div>' +
+          '<div style="margin-top:14px;padding:12px;background:#fef4f6;border-radius:12px;font-size:13px;color:#b0878f;">ðŸŽ Higher loyalty score = higher chances of winning freebies!</div>' +
         '</div>';
         } catch (e) { resultDiv.innerHTML = '<div class="empty-state">Error: ' + e.message + '</div>'; }
     }
@@ -111,8 +111,8 @@
               '<td>' + (c.name || '-') + '</td>' +
               '<td><strong>' + c.loyalty_points + '</strong></td>' +
               '<td>' + (c.discount_used || 0) + '</td>' +
-              '<td>' + (c.loyalty_points > 0 && c.loyalty_points % 4 === 3 ? '🎉 Now!' : nextIn + ' order(s)') + '</td>' +
-              '<td>' + (prebookOk ? '✅' : '🔒') + '</td>' +
+              '<td>' + (c.loyalty_points > 0 && c.loyalty_points % 4 === 3 ? 'ðŸŽ‰ Now!' : nextIn + ' order(s)') + '</td>' +
+              '<td>' + (prebookOk ? 'âœ…' : 'ðŸ”’') + '</td>' +
             '</tr>';
           }).join('') + '</tbody></table>';
       } catch (e) { resultDiv.innerHTML = '<div class="empty-state">Error: ' + e.message + '</div>'; }
@@ -122,12 +122,12 @@
   </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/service-worker.js')}</script>
   <nav class="admin-bottom-nav">
-    <a href="/admin/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
-    <a href="/admin/verify.html"><span class="nav-icon">✅</span> Verify</a>
-    <a href="/admin/orders.html"><span class="nav-icon">📦</span> Orders</a>
-    <a href="/admin/inventory.html"><span class="nav-icon">🏷️</span> Inventory</a>
-    <a href="/admin/loyalty.html" class="active"><span class="nav-icon">⭐</span> Loyalty</a>
-    <a href="/admin/settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+    <a href="/admin/dashboard.html"><span class="nav-icon">ðŸ“Š</span> Dashboard</a>
+    <a href="/admin/verify.html"><span class="nav-icon">âœ…</span> Verify</a>
+    <a href="/admin/orders.html"><span class="nav-icon">ðŸ“¦</span> Orders</a>
+    <a href="/admin/inventory.html"><span class="nav-icon">ðŸ·ï¸</span> Inventory</a>
+    <a href="/admin/loyalty.html" class="active"><span class="nav-icon">â­</span> Loyalty</a>
+    <a href="/admin/settings.html"><span class="nav-icon">âš™ï¸</span> Settings</a>
   </nav>
   <div class="pull-hint">Pull down to refresh</div>
   <script src="/admin/admin-app.js"></script>

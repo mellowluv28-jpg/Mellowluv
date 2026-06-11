@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -14,16 +14,16 @@
 <body class="page-enter">
   <nav class="navbar">
     <div class="container">
-      <a href="/" class="logo"><span class="cat-icon">🐱</span> Mellowluv</a>
-      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
+      <a href="/" class="logo"><img src="/public/icons/logo.png" class="cat-icon" alt="Mellowluv" style="height:32px;width:auto;vertical-align:middle;border-radius:6px;"> Mellowluv</a>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">â˜°</button>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/public/thrift.html">Thrift Store</a></li>
         <li><a href="/public/jewelry.html">Mellowluv</a></li>
-        <li><a href="/public/cart.html">🛒 Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
-        <li><a href="/public/tracking.html">📦 Track</a></li>
-        <li><a href="/public/loyalty.html">⭐ Loyalty</a></li>
-        <li><a href="/public/how-to-purchase.html">📖 How to Buy</a></li>
+        <li><a href="/public/cart.html">ðŸ›’ Cart <span class="cart-badge" id="cart-badge">0</span></a></li>
+        <li><a href="/public/tracking.html">ðŸ“¦ Track</a></li>
+        <li><a href="/public/loyalty.html">â­ Loyalty</a></li>
+        <li><a href="/public/how-to-purchase.html">ðŸ“– How to Buy</a></li>
       </ul>
     </div>
     <div id="nav-overlay" onclick="toggleNav()"></div>
@@ -32,8 +32,8 @@
   <section class="checkout-section">
     <div class="container">
       <div class="payment-section animate-pop">
-        <h2>Order Placed! 🐱✨</h2>
-        <p>Yay! Your order has been received. <strong style="color:#d4808a;">👇 Scroll down to complete payment and upload screenshot!</strong></p>
+        <h2>Order Placed! ðŸ±âœ¨</h2>
+        <p>Yay! Your order has been received. <strong style="color:#d4808a;">ðŸ‘‡ Scroll down to complete payment and upload screenshot!</strong></p>
         <div class="order-number">Order #<span id="display-order-id"></span></div>
         <div class="amount" id="display-amount"></div>
         <div class="qr-container">
@@ -44,44 +44,44 @@
         </div>
 
         <div style="background:#e8f5e9;color:#2e7d32;border:2px solid #a5d6a7;border-radius:12px;padding:10px 12px;margin:12px 0;text-align:center;font-size:13px;font-weight:500;">
-          📱 Scan & pay — your Order <strong>#<span id="note-order-id2"></span></strong> is already in the note. Then upload screenshot below!
+          ðŸ“± Scan & pay â€” your Order <strong>#<span id="note-order-id2"></span></strong> is already in the note. Then upload screenshot below!
         </div>
 
         <div style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border:3px solid #e8a0b4;border-radius:16px;padding:20px;margin:12px 0;box-shadow:0 4px 20px rgba(232,160,180,0.15);">
-          <div style="font-size:16px;font-weight:800;color:#d4808a;margin-bottom:12px;text-align:center;">📸 STEP 2: UPLOAD PAYMENT SCREENSHOT</div>
+          <div style="font-size:16px;font-weight:800;color:#d4808a;margin-bottom:12px;text-align:center;">ðŸ“¸ STEP 2: UPLOAD PAYMENT SCREENSHOT</div>
           <div style="margin-bottom:10px;">
             <input type="file" id="screenshot-input" accept="image/*" style="width:100%;padding:14px;border:2px dashed #e8a0b4;border-radius:12px;font-size:14px;background:white;color:#5a4a4a;cursor:pointer;">
           </div>
-          <button class="btn-paid" id="upload-btn" onclick="uploadScreenshot()" style="width:100%;padding:16px;font-size:16px;">Submit Screenshot ✅</button>
+          <button class="btn-paid" id="upload-btn" onclick="uploadScreenshot()" style="width:100%;padding:16px;font-size:16px;">Submit Screenshot âœ…</button>
           <div id="upload-status" style="margin-top:10px;font-size:14px;text-align:center;"></div>
         </div>
-        <p class="note" style="color:#b5838d;font-size:13px;margin-top:0;">Your order will be confirmed after we verify your payment screenshot. You'll be notified on Instagram once verified 🐱</p>
+        <p class="note" style="color:#b5838d;font-size:13px;margin-top:0;">Your order will be confirmed after we verify your payment screenshot. You'll be notified on Instagram once verified ðŸ±</p>
 
         <div id="loyalty-success" style="display:none;margin-bottom:14px;background:#fff8e1;border:2px solid #ffe082;border-radius:12px;padding:12px;font-size:13px;color:#5a4a4a;"></div>
 
         <div id="contact-section" style="margin-top:25px; padding-top:20px; border-top:2px dashed #ffe4e1; text-align:center;">
-          <p style="color:#b5838d; font-size:13px; margin-bottom:8px;">📬 For any order queries, contact us:</p>
+          <p style="color:#b5838d; font-size:13px; margin-bottom:8px;">ðŸ“¬ For any order queries, contact us:</p>
           <p style="font-size:18px; font-weight:700; color:#e8a0b4;"><span id="contact-insta">Instagram - @mellowluvv_</span></p>
-          <p style="font-size:15px; color:#5a4a4a; font-weight:500;">✉️ nishthapanchal287@gmail.com</p>
+          <p style="font-size:15px; color:#5a4a4a; font-weight:500;">âœ‰ï¸ nishthapanchal287@gmail.com</p>
           <p style="font-size:14px; color:#5a4a4a; font-weight:500;">Store ran by <strong>Nishtha Panchal</strong></p>
-          <p style="color:#b5838d; font-size:12px; margin-top:10px;">📦 Tracking ID will be shared on Instagram as soon as your order is dispatched!</p>
+          <p style="color:#b5838d; font-size:12px; margin-top:10px;">ðŸ“¦ Tracking ID will be shared on Instagram as soon as your order is dispatched!</p>
         </div>
 
-        <p class="note" style="margin-top:10px;"><a href="/public/tracking.html" style="color:#c98a9a; font-weight:700;">📦 Track Your Order</a></p>
-        <p class="note" style="margin-top:10px;"><a href="/" style="color:#e8a0b4; font-weight:600;">← Back to Home</a></p>
+        <p class="note" style="margin-top:10px;"><a href="/public/tracking.html" style="color:#c98a9a; font-weight:700;">ðŸ“¦ Track Your Order</a></p>
+        <p class="note" style="margin-top:10px;"><a href="/" style="color:#e8a0b4; font-weight:600;">â† Back to Home</a></p>
       </div>
     </div>
   </section>
 
-  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
+  <div class="cat-deco">ðŸ± ðŸŒ¸ ðŸ± ðŸŒ¸ ðŸ±</div>
 
   <footer class="footer">
     <div class="container">
-      <div class="cat">🐱</div>
+      <div class="cat">ðŸ±</div>
       <div class="instagram">Instagram - @mellowluvv_</div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
-      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">📦 Track Order</a></p>
+      <p><a href="/public/tracking.html" style="color:#e8a0b4; text-decoration:underline;">ðŸ“¦ Track Order</a></p>
       <p>&copy; 2026 <span>Mellowluv</span>. All rights reserved.</p>
     </div>
   </footer>
@@ -91,7 +91,7 @@
     const params = new URLSearchParams(window.location.search);
     document.getElementById('qr-image').src = decodeURIComponent(params.get('qr') || '');
     document.getElementById('display-upi').textContent = decodeURIComponent(params.get('upi') || '');
-    document.getElementById('display-amount').textContent = '₹' + (params.get('amount') || '0');
+    document.getElementById('display-amount').textContent = 'â‚¹' + (params.get('amount') || '0');
     document.getElementById('display-order-id').textContent = params.get('order') || 'N/A';
     document.getElementById('note-order-id2').textContent = params.get('order') || 'N/A';
 
@@ -104,7 +104,7 @@
     if (loyaltyWillEarn > 0) {
       const el = document.getElementById('loyalty-success');
       el.style.display = 'block';
-      el.innerHTML = `<strong>⭐ Loyalty Points:</strong> You'll earn <strong>${loyaltyWillEarn}</strong> point${loyaltyWillEarn > 1 ? 's' : ''} from this order! 🎉<br><small style="color:#b0878f;">🎁 Higher loyalty = higher chances of winning freebies!</small>`;
+      el.innerHTML = `<strong>â­ Loyalty Points:</strong> You'll earn <strong>${loyaltyWillEarn}</strong> point${loyaltyWillEarn > 1 ? 's' : ''} from this order! ðŸŽ‰<br><small style="color:#b0878f;">ðŸŽ Higher loyalty = higher chances of winning freebies!</small>`;
     }
 
     const contactInsta = decodeURIComponent(params.get('ci') || '');
@@ -134,18 +134,18 @@
           });
           const data = await res.json();
           if (data.success) {
-            status.innerHTML = '<span style="color:#2e7d32;font-weight:600;">✅ Screenshot uploaded! We will verify and confirm your order shortly. 🐱💕</span>';
+            status.innerHTML = '<span style="color:#2e7d32;font-weight:600;">âœ… Screenshot uploaded! We will verify and confirm your order shortly. ðŸ±ðŸ’•</span>';
             btn.style.display = 'none';
             input.style.display = 'none';
           } else {
             status.innerHTML = '<span style="color:#d4808a;">Upload failed: ' + (data.error || 'Unknown error') + '</span>';
             btn.disabled = false;
-            btn.textContent = 'Submit Screenshot ✅';
+            btn.textContent = 'Submit Screenshot âœ…';
           }
         } catch {
           status.innerHTML = '<span style="color:#d4808a;">Network error. Try again or DM @mellowluvv_ on Instagram.</span>';
           btn.disabled = false;
-          btn.textContent = 'Submit Screenshot ✅';
+          btn.textContent = 'Submit Screenshot âœ…';
         }
       };
       reader.readAsDataURL(file);
