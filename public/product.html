@@ -135,11 +135,8 @@
     </div>
   </section>
 
-  <div class="cat-deco">🐱 🌸 🐱 🌸 🐱</div>
-
   <footer class="footer">
     <div class="container">
-      <div class="cat">🐱</div>
       <div class="instagram">Instagram - @mellowluvv_</div>
       <div class="email">nishthapanchal287@gmail.com</div>
       <p style="margin-top:6px;">Store ran by <strong>Nishtha Panchal</strong></p>
@@ -178,7 +175,7 @@
     async function loadProduct() {
       try {
         const res = await fetch('/api/products/' + productId);
-        if (!res.ok) { document.getElementById('product-content').innerHTML = '<div style="text-align:center;padding:60px 0;color:#b0878f;">Product not found 🐱</div>'; return; }
+        if (!res.ok) { document.getElementById('product-content').innerHTML = '<div style="text-align:center;padding:60px 0;color:#b0878f;">Product not found</div>'; return; }
         const p = await res.json();
 
         const images = [];
