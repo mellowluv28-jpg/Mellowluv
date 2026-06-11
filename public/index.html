@@ -277,10 +277,6 @@
         document.getElementById('guide-popup-overlay').classList.add('show');
       }, 1500);
     }
-      sessionStorage.setItem('guide_seen', '1');
-      document.getElementById('guide-popup').classList.remove('show');
-      document.getElementById('guide-popup-overlay').classList.remove('show');
-    }
     function dismissGuide() {
       sessionStorage.setItem('guide_seen', '1');
       document.getElementById('guide-popup').classList.remove('show');
