@@ -4,3 +4,5 @@ uploads/
 adorn-archive.db
 .DS_Store
 *.log
+
+.vercel

@@ -457,13 +457,13 @@ app.post('/api/admin/login', async (req, res) => {
 
 app.get('/api/admin/dashboard', adminAuth, async (req, res) => {
   const totalOrders = await queryOne("SELECT COUNT(*) as count FROM orders");
-  const totalRevenue = await queryOne("SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE payment_status = 'verified'");
+  const totalRevenue = await queryOne("SELECT COALESCE(SUM(total - shipping_charge), 0) as total FROM orders WHERE payment_status = 'verified'");
   const totalShipping = await queryOne("SELECT COALESCE(SUM(shipping_charge), 0) as total FROM orders WHERE payment_status = 'verified'");
   const paidOrders = await queryOne("SELECT COUNT(*) as count FROM orders WHERE payment_status = 'paid' OR payment_status = 'verified'");
   const unpaidOrders = await queryOne("SELECT COUNT(*) as count FROM orders WHERE payment_status = 'unpaid'");
   const orders = await query("SELECT * FROM orders ORDER BY created_at DESC LIMIT 5");
   const mostSold = await query("SELECT product_name, SUM(quantity) as total_qty FROM orders WHERE payment_status = 'verified' GROUP BY product_name ORDER BY total_qty DESC LIMIT 5");
-  const revenueData = await query("SELECT TO_CHAR(created_at, 'DD-MM') as date, SUM(total) as revenue FROM orders WHERE payment_status = 'verified' GROUP BY TO_CHAR(created_at, 'DD-MM') ORDER BY MIN(created_at) ASC LIMIT 30");
+  const revenueData = await query("SELECT TO_CHAR(created_at, 'DD-MM') as date, SUM(total - shipping_charge) as revenue FROM orders WHERE payment_status = 'verified' GROUP BY TO_CHAR(created_at, 'DD-MM') ORDER BY MIN(created_at) ASC LIMIT 30");
   const upcomingProducts = await query("SELECT * FROM products WHERE scheduled_at IS NOT NULL AND scheduled_at > NOW() ORDER BY scheduled_at ASC LIMIT 10");
   res.json({
     stats: {
@@ -478,7 +478,7 @@ app.get('/api/admin/dashboard', adminAuth, async (req, res) => {
 
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
   const totalOrders = await queryOne("SELECT COUNT(*) as count FROM orders");
-  const totalRevenue = await queryOne("SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE payment_status = 'verified'");
+  const totalRevenue = await queryOne("SELECT COALESCE(SUM(total - shipping_charge), 0) as total FROM orders WHERE payment_status = 'verified'");
   const totalShipping = await queryOne("SELECT COALESCE(SUM(shipping_charge), 0) as total FROM orders WHERE payment_status = 'verified'");
   const paidOrders = await queryOne("SELECT COUNT(*) as count FROM orders WHERE payment_status = 'paid' OR payment_status = 'verified'");
   const unpaidOrders = await queryOne("SELECT COUNT(*) as count FROM orders WHERE payment_status = 'unpaid'");
