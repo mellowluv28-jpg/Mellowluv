@@ -786,6 +786,11 @@ app.get('/api/products/:id', async (req, res) => {
   res.json({ ...product, is_live: !isScheduled });
 });
 
+app.get('/api/public/shipping', async (req, res) => {
+  const charge = parseFloat(await getSetting('shipping_charge')) || 50;
+  res.json({ shipping_charge: charge });
+});
+
 // --- Error handler ---
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err?.message || err);

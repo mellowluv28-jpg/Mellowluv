@@ -32,7 +32,7 @@ async function initCheckout() {
       document.getElementById('checkout-form').innerHTML = '<div class="loading">Product not found. <a href="/">Go back</a></div>';
       return;
     }
-    const shippingRes = await fetch('/api/admin/settings');
+    const shippingRes = await fetch('/api/public/shipping');
     try { const s = await shippingRes.json(); cachedShipping = parseFloat(s.shipping_charge) || 50; } catch { cachedShipping = 50; }
     updateSummary();
     document.querySelector('[name="quantity"]').addEventListener('input', () => updateSummary());
@@ -44,7 +44,7 @@ async function initCheckout() {
 
 async function renderCartCheckout() {
   if (cachedShipping === null) {
-    try { const r = await fetch('/api/admin/settings'); const s = await r.json(); cachedShipping = parseFloat(s.shipping_charge) || 50; } catch { cachedShipping = 50; }
+    try { const r = await fetch('/api/public/shipping'); const s = await r.json(); cachedShipping = parseFloat(s.shipping_charge) || 50; } catch { cachedShipping = 50; }
   }
   let shipping = cachedShipping;
 
@@ -60,7 +60,7 @@ function updateCartSummary(shipping) {
   if (!cartData) return;
   if (shipping === undefined) {
     if (cachedShipping !== null) { updateCartSummary(cachedShipping); return; }
-    fetch('/api/admin/settings').then(r => r.json()).then(s => { cachedShipping = parseFloat(s.shipping_charge) || 50; updateCartSummary(cachedShipping); });
+    fetch('/api/public/shipping').then(r => r.json()).then(s => { cachedShipping = parseFloat(s.shipping_charge) || 50; updateCartSummary(cachedShipping); });
     return;
   }
   const urgency = document.querySelector('[name="urgency"]')?.value || '';
@@ -92,7 +92,7 @@ function updateSummary() {
   const hasOffer = currentProduct.offer_price && currentProduct.offer_price > 0;
 
   if (cachedShipping === null) {
-    fetch('/api/admin/settings').then(r => r.json()).then(s => {
+    fetch('/api/public/shipping').then(r => r.json()).then(s => {
       cachedShipping = parseFloat(s.shipping_charge) || 50;
       updateSummary();
     });
