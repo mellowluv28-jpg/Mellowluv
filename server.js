@@ -231,8 +231,8 @@ app.post('/api/orders', async (req, res) => {
       allItems.push({ product, qty: item.qty, unitPrice, lineTotal, category });
     }
     let shipping = 0;
-    const cats = [...new Set(allItems.map(i => i.product.category))];
-    for (const cat of cats) {
+    const allCats = [...new Set(allItems.map(i => i.product.category))];
+    for (const cat of allCats) {
       const rate = await getShippingForCategory(cat === 'jewelry' ? 'mellowluv' : 'thrift');
       if (rate > shipping) shipping = rate;
     }
