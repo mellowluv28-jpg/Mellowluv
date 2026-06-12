@@ -284,12 +284,20 @@
       const imgFile = document.getElementById('prod-image').files[0];
       if (imgFile) formData.append('image', imgFile);
       const imgFiles = document.getElementById('prod-images').files;
+      let skippedImgs = 0;
       for (const f of imgFiles) {
+        if (!f.type.startsWith('image/')) { skippedImgs++; continue; }
         const compressed = await compressImage(f);
         formData.append('images', compressed || f);
       }
+      if (skippedImgs > 0 && window.adminToast) adminToast(skippedImgs + ' non-image file(s) skipped. Use Videos section for videos.', 'error');
       const vidFiles = document.getElementById('prod-videos').files;
-      for (const f of vidFiles) formData.append('videos', f);
+      let skippedVids = 0;
+      for (const f of vidFiles) {
+        if (!f.type.startsWith('video/')) { skippedVids++; continue; }
+        formData.append('videos', f);
+      }
+      if (skippedVids > 0 && window.adminToast) adminToast(skippedVids + ' non-video file(s) skipped.', 'error');
 
       if (id) {
         const previews = document.getElementById('image-previews');
@@ -306,7 +314,7 @@
         headers: { 'Authorization': 'Bearer ' + token },
         body: formData
       });
-      closeModal();
+      if (id) { closeModal(); } else { openAddModal(); }
       loadInventory();
     }
 

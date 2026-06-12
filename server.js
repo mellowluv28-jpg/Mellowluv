@@ -652,13 +652,14 @@ app.post('/api/admin/products', adminAuth, upload.fields([{ name: 'image', maxCo
   const parsedStock = parseInt(stock);
   if (isNaN(parsedStock) || parsedStock < 0) return res.status(400).json({ error: 'Valid non-negative stock is required' });
   let image = null;
-  if (req.files?.image?.[0]) {
+  if (req.files?.image?.[0] && req.files.image[0].mimetype.startsWith('image/')) {
     const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv', 'image');
     image = result.url;
   }
   let imagesArr = [];
   if (req.files?.images) {
     for (const f of req.files.images) {
+      if (!f.mimetype.startsWith('image/')) continue;
       const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'image');
       imagesArr.push(result.url);
     }
@@ -666,6 +667,7 @@ app.post('/api/admin/products', adminAuth, upload.fields([{ name: 'image', maxCo
   let videosArr = [];
   if (req.files?.videos) {
     for (const f of req.files.videos) {
+      if (!f.mimetype.startsWith('video/')) continue;
       const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'video');
       videosArr.push(result.url);
     }
@@ -689,7 +691,7 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
   const product = await queryOne('SELECT * FROM products WHERE id = $1', [req.params.id]);
   if (!product) return res.status(404).json({ error: 'Product not found' });
   let image = product.image;
-  if (req.files?.image?.[0]) {
+  if (req.files?.image?.[0] && req.files.image[0].mimetype.startsWith('image/')) {
     const result = await cloudinary.uploadBuffer(req.files.image[0].buffer, 'mellowluv', 'image');
     image = result.url;
   }
@@ -699,6 +701,7 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
   }
   if (req.files?.images) {
     for (const f of req.files.images) {
+      if (!f.mimetype.startsWith('image/')) continue;
       const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'image');
       imagesArr.push(result.url);
     }
@@ -709,6 +712,7 @@ app.put('/api/admin/products/:id', adminAuth, upload.fields([{ name: 'image', ma
   }
   if (req.files?.videos) {
     for (const f of req.files.videos) {
+      if (!f.mimetype.startsWith('video/')) continue;
       const result = await cloudinary.uploadBuffer(f.buffer, 'mellowluv', 'video');
       videosArr.push(result.url);
     }
