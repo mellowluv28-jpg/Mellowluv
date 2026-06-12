@@ -3,6 +3,49 @@ let cartData = null;
 let loyaltyData = null;
 let cachedShipping = null;
 
+async function lookupPincode(pincode) {
+  const statusEl = document.getElementById('pincode-status');
+  if (pincode.length !== 6) { statusEl.textContent = 'Enter 6 digits — city/state auto-fill when available'; statusEl.style.color = '#b5838d'; return; }
+  try {
+    const res = await fetch('https://api.postalpincode.in/pincode/' + pincode);
+    const data = await res.json();
+    if (data[0]?.Status === 'Success' && data[0].PostOffice?.length > 0) {
+      const po = data[0].PostOffice[0];
+      const cityInput = document.querySelector('[name="city"]');
+      const stateInput = document.querySelector('[name="state"]');
+      if (cityInput && !cityInput.value) cityInput.value = po.Division || po.District || po.Name;
+      if (stateInput && !stateInput.value) stateInput.value = po.State;
+      statusEl.textContent = '✅ Auto-filled from pincode';
+      statusEl.style.color = '#2e7d32';
+    } else {
+      statusEl.textContent = '⚠️ Pincode not found, enter city/state manually';
+      statusEl.style.color = '#d84315';
+    }
+  } catch {
+    statusEl.textContent = 'Could not auto-fill, enter city/state manually';
+    statusEl.style.color = '#b0878f';
+  }
+}
+
+function restoreAddress(phone) {
+  if (!phone || phone.length < 10) return;
+  const saved = localStorage.getItem('mellowluv_addr_' + phone);
+  if (!saved) return;
+  try {
+    const addr = JSON.parse(saved);
+    const fields = { address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode };
+    for (const [name, value] of Object.entries(fields)) {
+      const el = document.querySelector('[name="' + name + '"]');
+      if (el && !el.value) el.value = value || '';
+    }
+  } catch {}
+}
+
+function saveAddress(phone, address, city, state, pincode) {
+  if (!phone || phone.length < 10) return;
+  localStorage.setItem('mellowluv_addr_' + phone, JSON.stringify({ address, city, state, pincode }));
+}
+
 async function initCheckout() {
   const params = new URLSearchParams(window.location.search);
   const productId = params.get('product');
@@ -10,7 +53,22 @@ async function initCheckout() {
 
   document.querySelector('[name="phone"]')?.addEventListener('input', function() {
     checkLoyalty(this.value);
+    restoreAddress(this.value);
   });
+
+  document.querySelector('[name="pincode"]')?.addEventListener('input', function() {
+    lookupPincode(this.value);
+  });
+
+  const savedPhone = localStorage.getItem('mellowluv_last_phone');
+  if (savedPhone) {
+    const phoneInput = document.querySelector('[name="phone"]');
+    if (phoneInput && !phoneInput.value) {
+      phoneInput.value = savedPhone;
+      restoreAddress(savedPhone);
+      checkLoyalty(savedPhone);
+    }
+  }
 
   if (cartParam === '1') {
     const raw = localStorage.getItem('mellowluv_cart');
@@ -145,6 +203,8 @@ function validateForm(formData) {
   if (!/^[0-9]{6}$/.test(pincode)) { alert('Pincode must be exactly 6 digits.'); return false; }
   const instagram = formData.get('instagram');
   if (!instagram || !instagram.trim()) { alert('Instagram handle is required.'); return false; }
+  if (!formData.get('city')?.trim()) { alert('City is required.'); return false; }
+  if (!formData.get('state')?.trim()) { alert('State is required.'); return false; }
   return true;
 }
 
@@ -159,11 +219,16 @@ async function placeOrder(event) {
     phone: formData.get('phone'),
     instagram: formData.get('instagram'),
     address: formData.get('address'),
+    city: formData.get('city'),
+    state: formData.get('state'),
     pincode: formData.get('pincode'),
     urgency: formData.get('urgency'),
     aesthetics: formData.get('aesthetics'),
     extra_note: formData.get('extra_note')
   };
+
+  saveAddress(data.phone, data.address, data.city, data.state, data.pincode);
+  localStorage.setItem('mellowluv_last_phone', data.phone);
 
   if (cartData) {
     data.is_cart = true;

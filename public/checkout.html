@@ -55,12 +55,22 @@
             </div>
             <div class="form-group">
               <label>📍 Address *</label>
-              <textarea name="address" required placeholder="Street, area, landmark, city" minlength="5"></textarea>
+              <textarea name="address" required placeholder="Street, area, landmark" minlength="5"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div class="form-group">
+                <label>🏙️ City *</label>
+                <input type="text" name="city" required placeholder="City">
+              </div>
+              <div class="form-group">
+                <label>🗺️ State *</label>
+                <input type="text" name="state" required placeholder="State">
+              </div>
             </div>
             <div class="form-group">
               <label>📮 Pincode *</label>
               <input type="text" name="pincode" required placeholder="6-digit pincode" pattern="[0-9]{6}" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')" title="Enter exactly 6 digits">
-              <small style="color:#b5838d; font-size:11px;">Enter exactly 6 digits</small>
+              <small style="color:#b5838d; font-size:11px;" id="pincode-status">Enter exactly 6 digits — city/state auto-fill when available</small>
             </div>
             <div class="form-group">
               <label>🔢 Quantity *</label>
