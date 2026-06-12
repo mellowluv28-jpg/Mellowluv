@@ -57,8 +57,14 @@
             <input type="text" id="upi_name" placeholder="e.g. Mellowluv">
           </div>
           <div class="form-group">
-            <label>🚚 Shipping Charge (₹)</label>
-            <input type="number" id="shipping_charge" step="1" placeholder="e.g. 50">
+            <label>🚚 Thrift Shipping (₹)</label>
+            <input type="number" id="shipping_charge_thrift" step="1" placeholder="e.g. 70">
+            <small style="color:#b0878f;font-size:11px;">Shipping charge for Thrift Store products</small>
+          </div>
+          <div class="form-group">
+            <label>💎 Jewelry Shipping (₹)</label>
+            <input type="number" id="shipping_charge_jewelry" step="1" placeholder="e.g. 50">
+            <small style="color:#b0878f;font-size:11px;">Shipping charge for Mellowluv (Jewelry) products</small>
           </div>
           <hr style="border:none; border-top:2px solid #ffe8e4; margin:20px 0;">
           <div class="form-group">
@@ -101,6 +107,8 @@
         document.getElementById('upi_id').value = s.upi_id || '';
         document.getElementById('upi_name').value = s.upi_name || '';
         document.getElementById('shipping_charge').value = s.shipping_charge || '';
+        document.getElementById('shipping_charge_thrift').value = s.shipping_charge_thrift || '';
+        document.getElementById('shipping_charge_jewelry').value = s.shipping_charge_jewelry || '';
         document.getElementById('contact_instagram').value = s.contact_instagram || '';
         document.getElementById('ntfy_topic').value = s.ntfy_topic || '';
         document.getElementById('admin_username').value = s.admin_username || 'admin';
@@ -116,6 +124,8 @@
         upi_id: document.getElementById('upi_id').value,
         upi_name: document.getElementById('upi_name').value,
         shipping_charge: document.getElementById('shipping_charge').value,
+        shipping_charge_thrift: document.getElementById('shipping_charge_thrift').value,
+        shipping_charge_jewelry: document.getElementById('shipping_charge_jewelry').value,
         contact_instagram: ci,
         ntfy_topic: document.getElementById('ntfy_topic').value,
         admin_username: document.getElementById('admin_username').value || 'admin'

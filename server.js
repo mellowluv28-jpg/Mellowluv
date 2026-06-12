@@ -32,6 +32,8 @@ async function getSetting(key) {
   if (row) return row.value;
   const envMap = {
     shipping_charge: process.env.SHIPPING_CHARGE || '50',
+    shipping_charge_thrift: process.env.SHIPPING_CHARGE_THRIFT || '70',
+    shipping_charge_jewelry: process.env.SHIPPING_CHARGE_JEWELRY || '50',
     upi_id: process.env.UPI_ID || '8401535686@fam',
     upi_name: process.env.UPI_NAME || 'Mellowluv',
     contact_phone: process.env.CONTACT_PHONE || '8401535686',
@@ -41,6 +43,11 @@ async function getSetting(key) {
     ntfy_topic: process.env.NTFY_TOPIC || ''
   };
   return envMap[key] || null;
+}
+
+async function getShippingForCategory(category) {
+  if (category === 'thrift') return parseFloat(await getSetting('shipping_charge_thrift')) || 70;
+  return parseFloat(await getSetting('shipping_charge_jewelry')) || 50;
 }
 
 // --- SSE ---
@@ -175,10 +182,10 @@ app.post('/api/prebook', async (req, res) => {
   if (!product) return res.status(404).json({ error: 'Product not found' });
   if (!product.scheduled_at || new Date(product.scheduled_at) <= new Date()) return res.status(400).json({ error: 'This product is already available for regular purchase.' });
   const unitPrice = (product.offer_price && product.offer_price > 0) ? product.offer_price : product.price;
-  const shipping = parseFloat(await getSetting('shipping_charge'));
+  const category = product.category === 'jewelry' ? 'mellowluv' : 'thrift';
+  const shipping = await getShippingForCategory(category);
   const prebookCharge = 50;
   const total = unitPrice + prebookCharge + shipping;
-  const category = product.category === 'jewelry' ? 'mellowluv' : 'thrift';
   const result = await execute(
     "INSERT INTO orders (customer_name, phone, instagram, address, city, state, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied, is_prebook, loyalty_award, whatsapp_optin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', '', 1, $9, $10, $11, $12, $13, $14, 'unpaid', 'unverified', 0, 1, 2, $15)",
     [customer_name, phone, instagram || '', address, city || '', state || '', pincode, urgency || '', product_id, product.name, product.price, category, shipping, Math.round(total), whatsapp_optin ? 1 : 0]
@@ -211,7 +218,6 @@ app.post('/api/orders', async (req, res) => {
   if (is_cart && cart_items && cart_items.length > 0) {
     let extraCharge = 0;
     let totalBeforeExtra = 0;
-    let shipping = parseFloat(await getSetting('shipping_charge'));
     let allItems = [];
     for (const item of cart_items) {
       const product = await queryOne('SELECT * FROM products WHERE id = $1', [item.id]);
@@ -223,6 +229,12 @@ app.post('/api/orders', async (req, res) => {
       totalBeforeExtra += lineTotal;
       const category = product.category === 'jewelry' ? 'mellowluv' : 'thrift';
       allItems.push({ product, qty: item.qty, unitPrice, lineTotal, category });
+    }
+    let shipping = 0;
+    const cats = [...new Set(allItems.map(i => i.product.category))];
+    for (const cat of cats) {
+      const rate = await getShippingForCategory(cat === 'jewelry' ? 'mellowluv' : 'thrift');
+      if (rate > shipping) shipping = rate;
     }
 
     if (urgency === 'urgent') extraCharge += 50;
@@ -297,10 +309,10 @@ app.post('/api/orders', async (req, res) => {
   let extraCharge = 0;
   if (urgency === 'urgent') extraCharge += 50;
 
-  const shipping = parseFloat(await getSetting('shipping_charge'));
   const unitPrice = (product.offer_price && product.offer_price > 0) ? product.offer_price : product.price;
-  let total = (unitPrice * qty) + shipping + extraCharge;
   const category = product.category === 'jewelry' ? 'mellowluv' : 'thrift';
+  const shipping = await getShippingForCategory(category);
+  let total = (unitPrice * qty) + shipping + extraCharge;
 
   const loyaltyInfo = await getLoyaltyInfo(phone);
   let discountApplied = 0;
@@ -749,7 +761,7 @@ app.get('/api/admin/settings', adminAuth, async (req, res) => {
 });
 
 app.put('/api/admin/settings', adminAuth, async (req, res) => {
-  const allowed = ['upi_id', 'upi_name', 'shipping_charge', 'admin_username', 'admin_password', 'contact_phone', 'contact_instagram', 'ntfy_topic'];
+  const allowed = ['upi_id', 'upi_name', 'shipping_charge', 'shipping_charge_thrift', 'shipping_charge_jewelry', 'admin_username', 'admin_password', 'contact_phone', 'contact_instagram', 'ntfy_topic'];
   for (const [key, value] of Object.entries(req.body)) {
     if (allowed.includes(key)) {
       if (value === '' || value === null || value === undefined) {
@@ -791,8 +803,9 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 app.get('/api/public/shipping', async (req, res) => {
-  const charge = parseFloat(await getSetting('shipping_charge')) || 50;
-  res.json({ shipping_charge: charge });
+  const thrift = parseFloat(await getSetting('shipping_charge_thrift')) || 70;
+  const jewelry = parseFloat(await getSetting('shipping_charge_jewelry')) || 50;
+  res.json({ shipping_charge_thrift: thrift, shipping_charge_jewelry: jewelry });
 });
 
 // --- Error handler ---
