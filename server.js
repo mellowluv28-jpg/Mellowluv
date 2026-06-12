@@ -32,8 +32,8 @@ async function getSetting(key) {
   if (row) return row.value;
   const envMap = {
     shipping_charge: process.env.SHIPPING_CHARGE || '50',
-    shipping_charge_thrift: process.env.SHIPPING_CHARGE_THRIFT || '70',
-    shipping_charge_jewelry: process.env.SHIPPING_CHARGE_JEWELRY || '50',
+    shipping_charge_thrift: process.env.SHIPPING_CHARGE_THRIFT || '50',
+    shipping_charge_jewelry: process.env.SHIPPING_CHARGE_JEWELRY || '70',
     upi_id: process.env.UPI_ID || '8401535686@fam',
     upi_name: process.env.UPI_NAME || 'Mellowluv',
     contact_phone: process.env.CONTACT_PHONE || '8401535686',
@@ -46,8 +46,8 @@ async function getSetting(key) {
 }
 
 async function getShippingForCategory(category) {
-  if (category === 'thrift') return parseFloat(await getSetting('shipping_charge_thrift')) || 70;
-  return parseFloat(await getSetting('shipping_charge_jewelry')) || 50;
+  if (category === 'thrift') return parseFloat(await getSetting('shipping_charge_thrift')) || 50;
+  return parseFloat(await getSetting('shipping_charge_jewelry')) || 70;
 }
 
 // --- SSE ---
@@ -803,8 +803,8 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 app.get('/api/public/shipping', async (req, res) => {
-  const thrift = parseFloat(await getSetting('shipping_charge_thrift')) || 70;
-  const jewelry = parseFloat(await getSetting('shipping_charge_jewelry')) || 50;
+  const thrift = parseFloat(await getSetting('shipping_charge_thrift')) || 50;
+  const jewelry = parseFloat(await getSetting('shipping_charge_jewelry')) || 70;
   res.json({ shipping_charge_thrift: thrift, shipping_charge_jewelry: jewelry });
 });
 

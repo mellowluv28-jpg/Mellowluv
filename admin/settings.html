@@ -58,13 +58,13 @@
           </div>
           <div class="form-group">
             <label>🚚 Thrift Shipping (₹)</label>
-            <input type="number" id="shipping_charge_thrift" step="1" placeholder="e.g. 70">
-            <small style="color:#b0878f;font-size:11px;">Shipping charge for Thrift Store products</small>
+            <input type="number" id="shipping_charge_thrift" step="1" placeholder="e.g. 50">
+            <small style="color:#b0878f;font-size:11px;">Shipping charge for Thrift Store products (default ₹50)</small>
           </div>
           <div class="form-group">
             <label>💎 Jewelry Shipping (₹)</label>
-            <input type="number" id="shipping_charge_jewelry" step="1" placeholder="e.g. 50">
-            <small style="color:#b0878f;font-size:11px;">Shipping charge for Mellowluv (Jewelry) products</small>
+            <input type="number" id="shipping_charge_jewelry" step="1" placeholder="e.g. 70">
+            <small style="color:#b0878f;font-size:11px;">Shipping charge for Mellowluv (Jewelry) products (default ₹70)</small>
           </div>
           <hr style="border:none; border-top:2px solid #ffe8e4; margin:20px 0;">
           <div class="form-group">
@@ -106,7 +106,6 @@
         const s = await res.json();
         document.getElementById('upi_id').value = s.upi_id || '';
         document.getElementById('upi_name').value = s.upi_name || '';
-        document.getElementById('shipping_charge').value = s.shipping_charge || '';
         document.getElementById('shipping_charge_thrift').value = s.shipping_charge_thrift || '';
         document.getElementById('shipping_charge_jewelry').value = s.shipping_charge_jewelry || '';
         document.getElementById('contact_instagram').value = s.contact_instagram || '';
@@ -123,7 +122,6 @@
       const data = {
         upi_id: document.getElementById('upi_id').value,
         upi_name: document.getElementById('upi_name').value,
-        shipping_charge: document.getElementById('shipping_charge').value,
         shipping_charge_thrift: document.getElementById('shipping_charge_thrift').value,
         shipping_charge_jewelry: document.getElementById('shipping_charge_jewelry').value,
         contact_instagram: ci,

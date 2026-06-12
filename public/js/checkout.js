@@ -5,8 +5,8 @@ let cachedShippingThrift = null;
 let cachedShippingJewelry = null;
 
 function getShippingForCategory(category) {
-  if (category === 'thrift') return cachedShippingThrift || 70;
-  return cachedShippingJewelry || 50;
+  if (category === 'thrift') return cachedShippingThrift || 50;
+  return cachedShippingJewelry || 70;
 }
 
 function getMaxShippingForItems(items) {
@@ -23,12 +23,11 @@ async function fetchShipping() {
   try {
     const r = await fetch('/api/public/shipping');
     const s = await r.json();
-    cachedShippingThrift = parseFloat(s.shipping_charge_thrift) || 70;
-    cachedShippingJewelry = parseFloat(s.shipping_charge_jewelry) || 50;
-    return true;
+    cachedShippingThrift = parseFloat(s.shipping_charge_thrift) || 50;
+    cachedShippingJewelry = parseFloat(s.shipping_charge_jewelry) || 70;
   } catch {
-    cachedShippingThrift = 70;
-    cachedShippingJewelry = 50;
+    cachedShippingThrift = 50;
+    cachedShippingJewelry = 70;
     return false;
   }
 }
