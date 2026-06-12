@@ -155,7 +155,7 @@
   </div>
 
   <script>
-    const token = sessionStorage.getItem('admin_token');
+    const token = localStorage.getItem('admin_token');
     if (!token) window.location.href = '/admin/login.html';
 
     function switchDispatchTab(el) {
@@ -183,7 +183,7 @@
         const tbody = document.getElementById('orders-body');
         const paginator = document.getElementById('orders-paginator');
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
-        if (res.status === 401) { sessionStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
+        if (res.status === 401) { localStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
         const data = await res.json();
         if (!res.ok) { tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:#c62828;">API error: ' + (data.error || res.status) + '</td></tr>'; paginator.innerHTML = ''; return; }
         const orders = data.orders || [];
