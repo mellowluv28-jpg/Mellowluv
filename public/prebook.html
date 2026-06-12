@@ -126,7 +126,13 @@
           </div>
           <div class="form-group">
             <label>📍 Address *</label>
-            <textarea id="pb-address" required placeholder="Street, area, landmark" minlength="5"></textarea>
+          <div class="form-group">
+            <label>🏠 House / Building / Apartment *</label>
+            <input type="text" id="pb-house" required placeholder="e.g. Flat 4, Sunshine Apartments, 42" minlength="2">
+          </div>
+          <div class="form-group">
+            <label>📍 Street / Area / Landmark *</label>
+            <input type="text" id="pb-street" required placeholder="e.g. MG Road, near City Mall" minlength="2">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
             <div class="form-group">
@@ -201,7 +207,9 @@
       event.preventDefault();
       const name = document.getElementById('pb-name').value.trim();
       const phone = document.getElementById('pb-phone').value.trim();
-      const address = document.getElementById('pb-address').value.trim();
+      const house = document.getElementById('pb-house').value.trim();
+      const street = document.getElementById('pb-street').value.trim();
+      const address = house + ', ' + street;
       const city = document.getElementById('pb-city').value.trim();
       const state = document.getElementById('pb-state').value.trim();
       const pincode = document.getElementById('pb-pincode').value.trim();
@@ -210,7 +218,7 @@
       const aesthetics = document.getElementById('pb-aesthetics')?.value.trim() || '';
       const submitBtn = document.getElementById('pb-submit');
 
-      if (!name || !phone || !address || !city || !state || !pincode || !instagram) { alert('Please fill all fields'); return; }
+      if (!name || !phone || !house || !street || !city || !state || !pincode || !instagram) { alert('Please fill all fields'); return; }
       if (!/^[0-9]{10}$/.test(phone)) { alert('Phone number must be exactly 10 digits'); return; }
       if (!/^[0-9]{6}$/.test(pincode)) { alert('Pincode must be exactly 6 digits'); return; }
 

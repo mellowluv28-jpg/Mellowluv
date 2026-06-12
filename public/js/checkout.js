@@ -33,10 +33,17 @@ function restoreAddress(phone) {
   if (!saved) return;
   try {
     const addr = JSON.parse(saved);
-    const fields = { address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode };
+    const fields = { city: addr.city, state: addr.state, pincode: addr.pincode };
     for (const [name, value] of Object.entries(fields)) {
       const el = document.querySelector('[name="' + name + '"]');
       if (el && !el.value) el.value = value || '';
+    }
+    if (addr.address && addr.address.includes(', ')) {
+      const parts = addr.address.split(', ');
+      const houseEl = document.querySelector('[name="house"]');
+      const streetEl = document.querySelector('[name="street"]');
+      if (houseEl && !houseEl.value) houseEl.value = parts[0] || '';
+      if (streetEl && !streetEl.value) streetEl.value = parts.slice(1).join(', ') || '';
     }
   } catch {}
 }
@@ -203,6 +210,8 @@ function validateForm(formData) {
   if (!/^[0-9]{6}$/.test(pincode)) { alert('Pincode must be exactly 6 digits.'); return false; }
   const instagram = formData.get('instagram');
   if (!instagram || !instagram.trim()) { alert('Instagram handle is required.'); return false; }
+  if (!formData.get('house')?.trim()) { alert('House / Building / Apartment is required.'); return false; }
+  if (!formData.get('street')?.trim()) { alert('Street / Area / Landmark is required.'); return false; }
   if (!formData.get('city')?.trim()) { alert('City is required.'); return false; }
   if (!formData.get('state')?.trim()) { alert('State is required.'); return false; }
   return true;
@@ -218,7 +227,7 @@ async function placeOrder(event) {
     customer_name: formData.get('customer_name'),
     phone: formData.get('phone'),
     instagram: formData.get('instagram'),
-    address: formData.get('address'),
+    address: (formData.get('house') || '') + ', ' + (formData.get('street') || ''),
     city: formData.get('city'),
     state: formData.get('state'),
     pincode: formData.get('pincode'),
