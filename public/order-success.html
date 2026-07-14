@@ -34,22 +34,20 @@
     <div class="container">
       <div class="payment-section animate-pop">
         <h2>Order Placed! 🐱✨</h2>
-        <p>Yay! Your order has been received. <strong style="color:#d4808a;">👇 Scroll down to complete payment and upload screenshot!</strong></p>
+        <p>Yay! Your order has been received. <strong style="color:#d4808a;">👇 Scan the QR, pay, and upload screenshot below!</strong></p>
         <div class="order-number">Order #<span id="display-order-id"></span></div>
         <div class="amount" id="display-amount"></div>
-        <div class="qr-container">
-          <img id="qr-image" src="" alt="Scan to pay">
-        </div>
-        <div class="upi-details">
-          Pay to UPI ID: <strong id="display-upi"></strong>
-        </div>
-
-        <div style="background:#e8f5e9;color:#2e7d32;border:2px solid #a5d6a7;border-radius:12px;padding:10px 12px;margin:12px 0;text-align:center;font-size:13px;font-weight:500;">
-          📱 Scan & pay — your Order <strong>#<span id="note-order-id2"></span></strong> is already in the note. Then upload screenshot below!
-        </div>
-
         <div style="background:linear-gradient(135deg,#fce4ec,#fef4f6);border:3px solid #e8a0b4;border-radius:16px;padding:20px;margin:12px 0;box-shadow:0 4px 20px rgba(232,160,180,0.15);">
-          <div style="font-size:16px;font-weight:800;color:#d4808a;margin-bottom:12px;text-align:center;">📸 STEP 2: UPLOAD PAYMENT SCREENSHOT</div>
+          <div style="font-size:16px;font-weight:800;color:#d4808a;margin-bottom:12px;text-align:center;">📸 STEP 1: PAY & UPLOAD SCREENSHOT</div>
+          <div class="qr-container">
+            <img id="qr-image" src="" alt="Scan to pay">
+          </div>
+          <div class="upi-details">
+            Pay to UPI ID: <strong id="display-upi"></strong>
+          </div>
+          <div style="background:#e8f5e9;color:#2e7d32;border:2px solid #a5d6a7;border-radius:12px;padding:10px 12px;margin:12px 0;text-align:center;font-size:13px;font-weight:500;">
+            📱 Scan & pay — your Order <strong>#<span id="note-order-id2"></span></strong> is already in the note.
+          </div>
           <div style="margin-bottom:10px;">
             <input type="file" id="screenshot-input" accept="image/*" style="width:100%;padding:14px;border:2px dashed #e8a0b4;border-radius:12px;font-size:14px;background:white;color:#5a4a4a;cursor:pointer;">
           </div>
@@ -95,10 +93,6 @@
     document.getElementById('display-amount').textContent = '₹' + (params.get('amount') || '0');
     document.getElementById('display-order-id').textContent = params.get('order') || 'N/A';
     document.getElementById('note-order-id2').textContent = params.get('order') || 'N/A';
-
-    if (window.innerWidth <= 768) {
-      setTimeout(() => window.scrollTo({ top: 340, behavior: 'smooth' }), 800);
-    }
 
     const loyaltyPts = parseInt(params.get('lp') || '0');
     const loyaltyWillEarn = parseInt(params.get('lw') || '0');

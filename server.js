@@ -13,7 +13,6 @@ const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const sseClients = [];
-const adminSessions = new Map();
 const loginAttempts = new Map();
 const SESSION_DURATION = 4 * 60 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -51,11 +50,11 @@ async function getShippingForCategory(category) {
 }
 
 // --- SSE ---
-app.get('/api/admin/events', (req, res) => {
+app.get('/api/admin/events', async (req, res) => {
   const auth = req.headers.authorization || '';
   const token = (auth.startsWith('Bearer ') ? auth.split(' ')[1] : '') || req.query.token || '';
-  const session = adminSessions.get(token);
-  if (!session || Date.now() - session.createdAt > SESSION_DURATION) return res.status(401).json({ error: 'Unauthorized' });
+  const row = await queryOne('SELECT * FROM admin_sessions WHERE token = $1', [token]);
+  if (!row || Date.now() - new Date(row.created_at).getTime() > SESSION_DURATION) { res.status(401).json({ error: 'Unauthorized' }); return; }
   res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
   res.write('data: {"type":"connected"}\n\n');
   sseClients.push(res);
@@ -77,14 +76,14 @@ function parseOrderItems(order) {
   return [];
 }
 
-function adminAuth(req, res, next) {
+async function adminAuth(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized' });
   const token = auth.split(' ')[1];
-  const session = adminSessions.get(token);
-  if (!session) return res.status(401).json({ error: 'Unauthorized' });
-  if (Date.now() - session.createdAt > SESSION_DURATION) {
-    adminSessions.delete(token);
+  const row = await queryOne('SELECT * FROM admin_sessions WHERE token = $1', [token]);
+  if (!row) return res.status(401).json({ error: 'Unauthorized' });
+  if (Date.now() - new Date(row.created_at).getTime() > SESSION_DURATION) {
+    await execute('DELETE FROM admin_sessions WHERE token = $1', [token]);
     return res.status(401).json({ error: 'Session expired' });
   }
   next();
@@ -455,7 +454,7 @@ app.post('/api/admin/login', async (req, res) => {
   if (username === adminUser && password === adminPass) {
     loginAttempts.delete(username);
     const token = crypto.randomBytes(32).toString('hex');
-    adminSessions.set(token, { createdAt: Date.now() });
+    await execute('INSERT INTO admin_sessions (token, username) VALUES ($1, $2)', [token, username]);
     return res.json({ success: true, token });
   }
   attempts.count += 1;
@@ -541,6 +540,23 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
   const total = (await queryOne(`SELECT COUNT(*) as count FROM (${sql}) sub`, params))?.count || 0;
   const rows = await query(sql + ` LIMIT $${pIdx++} OFFSET $${pIdx}`, [...params, limit, offset]);
   res.json({ orders: rows, total, page, pages: Math.ceil(total / limit) });
+});
+
+app.post('/api/admin/orders/manual', adminAuth, async (req, res) => {
+  const { customer_name, phone, address, city, state, pincode, urgency, quantity, product_name, aesthetics, extra_note, total, shipping_charge, payment_status, category } = req.body;
+  if (!customer_name || !customer_name.trim()) return res.status(400).json({ error: 'Customer name is required' });
+  if (!product_name || !product_name.trim()) return res.status(400).json({ error: 'Item name is required' });
+  const parsedTotal = parseFloat(total);
+  if (isNaN(parsedTotal)) return res.status(400).json({ error: 'Valid total amount is required' });
+  const qty = parseInt(quantity) || 1;
+  const shipping = parseFloat(shipping_charge) || 0;
+  const cat = category === 'jewelry' ? 'mellowluv' : (category === 'thrift' ? 'thrift' : 'mixed');
+  const payStatus = payment_status === 'verified' ? 'verified' : 'unpaid';
+  const result = await execute(
+    "INSERT INTO orders (customer_name, phone, instagram, address, city, state, pincode, urgency, aesthetics, extra_note, quantity, product_id, product_name, product_price, product_category, shipping_charge, total, payment_status, tracking_status, discount_applied, whatsapp_optin) VALUES ($1, $2, '', $3, $4, $5, $6, $7, $8, $9, $10, 0, $11, 0, $12, $13, $14, $15, 'unverified', 0, 0)",
+    [customer_name.trim(), phone || '', address || '', city || '', state || '', pincode || '', urgency || '', aesthetics || '', extra_note || '', qty, product_name.trim(), cat, shipping, Math.round(parsedTotal), payStatus]
+  );
+  res.json({ success: true, order_id: result.lastInsertRowid });
 });
 
 app.get('/api/admin/verify', adminAuth, async (req, res) => {
@@ -808,6 +824,59 @@ app.get('/api/public/shipping', async (req, res) => {
   res.json({ shipping_charge_thrift: thrift, shipping_charge_jewelry: jewelry });
 });
 
+// --- Batches ---
+app.get('/api/admin/batches', adminAuth, async (req, res) => {
+  const batches = await query('SELECT b.*, (SELECT COUNT(*) FROM orders o WHERE o.batch_id = b.id) as order_count FROM batches b ORDER BY b.created_at DESC');
+  res.json(batches);
+});
+
+app.post('/api/admin/batches', adminAuth, async (req, res) => {
+  const { name } = req.body;
+  if (!name || !name.trim()) return res.status(400).json({ error: 'Batch name is required' });
+  const result = await execute('INSERT INTO batches (name) VALUES ($1)', [name.trim()]);
+  const batch = await queryOne('SELECT * FROM batches WHERE id = $1', [result.lastInsertRowid]);
+  res.json(batch);
+});
+
+app.put('/api/admin/batches/:id', adminAuth, async (req, res) => {
+  const { name } = req.body;
+  if (!name || !name.trim()) return res.status(400).json({ error: 'Batch name is required' });
+  await execute('UPDATE batches SET name = $1 WHERE id = $2', [name.trim(), req.params.id]);
+  res.json({ success: true });
+});
+
+app.delete('/api/admin/batches/:id', adminAuth, async (req, res) => {
+  await execute('UPDATE orders SET batch_id = NULL WHERE batch_id = $1', [req.params.id]);
+  await execute('DELETE FROM batches WHERE id = $1', [req.params.id]);
+  res.json({ success: true });
+});
+
+app.get('/api/admin/batches/:id/orders', adminAuth, async (req, res) => {
+  const { page = 1, limit = 20 } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const orders = await query('SELECT * FROM orders WHERE batch_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3', [req.params.id, parseInt(limit), offset]);
+  const total = await queryOne('SELECT COUNT(*) as count FROM orders WHERE batch_id = $1', [req.params.id]);
+  res.json({ orders, total: parseInt(total.count), page: parseInt(page), pages: Math.ceil(parseInt(total.count) / parseInt(limit)) });
+});
+
+app.post('/api/admin/batches/:id/orders', adminAuth, async (req, res) => {
+  const { order_ids } = req.body;
+  if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) return res.status(400).json({ error: 'order_ids array is required' });
+  for (const oid of order_ids) {
+    await execute('UPDATE orders SET batch_id = $1 WHERE id = $2 AND (batch_id IS NULL OR batch_id != $1)', [req.params.id, oid]);
+  }
+  res.json({ success: true });
+});
+
+app.delete('/api/admin/batches/:id/orders', adminAuth, async (req, res) => {
+  const { order_ids } = req.body;
+  if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) return res.status(400).json({ error: 'order_ids array is required' });
+  for (const oid of order_ids) {
+    await execute('UPDATE orders SET batch_id = NULL WHERE id = $1 AND batch_id = $2', [oid, req.params.id]);
+  }
+  res.json({ success: true });
+});
+
 // --- Error handler ---
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err?.message || err);
@@ -815,11 +884,20 @@ app.use((err, req, res, next) => {
 });
 
 // --- Start ---
-async function start() {
+async function runMigrations() {
   try {
     await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT DEFAULT ''");
     await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS state TEXT DEFAULT ''");
+    await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS whatsapp_optin BOOLEAN DEFAULT false");
+    await execute("CREATE TABLE IF NOT EXISTS admin_sessions (token TEXT PRIMARY KEY, username TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+    await execute("CREATE TABLE IF NOT EXISTS batches (id SERIAL PRIMARY KEY, name TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+    await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS batch_id INTEGER REFERENCES batches(id) ON DELETE SET NULL");
   } catch (e) { console.error('Migration warning:', e.message); }
+}
+
+runMigrations().catch(e => console.error('Migration failed:', e.message || e));
+
+async function start() {
   app.listen(PORT, () => {
     console.log(`Mellowluv running at http://localhost:${PORT}`);
   });

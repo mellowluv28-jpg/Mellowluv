@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="manifest" href="/admin/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batches - Mellowluv Admin</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link rel="stylesheet" href="/admin/admin-app.css">
+  <style>
+    .admin-layout { display: flex; }
+    .sidebar { width: 240px; background: linear-gradient(180deg, #fef4f6, #fce4ec); min-height: 100vh; padding: 30px 0; border-right: 2px solid #f5d6de; }
+    .sidebar h3 { color: #e8a0b4; padding: 0 20px; margin-bottom: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+    .sidebar a { display: block; padding: 12px 20px; color: #b0878f; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; font-weight: 500; }
+    .sidebar a:hover, .sidebar a.active { background: rgba(232,160,180,0.1); color: #e8a0b4; border-left-color: #e8a0b4; }
+    .main-content { flex: 1; padding: 30px; background: #fffbfb; }
+    .main-content h1 { font-size: 26px; margin-bottom: 20px; color: #5a4a4a; }
+    .batch-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .batch-pill { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 2px solid #f5d6de; background: white; color: #b0878f; transition: all 0.2s; }
+    .batch-pill:hover { background: #fff5f5; }
+    .batch-pill.active { background: linear-gradient(135deg, #fce4ec, #fef4f6); color: #d4808a; border-color: #e8a0b4; box-shadow: 0 2px 8px rgba(232,160,180,0.15); }
+    .batch-pill .count { font-size: 11px; opacity: 0.7; }
+    .btn-batch { padding: 8px 18px; border: 2px solid #e8a0b4; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; background: white; color: #d4808a; transition: all 0.2s; }
+    .btn-batch:hover { background: linear-gradient(135deg, #fce4ec, #fef4f6); }
+    .orders-table-wrap { background: white; border-radius: 18px; box-shadow: 0 2px 20px rgba(232,160,180,0.08); border: 2px solid #f5d6de; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 15px; text-align: left; font-size: 13px; border-bottom: 1px solid #ffe8e4; }
+    th { background: linear-gradient(135deg, #fff5f5, #fffbe6); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; color: #b0878f; }
+    tr:hover { background: #fffdfc; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .badge-pending { background: #fff3e0; color: #e65100; }
+    .badge-confirmed { background: #e3f2fd; color: #1565c0; }
+    .badge-completed { background: #e8f5e9; color: #2e7d32; }
+    .badge-cancelled { background: #ffebee; color: #c62828; }
+    .badge-unpaid { background: #fce4ec; color: #880e4f; }
+    .badge-paid { background: #fff8e1; color: #f57f17; }
+    .badge-verified { background: #e8f5e9; color: #1b5e20; }
+    select.status-select { padding: 5px 8px; border: 2px solid #f5d6de; border-radius: 8px; font-size: 12px; background: white; color: #5a4a4a; }
+    .order-detail { display: none; background: #fffdfc; padding: 20px; border-radius: 12px; margin-top: 8px; font-size: 13px; border: 1px solid #ffe8e4; }
+    .order-detail.show { display: block; }
+    .order-detail strong { color: #5a4a4a; }
+    .toggle-detail { cursor: pointer; color: #e8a0b4; font-size: 12px; font-weight: 600; transition: transform 0.3s; display: inline-block; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #b0878f; }
+    .empty-state p { font-size: 14px; margin-top: 10px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(90,74,74,0.3); align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
+    .modal.show { display: flex; }
+    .modal-content { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; max-height: 80vh; overflow-y: auto; border: 2px solid #f5d6de; animation: pop 0.3s ease; }
+    .modal-content h2 { margin-bottom: 16px; color: #5a4a4a; }
+    .modal-content .close { float: right; font-size: 24px; cursor: pointer; color: #d4a0a0; }
+    .modal-order-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #ffe8e4; }
+    .modal-order-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #d4808a; }
+    .modal-order-item .oi-name { font-weight: 600; color: #5a4a4a; font-size: 13px; }
+    .modal-order-item .oi-meta { font-size: 11px; color: #b0878f; }
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; display: flex; gap: 5px; padding: 15px; overflow-x: auto; }
+      .sidebar h3 { display: none; }
+      .sidebar a { padding: 8px 12px; font-size: 12px; border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+      .main-content { padding: 15px; }
+      .main-content h1 { font-size: 20px; }
+      .orders-table-wrap { overflow-x: auto; }
+      .orders-table-wrap table { min-width: 650px; }
+      th, td { padding: 8px 8px; font-size: 11px; white-space: nowrap; }
+      .order-detail { padding: 12px; }
+      .order-detail > div > div { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="sidebar">
+      <h3>🌸 Mellowluv</h3>
+      <a href="/admin/dashboard.html">📊 Dashboard</a>
+      <a href="/admin/verify.html">✅ Verify Payments</a>
+      <a href="/admin/orders.html">📦 Orders</a>
+      <a href="/admin/batches.html" class="active">📦📦 Batches</a>
+      <a href="/admin/inventory.html">🏷️ Inventory</a>
+      <a href="/admin/loyalty.html">⭐ Loyalty</a>
+      <a href="/admin/settings.html">⚙️ Settings</a>
+      <a href="/" style="margin-top:40px; color:#d4808a; font-weight:700;">🏪 Back to Store</a>
+    </div>
+    <div class="main-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <h1>📦📦 Batches</h1>
+      </div>
+      <div class="batch-pills" id="batch-pills"></div>
+      <div id="batch-orders-area"></div>
+    </div>
+  </div>
+
+  <!-- Add Orders Modal -->
+  <div class="modal" id="add-orders-modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAddOrdersModal()">&times;</span>
+      <h2 id="add-orders-title">Add Orders to Batch</h2>
+      <div id="add-orders-list" style="margin-bottom:16px;"></div>
+      <button class="btn-batch" onclick="confirmAddOrders()" style="width:100%;padding:12px;font-size:14px;">Add Selected Orders</button>
+    </div>
+  </div>
+
+  <!-- Move Order Modal -->
+  <div class="modal" id="move-modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeMoveModal()">&times;</span>
+      <h2>Move Order to Another Batch</h2>
+      <p id="move-order-info" style="color:#b0878f;font-size:13px;margin-bottom:12px;"></p>
+      <div id="move-batch-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('admin_token');
+    if (!token) window.location.href = '/admin/login.html';
+    let selectedBatchId = null;
+    let currentPage = 1;
+
+    async function loadBatches() {
+      try {
+        const res = await fetch('/api/admin/batches', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.status === 401) { localStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
+        const batches = await res.json();
+        const pills = document.getElementById('batch-pills');
+        let html = '<button class="btn-batch" onclick="createBatch()">+ New Batch</button>';
+        for (const b of batches) {
+          const active = selectedBatchId === b.id ? 'active' : '';
+          html += `<button class="batch-pill ${active}" onclick="selectBatch(${b.id})">${b.name} <span class="count">(${b.order_count || 0})</span></button>`;
+        }
+        if (batches.length === 0) {
+          html += '<span style="color:#b0878f;font-size:13px;">No batches yet. Create one to start organizing orders.</span>';
+        }
+        pills.innerHTML = html;
+        if (!selectedBatchId && batches.length > 0) {
+          selectBatch(batches[0].id);
+        } else if (batches.length === 0) {
+          document.getElementById('batch-orders-area').innerHTML = '<div class="empty-state"><div style="font-size:48px;">📦📦</div><p>Create a batch to start organizing your orders.</p></div>';
+        }
+      } catch {
+        document.getElementById('batch-pills').innerHTML = '<span style="color:#c62828;">Failed to load batches</span>';
+      }
+    }
+
+    async function createBatch() {
+      const name = prompt('Enter batch name:');
+      if (!name || !name.trim()) return;
+      await fetch('/api/admin/batches', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() })
+      });
+      loadBatches();
+    }
+
+    function deleteBatch(id) {
+      if (!confirm('Delete this batch? Orders in it will NOT be deleted, just ungrouped.')) return;
+      fetch('/api/admin/batches/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(() => { if (selectedBatchId === id) selectedBatchId = null; loadBatches(); });
+    }
+
+    function renameBatch(id) {
+      const name = prompt('New batch name:');
+      if (!name || !name.trim()) return;
+      fetch('/api/admin/batches/' + id, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() })
+      }).then(() => loadBatches());
+    }
+
+    async function selectBatch(id) {
+      selectedBatchId = id;
+      currentPage = 1;
+      document.querySelectorAll('.batch-pill').forEach(p => p.classList.remove('active'));
+      const activePill = [...document.querySelectorAll('.batch-pill')].find(p => p.onclick && p.onclick.toString().includes(id));
+      loadBatchOrders();
+      loadBatches();
+    }
+
+    async function loadBatchOrders() {
+      const area = document.getElementById('batch-orders-area');
+      if (!selectedBatchId) { area.innerHTML = '<div class="empty-state"><p>Select a batch to view its orders.</p></div>'; return; }
+      try {
+        const res = await fetch('/api/admin/batches/' + selectedBatchId + '/orders?page=' + currentPage + '&limit=20', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.status === 401) { localStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
+        const data = await res.json();
+        const orders = data.orders || [];
+        const total = data.total || 0;
+        const pages = data.pages || 1;
+
+        if (orders.length === 0) {
+          area.innerHTML = `<div class="empty-state"><div style="font-size:48px;">📦</div><p>This batch is empty.</p><button class="btn-batch" onclick="openAddOrdersModal()">+ Add Orders</button></div>`;
+          return;
+        }
+
+        let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="color:#b0878f;font-size:13px;">${total} order(s) in this batch</span>
+          <div><button class="btn-batch" onclick="openAddOrdersModal()">+ Add Orders</button> <button class="btn-batch" onclick="renameBatch(${selectedBatchId})" style="border-color:#c98a9a;color:#c98a9a;">✏️ Rename</button> <button class="btn-batch" onclick="deleteBatch(${selectedBatchId})" style="border-color:#c62828;color:#c62828;">🗑️ Delete Batch</button></div>
+        </div>`;
+
+        html += `<div class="orders-table-wrap"><table><thead><tr>
+          <th>ID</th><th>Customer</th><th>📦 Tracking</th><th>📸 Instagram</th><th>Product</th><th>Urgency</th><th>Amount</th><th>Status</th><th>Payment</th><th>Date</th><th></th><th></th><th></th>
+        </tr></thead><tbody>`;
+
+        html += orders.map(o => {
+          const d = new Date(o.created_at);
+          const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          return `
+          <tr>
+            <td>#${o.id}</td>
+            <td><strong>${o.customer_name}</strong></td>
+            <td>
+              <select class="status-select" style="font-size:11px;padding:3px 6px;" onchange="batchRowTrackingChange(${o.id}, this.value)">
+                <option value="unverified" ${o.tracking_status === 'unverified' ? 'selected' : ''}>🔴 Unverified</option>
+                <option value="verified" ${o.tracking_status === 'verified' ? 'selected' : ''}>🟡 Verified</option>
+                ${o.product_category === 'thrift' ? '' : '<option value="in_making" ' + (o.tracking_status === 'in_making' ? 'selected' : '') + '>🟠 In Making</option>'}
+                <option value="dispatched" ${o.tracking_status === 'dispatched' ? 'selected' : ''}>🟢 Dispatched ✓</option>
+              </select>
+              <div id="batch-row-track-${o.id}" style="margin-top:4px;${o.tracking_status === 'dispatched' ? '' : 'display:none;'}">
+                <input type="text" id="batch-row-track-input-${o.id}" placeholder="Tracking ID" value="${o.tracking_id || ''}" style="width:90px;padding:3px 6px;border:2px solid #f5d6de;border-radius:6px;font-size:11px;">
+                <button onclick="saveBatchRowTrackId(${o.id})" style="padding:2px 6px;border:none;border-radius:4px;background:#e8a0b4;color:white;font-size:10px;cursor:pointer;">💾</button>
+              </div>
+            </td>
+            <td>${o.instagram ? '<a href="https://ig.me/m/' + o.instagram.replace('@', '') + '" target="_blank" style="color:#e1306c;font-weight:600;text-decoration:none;">📷 ' + o.instagram + '</a>' : '-'}</td>
+            <td>${o.product_name || '-'}</td>
+            <td>${o.urgency === 'urgent' ? '<span style="color:#d84315;font-weight:700;font-size:12px;">⚡ Urgent</span>' : '<span style="color:#b0878f;font-size:11px;">—</span>'}</td>
+            <td>₹${o.total}</td>
+            <td>
+              <select class="status-select" onchange="batchUpdateStatus(${o.id}, 'status', this.value)">
+                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Completed</option>
+                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+              </select>
+            </td>
+            <td><span class="badge badge-${o.payment_status}">${o.payment_status}</span></td>
+            <td style="font-size:12px;color:#b5838d;">${dateStr}<br><small>${timeStr}</small></td>
+            <td><span class="toggle-detail" onclick="toggleBatchDetail(${o.id})">▼</span></td>
+            <td><button onclick="openMoveModal(${o.id}, '${o.customer_name.replace(/'/g, "\\'")}')" style="padding:3px 8px;border:1px solid #e8a0b4;border-radius:8px;background:white;color:#d4808a;cursor:pointer;font-size:11px;">↗️</button></td>
+            <td><button onclick="removeFromBatch(${o.id})" style="padding:3px 8px;border:none;border-radius:8px;background:#ffebee;color:#c62828;cursor:pointer;font-size:11px;">✕</button></td>
+          </tr>
+          <tr id="batch-detail-${o.id}" class="order-detail">
+            <td colspan="13">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div><strong>📅 Ordered on:</strong> ${dateStr} at ${timeStr}</div>
+                <div><strong>📞 Phone:</strong> <a href="#" onclick="filterBatchByPhone('${o.phone}'); return false;" style="color:#e8a0b4;font-weight:600;text-decoration:underline;">${o.phone || '-'}</a> <a href="https://wa.me/91${o.phone}?text=Hi%20${encodeURIComponent(o.customer_name)}%2C%20your%20order%20%23${o.id}%20status%3A%20${o.status}" target="_blank" style="display:inline-block;padding:2px 10px;background:#25D366;color:white;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;margin-left:6px;">📲 WhatsApp</a></div>
+                <div><strong>📸 Instagram:</strong> ${o.instagram ? '<a href="https://ig.me/m/' + o.instagram.replace('@', '') + '" target="_blank" style="display:inline-block;padding:2px 10px;background:linear-gradient(135deg,#f58529,#dd2a7b);color:white;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;">📷 DM</a>' : '-'}</div>
+                <div><strong>📍 Address:</strong> ${o.address}</div>
+                <div><strong>🏙️ City:</strong> ${o.city || '-'}</div>
+                <div><strong>🗺️ State:</strong> ${o.state || '-'}</div>
+                <div><strong>📮 Pincode:</strong> ${o.pincode}</div>
+                <div><strong>🔢 Quantity:</strong> ${o.quantity || 1}</div>
+                <div><strong>⏰ Urgency:</strong> ${o.urgency || 'N/A'}</div>
+                <div><strong>🎨 Aesthetics:</strong> ${o.aesthetics || 'N/A'}</div>
+                <div><strong>💬 Note:</strong> ${o.extra_note || 'N/A'}</div>
+                <div><strong>🚚 Shipping:</strong> ₹${o.shipping_charge}</div>
+                <div><strong>💰 Total:</strong> ₹${o.total}</div>
+                <div><strong>💰 Payment:</strong>
+                  <select class="status-select" onchange="batchUpdateStatus(${o.id}, 'payment_status', this.value)">
+                    <option value="unpaid" ${o.payment_status === 'unpaid' ? 'selected' : ''}>Unpaid</option>
+                    <option value="paid" ${o.payment_status === 'paid' ? 'selected' : ''}>Paid (verify)</option>
+                    <option value="verified" ${o.payment_status === 'verified' ? 'selected' : ''}>Verified ✓</option>
+                  </select>
+                </div>
+                <div><strong>📦 Tracking:</strong>
+                  <select class="status-select" id="batch-track-status-${o.id}" onchange="batchTrackingChange(${o.id})">
+                    <option value="unverified" ${o.tracking_status === 'unverified' ? 'selected' : ''}>🔴 Unverified</option>
+                    <option value="verified" ${o.tracking_status === 'verified' ? 'selected' : ''}>🟡 Verified</option>
+                    ${o.product_category === 'thrift' ? '' : '<option value="in_making" ' + (o.tracking_status === 'in_making' ? 'selected' : '') + '>🟠 In Making</option>'}
+                    <option value="dispatched" ${o.tracking_status === 'dispatched' ? 'selected' : ''}>🟢 Dispatched ✓</option>
+                  </select>
+                  <div id="batch-track-id-wrap-${o.id}" style="margin-top:6px;${o.tracking_status === 'dispatched' ? '' : 'display:none;'}">
+                    <input type="text" id="batch-track-id-input-${o.id}" placeholder="India Post tracking ID" value="${o.tracking_id || ''}" style="padding:6px 10px;border:2px solid #f5d6de;border-radius:8px;font-size:12px;width:100%;">
+                    <button onclick="saveBatchTrackId(${o.id})" style="margin-top:4px;padding:4px 12px;border:none;border-radius:8px;background:#e8a0b4;color:white;font-size:11px;cursor:pointer;">💾 Save ID</button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+
+        html += '</tbody></table></div>';
+
+        if (pages > 1) {
+          html += '<div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:20px 0;">';
+          if (currentPage > 1) html += '<button onclick="batchGoPage(' + (currentPage - 1) + ')" style="padding:6px 14px;border:2px solid #f5d6de;border-radius:10px;background:white;color:#5a4a4a;cursor:pointer;">←</button>';
+          html += '<span style="color:#b0878f;font-size:13px;">Page ' + currentPage + ' of ' + pages + '</span>';
+          if (currentPage < pages) html += '<button onclick="batchGoPage(' + (currentPage + 1) + ')" style="padding:6px 14px;border:2px solid #f5d6de;border-radius:10px;background:white;color:#5a4a4a;cursor:pointer;">→</button>';
+          html += '</div>';
+        }
+
+        area.innerHTML = html;
+      } catch (e) {
+        area.innerHTML = '<div style="text-align:center;padding:20px;color:#c62828;">Error: ' + e.message + '</div>';
+      }
+    }
+
+    function batchGoPage(p) { currentPage = p; loadBatchOrders(); }
+
+    async function batchUpdateStatus(orderId, field, value) {
+      await fetch('/api/admin/orders/' + orderId, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+      });
+      loadBatchOrders();
+    }
+
+    function batchTrackingChange(orderId) {
+      const sel = document.getElementById('batch-track-status-' + orderId);
+      const wrap = document.getElementById('batch-track-id-wrap-' + orderId);
+      if (sel.value === 'dispatched') { wrap.style.display = 'block'; }
+      else { wrap.style.display = 'none'; batchUpdateTracking(orderId, sel.value, null); }
+    }
+
+    function batchRowTrackingChange(orderId, val) {
+      const wrap = document.getElementById('batch-row-track-' + orderId);
+      if (val === 'dispatched') { wrap.style.display = 'block'; }
+      else { wrap.style.display = 'none'; batchUpdateTracking(orderId, val, null); }
+    }
+
+    function saveBatchRowTrackId(orderId) {
+      const val = document.getElementById('batch-row-track-input-' + orderId).value.trim();
+      if (!val) { alert('Enter a tracking ID'); return; }
+      batchUpdateTracking(orderId, 'dispatched', val);
+    }
+
+    async function saveBatchTrackId(orderId) {
+      const sel = document.getElementById('batch-track-status-' + orderId);
+      const trackId = document.getElementById('batch-track-id-input-' + orderId).value.trim();
+      if (!trackId) { alert('Please enter a tracking ID'); return; }
+      await batchUpdateTracking(orderId, 'dispatched', trackId);
+    }
+
+    async function batchUpdateTracking(orderId, status, trackId) {
+      try {
+        const body = { tracking_status: status };
+        if (trackId) body.tracking_id = trackId;
+        await fetch('/api/admin/orders/' + orderId + '/tracking', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } catch {}
+      loadBatchOrders();
+    }
+
+    function toggleBatchDetail(id) {
+      document.getElementById('batch-detail-' + id).classList.toggle('show');
+    }
+
+    async function removeFromBatch(orderId) {
+      if (!confirm('Remove this order from the batch? Order data is NOT deleted.')) return;
+      await fetch('/api/admin/batches/' + selectedBatchId + '/orders', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_ids: [orderId] })
+      });
+      loadBatchOrders();
+      loadBatches();
+    }
+
+    // --- Add Orders Modal ---
+    async function openAddOrdersModal() {
+      document.getElementById('add-orders-title').textContent = 'Add Orders to Batch';
+      document.getElementById('add-orders-list').innerHTML = 'Loading orders...';
+      document.getElementById('add-orders-modal').classList.add('show');
+      try {
+        const res = await fetch('/api/admin/orders?limit=1000', { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await res.json();
+        const allOrders = data.orders || [];
+        const unbatched = allOrders.filter(o => !o.batch_id);
+        if (unbatched.length === 0) {
+          document.getElementById('add-orders-list').innerHTML = '<div style="text-align:center;padding:20px;color:#b0878f;">All orders are already in a batch.</div>';
+          return;
+        }
+        let html = '<p style="color:#b0878f;font-size:13px;margin-bottom:10px;">Select orders to add to this batch (' + unbatched.length + ' available):</p>';
+        html += '<div style="margin-bottom:10px;"><label style="font-size:12px;color:#b0878f;"><input type="checkbox" onchange="toggleAllAddOrders(this)"> Select all</label></div>';
+        for (const o of unbatched) {
+          html += `<div class="modal-order-item">
+            <input type="checkbox" class="add-order-cb" value="${o.id}">
+            <span class="oi-name">#${o.id} - ${o.customer_name}</span>
+            <span class="oi-meta">${o.product_name || '-'} | ₹${o.total} | ${o.payment_status}</span>
+          </div>`;
+        }
+        document.getElementById('add-orders-list').innerHTML = html;
+      } catch {
+        document.getElementById('add-orders-list').innerHTML = '<div style="color:#c62828;">Failed to load orders</div>';
+      }
+    }
+
+    function toggleAllAddOrders(el) {
+      document.querySelectorAll('.add-order-cb').forEach(cb => cb.checked = el.checked);
+    }
+
+    async function confirmAddOrders() {
+      const cbs = document.querySelectorAll('.add-order-cb:checked');
+      const order_ids = [...cbs].map(cb => parseInt(cb.value));
+      if (order_ids.length === 0) { alert('Select at least one order.'); return; }
+      await fetch('/api/admin/batches/' + selectedBatchId + '/orders', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_ids })
+      });
+      closeAddOrdersModal();
+      loadBatchOrders();
+      loadBatches();
+    }
+
+    function closeAddOrdersModal() {
+      document.getElementById('add-orders-modal').classList.remove('show');
+    }
+
+    // --- Move Order Modal ---
+    let moveOrderId = null;
+
+    async function openMoveModal(orderId, customerName) {
+      moveOrderId = orderId;
+      document.getElementById('move-order-info').textContent = 'Moving Order #' + orderId + ' (' + customerName + ')';
+      document.getElementById('move-modal').classList.add('show');
+      try {
+        const res = await fetch('/api/admin/batches', { headers: { 'Authorization': 'Bearer ' + token } });
+        const batches = await res.json();
+        const others = batches.filter(b => b.id !== selectedBatchId);
+        if (others.length === 0) {
+          document.getElementById('move-batch-list').innerHTML = '<div style="color:#b0878f;">No other batches to move to.</div>';
+          return;
+        }
+        document.getElementById('move-batch-list').innerHTML = others.map(b =>
+          `<button onclick="confirmMove(${b.id})" style="display:block;width:100%;padding:10px;margin:6px 0;border:2px solid #f5d6de;border-radius:10px;background:white;color:#5a4a4a;cursor:pointer;font-size:13px;font-weight:600;text-align:left;">📦 ${b.name} <span style="color:#b0878f;font-weight:400;">(${b.order_count || 0} orders)</span></button>`
+        ).join('');
+      } catch {
+        document.getElementById('move-batch-list').innerHTML = '<div style="color:#c62828;">Failed to load batches</div>';
+      }
+    }
+
+    async function confirmMove(targetBatchId) {
+      await fetch('/api/admin/batches/' + selectedBatchId + '/orders', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_ids: [moveOrderId] })
+      });
+      await fetch('/api/admin/batches/' + targetBatchId + '/orders', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_ids: [moveOrderId] })
+      });
+      closeMoveModal();
+      loadBatchOrders();
+      loadBatches();
+    }
+
+    function closeMoveModal() {
+      document.getElementById('move-modal').classList.remove('show');
+      moveOrderId = null;
+    }
+
+    function filterBatchByPhone(phone) {
+      // Just close modals and show the batch
+    }
+
+    loadBatches();
+  </script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/service-worker.js')}</script>
+  <nav class="admin-bottom-nav">
+    <a href="/admin/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/admin/verify.html"><span class="nav-icon">✅</span> Verify</a>
+    <a href="/admin/orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a href="/admin/batches.html" class="active"><span class="nav-icon">📦📦</span> Batches</a>
+    <a href="/admin/inventory.html"><span class="nav-icon">🏷️</span> Inventory</a>
+    <a href="/admin/loyalty.html"><span class="nav-icon">⭐</span> Loyalty</a>
+    <a href="/admin/settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+  </nav>
+  <div class="pull-hint">Pull down to refresh</div>
+  <script src="/admin/admin-app.js"></script>
+</body>
+</html>

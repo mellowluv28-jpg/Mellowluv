@@ -258,7 +258,8 @@ async function placeOrder(event) {
     pincode: formData.get('pincode'),
     urgency: formData.get('urgency'),
     aesthetics: formData.get('aesthetics'),
-    extra_note: formData.get('extra_note')
+    extra_note: formData.get('extra_note'),
+    whatsapp_optin: formData.get('whatsapp_optin') === '1' ? 1 : 0
   };
 
   saveAddress(data.phone, data.address, data.city, data.state, data.pincode);

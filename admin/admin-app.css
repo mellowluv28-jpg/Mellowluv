@@ -127,3 +127,7 @@
 
 /* Splash screen bg color matches manifest */
 body { background: #fffbfb; }
+
+/* Spinner */
+.spinner { width: 32px; height: 32px; border: 3px solid #f5d6de; border-top-color: #e8a0b4; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 10px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -86,6 +86,7 @@
       <a href="/admin/dashboard.html">📊 Dashboard</a>
       <a href="/admin/verify.html">✅ Verify Payments</a>
       <a href="/admin/orders.html">📦 Orders</a>
+      <a href="/admin/batches.html">📦📦 Batches</a>
       <a href="/admin/inventory.html" class="active">🏷️ Inventory</a>
       <a href="/admin/loyalty.html">⭐ Loyalty</a>
       <a href="/admin/settings.html">⚙️ Settings</a>
@@ -170,21 +171,36 @@
   <script>
     const token = localStorage.getItem('admin_token');
     if (!token) window.location.href = '/admin/login.html';
+    let isLoading = false;
+
+    function setLoading(btn, loading) {
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.textContent = loading ? (btn.dataset.loading || 'Loading...') : btn.dataset.original || btn.textContent;
+    }
 
     async function loadInventory() {
+      const grid = document.getElementById('inventory-grid');
       try {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#b0878f;"><div class="spinner"></div>Loading inventory...</div>';
         const res = await fetch('/api/admin/products', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (res.status === 401) { localStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
+        if (!res.ok) { throw new Error('Server returned ' + res.status); }
         const products = await res.json();
-        const grid = document.getElementById('inventory-grid');
+        if (!products || products.length === 0) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#b0878f;"><div style="font-size:48px;">📦</div><p>No products yet. Click + Add Product to start.</p></div>';
+          return;
+        }
         grid.innerHTML = products.map(p => {
           const catLabel = p.category === 'thrift' ? '🛍️ Thrift' : '💎 Mellowluv';
           const hasOffer = p.offer_price && p.offer_price > 0;
           const offerTag = hasOffer ? `<div style="font-size:11px;color:#d84315;font-weight:700;">🔥 Offer: ₹${p.offer_price}${p.offer_note ? ' — ' + p.offer_note : ''}</div>` : '';
           const isScheduled = p.scheduled_at && new Date(p.scheduled_at) > new Date();
           const schedTag = isScheduled ? `<div style="font-size:11px;color:#7fb87f;font-weight:700;">📅 Scheduled: ${new Date(p.scheduled_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</div>` : (p.scheduled_at ? `<div style="font-size:11px;color:#b5838d;font-weight:600;">✅ Drop live</div>` : '');
+          const imgStyle = p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center; background-color: #fef4f6;` : '';
           return `
             <div class="inv-card">
-              <div class="inv-img" style="${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}">${p.image ? '' : '📷'}</div>
+              <div class="inv-img" style="${imgStyle}">${p.image ? '' : '📷'}</div>
               <div class="inv-body">
                 <div class="inv-category">${catLabel}</div>
                 <div class="inv-name">${p.name}</div>
@@ -195,13 +211,16 @@
                 <div class="inv-actions">
                   <a href="/public/product.html?id=${p.id}" target="_blank" class="btn-sm" style="background:#e8f5e9;color:#2e7d32;display:inline-block;padding:5px 14px;border-radius:10px;text-decoration:none;font-size:12px;font-weight:600;">👁️ View</a>
                   <button class="btn-sm btn-edit" onclick="openEditModal(${p.id})">Edit</button>
-                  <button class="btn-sm btn-delete" onclick="deleteProduct(${p.id})">Delete</button>
+                  <button class="btn-sm btn-delete" onclick="deleteProduct(${p.id}, this)">Delete</button>
                 </div>
               </div>
             </div>
           `;
         }).join('');
-      } catch {}
+      } catch (e) {
+        console.error('loadInventory error:', e);
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#d84315;"><div style="font-size:48px;">😿</div><p>Failed to load inventory. <button onclick="loadInventory()" style="background:none;border:2px solid #e8a0b4;border-radius:10px;padding:8px 20px;color:#d4808a;cursor:pointer;font-weight:600;">Retry</button></p><p style="font-size:12px;color:#b0878f;">' + (e?.message || 'Unknown error') + '</p></div>';
+      }
     }
 
     function openAddModal() {
@@ -209,35 +228,43 @@
       document.getElementById('product-form').reset();
       document.getElementById('edit-id').value = '';
       document.getElementById('prod-scheduled-at').value = '';
+      document.getElementById('image-previews').innerHTML = '';
+      document.getElementById('video-previews').innerHTML = '';
       document.getElementById('product-modal').classList.add('show');
     }
 
     async function openEditModal(id) {
-      const res = await fetch('/api/products/' + id);
-      const p = await res.json();
-      document.getElementById('modal-title').textContent = 'Edit Product ✏️';
-      document.getElementById('edit-id').value = p.id;
-      document.getElementById('prod-name').value = p.name;
-      document.getElementById('prod-desc').value = p.description || '';
-      document.getElementById('prod-price').value = p.price;
-      document.getElementById('prod-category').value = p.category;
-      document.getElementById('prod-stock').value = p.stock;
-      document.getElementById('prod-offer-price').value = p.offer_price || '';
-      document.getElementById('prod-offer-note').value = p.offer_note || '';
-      document.getElementById('prod-scheduled-at').value = p.scheduled_at ? p.scheduled_at.slice(0, 16) : '';
-      document.getElementById('prod-image').value = '';
-      document.getElementById('prod-images').value = '';
-      let videosArr = [];
-      try { const v = JSON.parse(p.videos || '[]'); if (Array.isArray(v)) videosArr = v; } catch {}
-      document.getElementById('prod-videos').value = '';
-      document.getElementById('existing-videos-json').value = JSON.stringify(videosArr);
-      const vidPreviews = document.getElementById('video-previews');
-      vidPreviews.innerHTML = videosArr.map(v => '<div style="position:relative;width:80px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;background:#000;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;">▶</div>').join('');
-      let existingImgs = [];
-      try { const parsed = JSON.parse(p.images || '[]'); if (Array.isArray(parsed)) existingImgs = parsed; } catch {}
-      const previews = document.getElementById('image-previews');
-      previews.innerHTML = existingImgs.map(img => '<div style="position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;"><img src="' + img + '" style="width:100%;height:100%;object-fit:cover;"></div>').join('');
-      document.getElementById('product-modal').classList.add('show');
+      const btn = event?.target;
+      if (btn) { btn.disabled = true; btn.textContent = '...'; }
+      try {
+        const res = await fetch('/api/products/' + id);
+        if (!res.ok) { adminToast('Failed to load product', 'error'); if (btn) { btn.disabled = false; btn.textContent = 'Edit'; } return; }
+        const p = await res.json();
+        document.getElementById('modal-title').textContent = 'Edit Product ✏️';
+        document.getElementById('edit-id').value = p.id;
+        document.getElementById('prod-name').value = p.name;
+        document.getElementById('prod-desc').value = p.description || '';
+        document.getElementById('prod-price').value = p.price;
+        document.getElementById('prod-category').value = p.category;
+        document.getElementById('prod-stock').value = p.stock;
+        document.getElementById('prod-offer-price').value = p.offer_price || '';
+        document.getElementById('prod-offer-note').value = p.offer_note || '';
+        document.getElementById('prod-scheduled-at').value = p.scheduled_at ? p.scheduled_at.slice(0, 16) : '';
+        document.getElementById('prod-image').value = '';
+        document.getElementById('prod-images').value = '';
+        let videosArr = [];
+        try { const v = JSON.parse(p.videos || '[]'); if (Array.isArray(v)) videosArr = v; } catch {}
+        document.getElementById('prod-videos').value = '';
+        document.getElementById('existing-videos-json').value = JSON.stringify(videosArr);
+        document.getElementById('video-previews').innerHTML = videosArr.map(() => '<div style="position:relative;width:80px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;background:#000;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;">▶</div>').join('');
+        let existingImgs = [];
+        try { const parsed = JSON.parse(p.images || '[]'); if (Array.isArray(parsed)) existingImgs = parsed; } catch {}
+        document.getElementById('image-previews').innerHTML = existingImgs.map(img => '<div style="position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;border:2px solid #f5d6de;"><img src="' + img + '" style="width:100%;height:100%;object-fit:cover;"></div>').join('');
+        document.getElementById('product-modal').classList.add('show');
+      } catch {
+        adminToast('Error loading product', 'error');
+      }
+      if (btn) { btn.disabled = false; btn.textContent = 'Edit'; }
     }
 
     function closeModal() {
@@ -246,6 +273,7 @@
 
     function compressImage(file) {
       return new Promise(resolve => {
+        if (!file.type.startsWith('image/')) return resolve(null);
         const reader = new FileReader();
         reader.onload = function(e) {
           const img = new Image();
@@ -268,7 +296,11 @@
 
     async function saveProduct(event) {
       event.preventDefault();
+      if (isLoading) return;
+      isLoading = true;
       const btn = event.target.querySelector('.btn-submit');
+      const origText = btn.textContent;
+      btn.disabled = true;
       btn.textContent = 'Saving...';
       const id = document.getElementById('edit-id').value;
       const formData = new FormData();
@@ -290,14 +322,14 @@
         const compressed = await compressImage(f);
         formData.append('images', compressed || f);
       }
-      if (skippedImgs > 0 && window.adminToast) adminToast(skippedImgs + ' non-image file(s) skipped. Use Videos section for videos.', 'error');
+      if (skippedImgs > 0) adminToast(skippedImgs + ' non-image file(s) skipped. Use Videos section for videos.', 'error');
       const vidFiles = document.getElementById('prod-videos').files;
       let skippedVids = 0;
       for (const f of vidFiles) {
         if (!f.type.startsWith('video/')) { skippedVids++; continue; }
         formData.append('videos', f);
       }
-      if (skippedVids > 0 && window.adminToast) adminToast(skippedVids + ' non-video file(s) skipped.', 'error');
+      if (skippedVids > 0) adminToast(skippedVids + ' non-video file(s) skipped.', 'error');
 
       if (id) {
         const previews = document.getElementById('image-previews');
@@ -306,34 +338,67 @@
         formData.append('existing_images', JSON.stringify(existingUrls));
       }
 
-      const url = id ? '/api/admin/products/' + id : '/api/admin/products';
-      const method = id ? 'PUT' : 'POST';
-
-      await fetch(url, {
-        method,
-        headers: { 'Authorization': 'Bearer ' + token },
-        body: formData
-      });
-      if (id) { closeModal(); } else { openAddModal(); }
-      loadInventory();
+      try {
+        const url = id ? '/api/admin/products/' + id : '/api/admin/products';
+        const method = id ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+        if (!res.ok) { throw new Error('Save failed'); }
+        adminToast(id ? 'Product updated ✅' : 'Product added ✅', 'success');
+        if (id) { closeModal(); } else { openAddModal(); }
+        loadInventory();
+      } catch (e) {
+        adminToast('Failed to save product', 'error');
+      }
+      btn.disabled = false;
+      btn.textContent = origText;
+      isLoading = false;
     }
 
-    async function deleteProduct(id) {
-      if (!confirm('Delete this product? 🌸')) return;
-      await fetch('/api/admin/products/' + id, {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      loadInventory();
+    async function deleteProduct(id, btn) {
+      if (!confirm('Delete this product? This cannot be undone.')) return;
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        const res = await fetch('/api/admin/products/' + id, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) { throw new Error('Delete failed'); }
+        adminToast('Product deleted 🗑️', 'success');
+        loadInventory();
+      } catch {
+        adminToast('Failed to delete', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+      }
     }
 
     loadInventory();
+
+    function adminToast(msg, type) {
+      let t = document.getElementById('admin-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'admin-toast';
+        t.className = 'admin-toast';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.className = 'admin-toast show' + (type === 'error' ? ' error' : type === 'success' ? ' success' : '');
+      clearTimeout(t._hide);
+      t._hide = setTimeout(() => t.classList.remove('show'), 3000);
+    }
   </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/service-worker.js')}</script>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/service-worker.js')}</script>
   <nav class="admin-bottom-nav">
     <a href="/admin/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
     <a href="/admin/verify.html"><span class="nav-icon">✅</span> Verify</a>
     <a href="/admin/orders.html"><span class="nav-icon">📦</span> Orders</a>
+    <a href="/admin/batches.html"><span class="nav-icon">📦📦</span> Batches</a>
     <a href="/admin/inventory.html" class="active"><span class="nav-icon">🏷️</span> Inventory</a>
     <a href="/admin/loyalty.html"><span class="nav-icon">⭐</span> Loyalty</a>
     <a href="/admin/settings.html"><span class="nav-icon">⚙️</span> Settings</a>

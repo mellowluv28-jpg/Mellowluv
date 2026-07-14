@@ -83,6 +83,21 @@
       .toggle-detail { font-size: 16px; padding: 6px; }
       .sidebar a { font-size: 13px; padding: 10px 14px; }
     }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(90,74,74,0.3); align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
+    .modal.show { display: flex; }
+    .modal-content { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; border: 2px solid #f5d6de; animation: pop 0.3s ease; }
+    .modal-content h2 { margin-bottom: 16px; color: #5a4a4a; }
+    .modal-content .close { float: right; font-size: 24px; cursor: pointer; color: #d4a0a0; }
+    .modal-content .form-group { margin-bottom: 14px; }
+    .modal-content .form-group label { display: block; font-size: 12px; color: #b0878f; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .modal-content .form-group input, .modal-content .form-group textarea, .modal-content .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #f5d6de; border-radius: 12px; font-size: 14px; color: #5a4a4a; background: #fff8f9; font-family: inherit; box-sizing: border-box; }
+    .modal-content .form-group input:focus, .modal-content .form-group textarea:focus, .modal-content .form-group select:focus { outline: none; border-color: #e8a0b4; }
+    .modal-content .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-content .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #fce4ec, #fef4f6); border: 2px solid #e8a0b4; border-radius: 25px; font-size: 15px; font-weight: 700; color: #d4808a; cursor: pointer; }
+    .modal-content .btn-submit:hover { background: linear-gradient(135deg, #e8a0b4, #fce4ec); color: white; }
+    @media (max-width: 768px) {
+      .modal-content .form-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -92,6 +107,7 @@
       <a href="/admin/dashboard.html">📊 Dashboard</a>
       <a href="/admin/verify.html">✅ Verify Payments</a>
       <a href="/admin/orders.html" class="active">📦 Orders</a>
+      <a href="/admin/batches.html">📦📦 Batches</a>
       <a href="/admin/inventory.html">🏷️ Inventory</a>
       <a href="/admin/loyalty.html">⭐ Loyalty</a>
       <a href="/admin/settings.html">⚙️ Settings</a>
@@ -101,7 +117,10 @@
     <div class="main-content">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
         <h1>📦 Orders</h1>
-        <a href="/" style="padding:8px 18px; background:linear-gradient(135deg,#ffe4e1,#fff5f5); border:2px solid #f5c542; border-radius:20px; color:#d4808a; font-weight:700; font-size:13px; text-decoration:none; transition:all 0.3s;">🏪 Back to Store</a>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <a href="/" style="padding:8px 18px; background:linear-gradient(135deg,#ffe4e1,#fff5f5); border:2px solid #f5c542; border-radius:20px; color:#d4808a; font-weight:700; font-size:13px; text-decoration:none; transition:all 0.3s;">🏪 Back to Store</a>
+          <button onclick="openManualOrderModal()" style="padding:8px 16px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border:2px solid #81c784; border-radius:20px; color:#2e7d32; font-weight:700; font-size:13px; cursor:pointer; border:none;">+ Manual Order</button>
+        </div>
       </div>
       <div class="dispatch-tabs" id="dispatch-tabs">
         <button class="dispatch-tab active" data-dispatch="new" onclick="switchDispatchTab(this)">🆕 New Orders</button>
@@ -139,6 +158,7 @@
               <th>📦 Tracking</th>
               <th>📸 Instagram</th>
               <th>Product</th>
+              <th>Urgency</th>
               <th>Amount</th>
               <th>Status</th>
               <th>Payment</th>
@@ -151,6 +171,98 @@
         </table>
       </div>
       <div id="orders-paginator"></div>
+    </div>
+  </div>
+
+  <!-- Manual Order Modal -->
+  <div class="modal" id="manual-order-modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeManualOrderModal()">&times;</span>
+      <h2>➕ Add Manual Order</h2>
+      <form id="manual-order-form" onsubmit="saveManualOrder(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Customer Name *</label>
+            <input type="text" id="mo-name" required>
+          </div>
+          <div class="form-group">
+            <label>Phone (optional)</label>
+            <input type="text" id="mo-phone" placeholder="10-digit">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pincode</label>
+            <input type="text" id="mo-pincode" placeholder="6-digit" onchange="autofillPincode()" maxlength="6">
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="mo-city" placeholder="Auto-filled from pincode">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>State</label>
+            <input type="text" id="mo-state" placeholder="Auto-filled from pincode">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="mo-category">
+              <option value="thrift">🛍️ Thrift</option>
+              <option value="jewelry">💎 Mellowluv</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="mo-address" placeholder="Full delivery address">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Item Name *</label>
+            <input type="text" id="mo-product-name" required placeholder="e.g. Vintage dress">
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="mo-quantity" value="1" min="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" id="mo-total" step="0.01" required placeholder="Total amount">
+          </div>
+          <div class="form-group">
+            <label>Shipping (₹)</label>
+            <input type="number" id="mo-shipping" step="0.01" value="0" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Urgency</label>
+            <select id="mo-urgency">
+              <option value="">Normal</option>
+              <option value="urgent">⚡ Urgent (₹50 extra)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Payment Status</label>
+            <select id="mo-payment-status">
+              <option value="unpaid">❌ Unpaid</option>
+              <option value="verified">✅ Paid / Verified</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Aesthetics / Notes (optional)</label>
+          <input type="text" id="mo-aesthetics" placeholder="e.g. Style preferences, color choices">
+        </div>
+        <div class="form-group">
+          <label>Extra Notes (optional)</label>
+          <input type="text" id="mo-extra-note" placeholder="Any additional info">
+        </div>
+        <button type="submit" class="btn-submit">Save Manual Order 📦</button>
+      </form>
     </div>
   </div>
 
@@ -185,12 +297,12 @@
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.status === 401) { localStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
         const data = await res.json();
-        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:#c62828;">API error: ' + (data.error || res.status) + '</td></tr>'; paginator.innerHTML = ''; return; }
+        if (!res.ok) { tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#c62828;">API error: ' + (data.error || res.status) + '</td></tr>'; paginator.innerHTML = ''; return; }
         const orders = data.orders || [];
         const total = data.total || 0;
         const pages = data.pages || 1;
         if (orders.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:#b0878f;">No orders found</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#b0878f;">No orders found</td></tr>';
           paginator.innerHTML = '';
           return;
         }
@@ -218,6 +330,7 @@
             </td>
             <td>${o.instagram ? '<a href="https://ig.me/m/' + o.instagram.replace('@', '') + '" target="_blank" style="color:#e1306c;font-weight:600;text-decoration:none;">📷 ' + o.instagram + '</a>' : '-'}</td>
             <td>${o.product_name || '-'}</td>
+            <td>${o.urgency === 'urgent' ? '<span style="color:#d84315;font-weight:700;font-size:12px;">⚡ Urgent</span>' : '<span style="color:#b0878f;font-size:11px;">—</span>'}</td>
             <td>₹${o.total}</td>
             <td>
               <select class="status-select" onchange="updateStatus(${o.id}, 'status', this.value)">
@@ -233,7 +346,7 @@
             <td><button class="btn-sm btn-delete" onclick="deleteOrder(${o.id})" style="padding:3px 10px; border:none; border-radius:8px; background:#ffebee; color:#c62828; cursor:pointer; font-size:11px;">✕</button></td>
           </tr>
           <tr id="detail-${o.id}" class="order-detail">
-            <td colspan="12">
+            <td colspan="13">
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 <div><strong>📅 Ordered on:</strong> ${dateStr} at ${timeStr}</div>
                 <div><strong>📞 Phone:</strong> <a href="#" onclick="filterByPhone('${o.phone}'); return false;" style="color:#e8a0b4; font-weight:600; text-decoration:underline;">${o.phone || '-'}</a> <a href="https://wa.me/91${o.phone}?text=Hi%20${encodeURIComponent(o.customer_name)}%2C%20your%20order%20%23${o.id}%20status%3A%20${o.status}" target="_blank" style="display:inline-block;padding:2px 10px;background:#25D366;color:white;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;margin-left:6px;">📲 WhatsApp</a></div>
@@ -278,7 +391,7 @@
         pagHtml += '</div>';
         paginator.innerHTML = pagHtml;
       } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:20px;color:#c62828;">Error: ' + e.message + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#c62828;">Error: ' + e.message + '</td></tr>';
       }
     }
 
@@ -403,6 +516,73 @@
       loadOrders();
     }
 
+    // --- Manual Order ---
+    function openManualOrderModal() {
+      document.getElementById('manual-order-form').reset();
+      document.getElementById('mo-quantity').value = '1';
+      document.getElementById('mo-shipping').value = '0';
+      document.getElementById('manual-order-modal').classList.add('show');
+    }
+
+    function closeManualOrderModal() {
+      document.getElementById('manual-order-modal').classList.remove('show');
+    }
+
+    async function autofillPincode() {
+      const pincode = document.getElementById('mo-pincode').value.trim();
+      if (pincode.length !== 6) return;
+      try {
+        const r = await fetch('https://api.postalpincode.in/pincode/' + pincode);
+        const data = await r.json();
+        if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+          document.getElementById('mo-city').value = data[0].PostOffice[0].District || '';
+          document.getElementById('mo-state').value = data[0].PostOffice[0].State || '';
+        }
+      } catch {}
+    }
+
+    async function saveManualOrder(event) {
+      event.preventDefault();
+      const btn = event.target.querySelector('.btn-submit');
+      const orig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      const body = {
+        customer_name: document.getElementById('mo-name').value.trim(),
+        phone: document.getElementById('mo-phone').value.trim(),
+        pincode: document.getElementById('mo-pincode').value.trim(),
+        city: document.getElementById('mo-city').value.trim(),
+        state: document.getElementById('mo-state').value.trim(),
+        address: document.getElementById('mo-address').value.trim(),
+        category: document.getElementById('mo-category').value,
+        product_name: document.getElementById('mo-product-name').value.trim(),
+        quantity: document.getElementById('mo-quantity').value,
+        total: document.getElementById('mo-total').value,
+        shipping_charge: document.getElementById('mo-shipping').value,
+        urgency: document.getElementById('mo-urgency').value,
+        payment_status: document.getElementById('mo-payment-status').value,
+        aesthetics: document.getElementById('mo-aesthetics').value.trim(),
+        extra_note: document.getElementById('mo-extra-note').value.trim()
+      };
+      try {
+        const res = await fetch('/api/admin/orders/manual', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (window.adminToast) adminToast('Order #' + data.order_id + ' added ✅', 'success');
+          closeManualOrderModal();
+          loadOrders();
+        } else {
+          alert(data.error || 'Failed to save');
+        }
+      } catch { alert('Network error'); }
+      btn.disabled = false;
+      btn.textContent = orig;
+    }
+
     loadOrders();
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/admin/service-worker.js')}</script>
@@ -410,6 +590,7 @@
     <a href="/admin/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
     <a href="/admin/verify.html"><span class="nav-icon">✅</span> Verify</a>
     <a href="/admin/orders.html" class="active"><span class="nav-icon">📦</span> Orders</a>
+    <a href="/admin/batches.html"><span class="nav-icon">📦📦</span> Batches</a>
     <a href="/admin/inventory.html"><span class="nav-icon">🏷️</span> Inventory</a>
     <a href="/admin/loyalty.html"><span class="nav-icon">⭐</span> Loyalty</a>
     <a href="/admin/settings.html"><span class="nav-icon">⚙️</span> Settings</a>
