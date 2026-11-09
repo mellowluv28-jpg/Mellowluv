@@ -49,6 +49,21 @@ async function getShippingForCategory(category) {
   return parseFloat(await getSetting('shipping_charge_jewelry')) || 70;
 }
 
+// Build a strictly spec-shaped UPI intent link.
+// - pa is kept RAW (some payment apps do not decode %40 back to @ and reject the VPA)
+// - am uses exactly 2 decimals (bare integers are rejected by some apps)
+// - tn avoids '#' and spaces, which can truncate the payload in stricter parsers
+function buildUpiLink(upiId, upiName, amount, orderId) {
+  const pa = String(upiId || '').trim();
+  const pn = String(upiName || '').trim() || 'Mellowluv';
+  const am = Number(amount || 0).toFixed(2);
+  const tn = `Order-${orderId}`;
+  return `upi://pay?pa=${pa}&pn=${encodeURIComponent(pn)}&am=${am}&tn=${encodeURIComponent(tn)}&cu=INR`;
+}
+
+// A larger, higher-resolution QR scans far more reliably off a phone screen.
+const QR_OPTIONS = { width: 512, margin: 2, errorCorrectionLevel: 'M' };
+
 // --- SSE ---
 app.get('/api/admin/events', async (req, res) => {
   const auth = req.headers.authorization || '';
@@ -191,14 +206,14 @@ app.post('/api/prebook', async (req, res) => {
   );
   const upiId = await getSetting('upi_id');
   const upiName = await getSetting('upi_name');
-  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(total)}&tn=Order%20%23${result.lastInsertRowid}&cu=INR`;
-  const qrDataUrl = await QRCode.toDataURL(upiLink);
+  const upiLink = buildUpiLink(upiId, upiName, Math.round(total), result.lastInsertRowid);
+  const qrDataUrl = await QRCode.toDataURL(upiLink, QR_OPTIONS);
   const contactInsta = await getSetting('contact_instagram');
   res.json({
     success: true,
     order_id: result.lastInsertRowid,
     qr_code: qrDataUrl,
-    upi_id: upiId,
+    upi_id: String(upiId || '').trim(),
     amount: Math.round(total),
     contact_instagram: contactInsta,
     is_prebook: true,
@@ -280,12 +295,12 @@ app.post('/api/orders', async (req, res) => {
 
     const upiId = await getSetting('upi_id');
     const upiName = await getSetting('upi_name');
-    const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(grandTotal)}&tn=Order%20%23${firstOrderId}&cu=INR`;
-    const qrDataUrl = await QRCode.toDataURL(upiLink);
+    const upiLink = buildUpiLink(upiId, upiName, Math.round(grandTotal), firstOrderId);
+    const qrDataUrl = await QRCode.toDataURL(upiLink, QR_OPTIONS);
     const contactInsta = await getSetting('contact_instagram');
 
     return res.json({
-      success: true, order_id: firstOrderId, qr_code: qrDataUrl, upi_id: upiId,
+      success: true, order_id: firstOrderId, qr_code: qrDataUrl, upi_id: String(upiId || '').trim(),
       amount: Math.round(grandTotal), contact_instagram: contactInsta,
       is_cart: true, items: allItems.length, extra_charge: extraCharge, discount_applied: discountAmount > 0,
       loyalty: { points: loyaltyInfo.total_loyalty_score, will_earn: 1, orders_until_discount: loyaltyInfo.orders_until_discount, prebook_eligible: loyaltyInfo.prebook_eligible }
@@ -331,15 +346,15 @@ app.post('/api/orders', async (req, res) => {
 
   const upiId = await getSetting('upi_id');
   const upiName = await getSetting('upi_name');
-  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName)}&am=${Math.round(total)}&tn=Order%20%23${result.lastInsertRowid}&cu=INR`;
-  const qrDataUrl = await QRCode.toDataURL(upiLink);
+  const upiLink = buildUpiLink(upiId, upiName, Math.round(total), result.lastInsertRowid);
+  const qrDataUrl = await QRCode.toDataURL(upiLink, QR_OPTIONS);
   const contactInsta = await getSetting('contact_instagram');
 
   res.json({
     success: true,
     order_id: result.lastInsertRowid,
     qr_code: qrDataUrl,
-    upi_id: upiId,
+    upi_id: String(upiId || '').trim(),
     amount: Math.round(total),
     contact_instagram: contactInsta,
     extra_charge: extraCharge,

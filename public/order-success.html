@@ -45,6 +45,7 @@
           <div class="upi-details">
             Pay to UPI ID: <strong id="display-upi"></strong>
           </div>
+          <a id="upi-pay-link" class="btn-paid" style="display:block;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;margin:0 0 12px;" href="#">📲 Open UPI App &amp; Pay</a>
           <div style="background:#e8f5e9;color:#2e7d32;border:2px solid #a5d6a7;border-radius:12px;padding:10px 12px;margin:12px 0;text-align:center;font-size:13px;font-weight:500;">
             📱 Scan & pay — your Order <strong>#<span id="note-order-id2"></span></strong> is already in the note.
           </div>
@@ -88,11 +89,24 @@
   <script src="/public/js/main.js"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
-    document.getElementById('qr-image').src = decodeURIComponent(params.get('qr') || '');
-    document.getElementById('display-upi').textContent = decodeURIComponent(params.get('upi') || '');
+    const qrData = params.get('qr') || '';
+    // URLSearchParams already decodes the value; do not decode a second time.
+    document.getElementById('qr-image').src = qrData;
+    document.getElementById('display-upi').textContent = params.get('upi') || '';
     document.getElementById('display-amount').textContent = '₹' + (params.get('amount') || '0');
     document.getElementById('display-order-id').textContent = params.get('order') || 'N/A';
     document.getElementById('note-order-id2').textContent = params.get('order') || 'N/A';
+
+    // Tap-to-pay fallback for people who cannot scan the QR on their phone.
+    const upiForLink = params.get('upi') || '';
+    const payLink = document.getElementById('upi-pay-link');
+    if (upiForLink) {
+      const amt = Number(params.get('amount') || 0).toFixed(2);
+      const note = 'Order-' + (params.get('order') || '');
+      payLink.href = `upi://pay?pa=${upiForLink}&am=${amt}&tn=${encodeURIComponent(note)}&cu=INR`;
+    } else {
+      payLink.style.display = 'none';
+    }
 
     const loyaltyPts = parseInt(params.get('lp') || '0');
     const loyaltyWillEarn = parseInt(params.get('lw') || '0');
