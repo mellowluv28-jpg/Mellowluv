@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Bag — Mellowluv | Test Website</title>
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/test-website/assets/css/test-site.css">
+</head>
+<body class="tw-body" data-page="cart">
+  <div id="tw-header-mount"></div>
+
+  <main class="tw-page-main">
+    <section class="tw-page-head">
+      <div class="tw-container">
+        <span class="tw-deco tw-deco--l" data-tw-deco="branch" aria-hidden="true"></span>
+        <span class="tw-deco tw-deco--r" data-tw-deco="wild" aria-hidden="true"></span>
+        <h1>Your Bag</h1>
+        <p>Little pieces, gathered together. Your bag lives only in this browser — nothing is sent to the live store.</p>
+      </div>
+    </section>
+
+    <section class="tw-container">
+      <div id="tw-cart-root">
+        <div class="tw-loading">Opening your bag…</div>
+      </div>
+    </section>
+
+    <div class="tw-torn-wrap" aria-hidden="true">
+      <svg viewBox="0 0 1200 30" preserveAspectRatio="none">
+        <path d="M0 30V16c25-8 50-8 75 0s50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 25 4 30 6V30Z"/>
+      </svg>
+    </div>
+  </main>
+
+  <div id="tw-footer-mount"></div>
+
+  <script src="/test-website/assets/js/test-site.js"></script>
+  <script>
+    TW.ready(function () {
+      var root = document.getElementById('tw-cart-root');
+
+      function emptyState() {
+        root.innerHTML =
+          '<div class="tw-panel tw-cart-empty">' +
+            '<span class="tw-deco" data-tw-deco="bloom" aria-hidden="true"></span>' +
+            '<h3>Your bag is empty</h3>' +
+            '<p>Start with a little piece that feels like you.</p>' +
+            '<a class="tw-btn tw-btn--plum" href="/test-website/collection">Explore the collection</a>' +
+          '</div>';
+        TW.mountDecos();
+      }
+
+      function render() {
+        var cart = TW.getCart();
+        if (!cart.items.length) { emptyState(); return; }
+        var t = TW.totals();
+
+        var items = cart.items.map(function (item) {
+          var note = TW.getNote(item.id);
+          return '' +
+            '<div class="tw-cart-item">' +
+              '<img src="' + TW.cld(item.image, 200) + '" alt="' + TW.esc(item.name) + '">' +
+              '<div>' +
+                '<a class="tw-cart-item-name" href="/test-website/product?id=' + item.id + '"><h4>' + TW.esc(item.name) + '</h4></a>' +
+                (note ? '<div class="tw-cart-item-note">Note: ' + TW.esc(note) + '</div>' : '') +
+                '<div class="tw-price" style="margin-top:4px;">' + TW.money(item.price) + '</div>' +
+              '</div>' +
+              '<div class="tw-cart-item-right">' +
+                '<div class="tw-qty tw-qty--sm">' +
+                  '<button type="button" data-cart-step="-1" data-id="' + item.id + '" aria-label="Decrease quantity">−</button>' +
+                  '<span>' + item.qty + '</span>' +
+                  '<button type="button" data-cart-step="1" data-id="' + item.id + '" aria-label="Increase quantity">+</button>' +
+                '</div>' +
+                '<button type="button" class="tw-remove" data-cart-remove="' + item.id + '" aria-label="Remove ' + TW.esc(item.name) + '">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>' +
+                '</button>' +
+              '</div>' +
+            '</div>';
+        }).join('');
+
+        root.innerHTML =
+          '<div class="tw-cart-layout">' +
+            '<div>' +
+              '<div class="tw-panel">' +
+                '<h3 style="font-size:22px;">Pieces in your bag</h3>' +
+                items +
+              '</div>' +
+              '<div class="tw-note-card" style="margin-top:12px;">' +
+                '<b>Shipping is charged separately.</b> Jewellery shipping is ₹70. Handmade pieces are dispatched in 10–15 days unless urgent making is selected.' +
+              '</div>' +
+              '<a class="tw-link-arrow" href="/test-website/collection" style="margin-top:16px;display:inline-flex;">' +
+                'Continue shopping' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>' +
+              '</a>' +
+            '</div>' +
+            '<aside class="tw-panel">' +
+              '<h3 style="font-size:22px;">Order summary</h3>' +
+              '<div class="tw-summary-list">' +
+                '<div class="tw-summary-row"><span>Subtotal (' + t.count + ' ' + (t.count === 1 ? 'piece' : 'pieces') + ')</span><span>' + TW.money(t.subtotal) + '</span></div>' +
+                '<div class="tw-summary-row"><span>Shipping</span><span>' + TW.money(t.shipping) + '</span></div>' +
+                '<div class="tw-summary-row tw-total"><span>Total</span><span>' + TW.money(t.total) + '</span></div>' +
+              '</div>' +
+              '<a class="tw-btn tw-btn--plum tw-btn--block" href="/test-website/checkout" style="margin-top:6px;">Proceed to Checkout</a>' +
+              '<p class="tw-note" style="text-align:center;margin-top:10px;">No COD. Full prepayment by UPI on the live store.</p>' +
+              '<div class="tw-note-card tw-note-card--plum" style="margin-top:14px;font-size:11px;">' +
+                '<b>Preview basket:</b> quantities and totals are kept in localStorage on this device only. No order is created until you complete the preview checkout.' +
+              '</div>' +
+            '</aside>' +
+          '</div>';
+
+        TW.mountDecos();
+      }
+
+      root.addEventListener('click', function (e) {
+        var step = e.target.closest('[data-cart-step]');
+        if (step) {
+          var id = Number(step.getAttribute('data-id'));
+          var item = TW.getCart().items.filter(function (i) { return i.id === id; })[0];
+          if (item) TW.updateQty(id, item.qty + Number(step.getAttribute('data-cart-step')));
+          render();
+          return;
+        }
+        var remove = e.target.closest('[data-cart-remove]');
+        if (remove) {
+          TW.removeItem(remove.getAttribute('data-cart-remove'));
+          render();
+        }
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piece Details — Mellowluv | Test Website</title>
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/test-website/assets/css/test-site.css">
+</head>
+<body class="tw-body" data-page="collection">
+  <div id="tw-header-mount"></div>
+
+  <main class="tw-page-main">
+    <section class="tw-container" style="padding-top:18px;">
+      <p class="tw-note" style="margin-bottom:10px;">
+        <a href="/test-website/collection" style="color:var(--tw-plum);">Shop</a>
+        <span style="color:var(--tw-mauve);"> / </span>
+        <span id="tw-breadcrumb">Piece details</span>
+      </p>
+
+      <div id="tw-product-root">
+        <div class="tw-loading">Opening this piece…</div>
+      </div>
+    </section>
+
+    <section class="tw-section" id="tw-related-section" hidden>
+      <div class="tw-container">
+        <div class="tw-section-head">
+          <h2 class="tw-section-title">
+            <span class="tw-flourish" data-tw-deco="branch" aria-hidden="true"></span>
+            You may also like
+          </h2>
+          <a class="tw-link-arrow tw-section-cta" href="/test-website/collection">View all</a>
+        </div>
+        <div class="tw-grid" id="tw-related"></div>
+      </div>
+    </section>
+
+    <div class="tw-torn-wrap" aria-hidden="true">
+      <svg viewBox="0 0 1200 30" preserveAspectRatio="none">
+        <path d="M0 30V16c25-8 50-8 75 0s50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 25 4 30 6V30Z"/>
+      </svg>
+    </div>
+  </main>
+
+  <div id="tw-footer-mount"></div>
+
+  <script src="/test-website/assets/js/test-site.js"></script>
+  <script>
+    TW.ready(function () {
+      var root = document.getElementById('tw-product-root');
+      var id = Number(new URLSearchParams(window.location.search).get('id'));
+      var qty = 1;
+      var product = null;
+
+      function notFound() {
+        root.innerHTML =
+          '<div class="tw-cart-empty">' +
+            '<span class="tw-deco" data-tw-deco="bloom" aria-hidden="true"></span>' +
+            '<h3>This piece could not be found.</h3>' +
+            '<p>It may have sold out or the link may be incomplete.</p>' +
+            '<a class="tw-btn tw-btn--plum" href="/test-website/collection">Back to the collection</a>' +
+          '</div>';
+        TW.mountDecos();
+      }
+
+      function swatches(p) {
+        var d = (p.description || '').toLowerCase();
+        var hasSilver = d.indexOf('silver') > -1;
+        var hasGold = d.indexOf('gold') > -1;
+        if (!hasSilver && !hasGold) return '';
+        var html = '<div class="tw-option-label">Finish preference</div><div class="tw-swatches">';
+        if (hasSilver) html += '<button type="button" class="tw-swatch tw-swatch--silver" data-finish="Silver" aria-label="Silver finish"><span class="tw-swatch-dot"></span></button>';
+        if (hasGold) html += '<button type="button" class="tw-swatch tw-swatch--gold" data-finish="Gold" aria-label="Gold finish"><span class="tw-swatch-dot"></span></button>';
+        html += '</div><p class="tw-swatch-note">Tap a finish — we will add it to your preference note.</p>';
+        return html;
+      }
+
+      function render(p) {
+        document.title = p.name + ' — Mellowluv | Test Website';
+        var bc = document.getElementById('tw-breadcrumb');
+        if (bc) bc.textContent = p.name;
+
+        var stock = p.stock;
+        var sold = stock <= 0;
+        var note = TW.getNote(p.id);
+
+        root.innerHTML =
+          '<div class="tw-product">' +
+            '<div>' +
+              '<div class="tw-gallery-main"><img id="tw-main-img" src="' + TW.cld(p.gallery[0], 900) + '" alt="' + TW.esc(p.name) + '"></div>' +
+              (p.gallery.length > 1
+                ? '<div class="tw-thumbs" id="tw-thumbs">' + p.gallery.map(function (src, i) {
+                    return '<button type="button" class="tw-thumb' + (i === 0 ? ' is-active' : '') + '" data-src="' + TW.cld(src, 900) + '" aria-label="View image ' + (i + 1) + '"><img src="' + TW.cld(src, 160) + '" alt=""></button>';
+                  }).join('') + '</div>'
+                : '') +
+            '</div>' +
+            '<div class="tw-pd">' +
+              '<div class="tw-eyebrow">Handmade jewellery</div>' +
+              '<h1>' + TW.esc(p.name) + '</h1>' +
+              '<div class="tw-pd-price" style="justify-content:space-between;align-items:center;">' +
+                (p.stock <= 0
+                  ? '<span class="tw-badge tw-badge--sold" style="position:static;">Sold out</span>'
+                  : (p.offer_price
+                    ? '<span class="tw-badge tw-badge--plum" style="position:static;">Offer</span>'
+                    : (p.stock <= 2 ? '<span class="tw-badge tw-badge--olive" style="position:static;">Only ' + p.stock + ' left</span>' : '<span></span>'))) +
+                '<span>' + (p.offer_price
+                  ? TW.money(p.offer_price) + ' <s style="font-size:14px;font-weight:400;color:var(--tw-mauve);">' + TW.money(p.price) + '</s>'
+                  : TW.money(p.price)) + '</span>' +
+              '</div>' +
+              '<p class="tw-pd-desc">' + TW.esc(p.description || 'A small-batch handmade piece from the Mellowluv studio.') + '</p>' +
+              '<div class="tw-stock' + (sold ? ' is-out' : '') + '"><i></i>' +
+                (sold ? 'Currently sold out' : 'In stock — ' + stock + (stock === 1 ? ' piece available' : ' pieces available')) +
+              '</div>' +
+              '<div class="tw-pd-meta">' +
+                '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10M12 10V4.5a1.5 1.5 0 0 1 3 0V11M15 11V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-2.5a1.5 1.5 0 0 1 3 0V13"/></svg> Made by hand</span>' +
+                '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h10v9H3zM13 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg> Dispatched with tracking</span>' +
+                '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z"/></svg> Secure UPI checkout</span>' +
+              '</div>' +
+              swatches(p) +
+              '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:4px 0 12px;">' +
+                '<div>' +
+                  '<div class="tw-option-label">Quantity</div>' +
+                  '<div class="tw-qty" id="tw-qty">' +
+                    '<button type="button" data-step="-1" aria-label="Decrease quantity"' + (sold ? ' disabled' : '') + '>−</button>' +
+                    '<span id="tw-qty-value">1</span>' +
+                    '<button type="button" data-step="1" aria-label="Increase quantity"' + (sold ? ' disabled' : '') + '>+</button>' +
+                  '</div>' +
+                '</div>' +
+                '<button type="button" class="tw-iconbtn" data-wish="' + p.id + '" aria-label="Save to wishlist"></button>' +
+              '</div>' +
+              '<div class="tw-buy-row">' +
+                '<button type="button" class="tw-btn tw-btn--plum" id="tw-add"' + (sold ? ' disabled' : '') + '>Add to Bag</button>' +
+                '<button type="button" class="tw-btn tw-btn--olive" id="tw-buy"' + (sold ? ' disabled' : '') + '>Buy Now</button>' +
+              '</div>' +
+              '<div class="tw-field" style="margin-top:16px;">' +
+                '<label for="tw-pref">Preference / personalisation note (optional)</label>' +
+                '<textarea id="tw-pref" rows="2" maxlength="280" placeholder="Colour, finish, theme, gifting note…">' + TW.esc(note) + '</textarea>' +
+                '<p class="tw-note">Saved in this browser only. We confirm every preference before making.</p>' +
+              '</div>' +
+              '<div class="tw-accordion">' +
+                '<div class="tw-acc-item is-open">' +
+                  '<button type="button" class="tw-acc-btn" aria-expanded="true">Details &amp; materials<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+                  '<div class="tw-acc-body"><div class="tw-acc-body-inner"><ul class="tw-detail-list">' +
+                    '<li>Handmade in small batches by Mellowluv.</li>' +
+                    '<li>Natural variations in colour and finish are part of the piece.</li>' +
+                    '<li>Exact materials are confirmed on Instagram before dispatch.</li>' +
+                  '</ul></div></div>' +
+                '</div>' +
+                '<div class="tw-acc-item">' +
+                  '<button type="button" class="tw-acc-btn" aria-expanded="false">Shipping &amp; dispatch<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+                  '<div class="tw-acc-body"><div class="tw-acc-body-inner">' +
+                    'Making and dispatch usually take <strong>10–15 days</strong>. Shipping is charged separately at checkout (₹70 for jewellery). ' +
+                    'Urgent making is available for ₹50 extra where offered. Every parcel is sent with tracking.' +
+                  '</div></div>' +
+                '</div>' +
+                '<div class="tw-acc-item">' +
+                  '<button type="button" class="tw-acc-btn" aria-expanded="false">Customisation<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+                  '<div class="tw-acc-body"><div class="tw-acc-body-inner">' +
+                    'Mystery jars and custom pieces are assembled around your preferences. Add a note above, or DM ' +
+                    '<a href="https://instagram.com/mellowluvv_" target="_blank" rel="noopener" style="color:var(--tw-plum);text-decoration:underline;">@mellowluvv_</a> ' +
+                    'with colours, vibes or a reference image. A fully custom piece is best discussed before ordering.' +
+                  '</div></div>' +
+                '</div>' +
+                '<div class="tw-acc-item">' +
+                  '<button type="button" class="tw-acc-btn" aria-expanded="false">Jewellery care<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+                  '<div class="tw-acc-body"><div class="tw-acc-body-inner">' +
+                    'Keep pieces away from water, perfume and harsh cleaners. Store them dry, wipe gently with a soft cloth, and put jewellery on last when getting ready.' +
+                  '</div></div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+
+        TW.mountDecos();
+        TW.syncWishes();
+
+        var qtyValue = document.getElementById('tw-qty-value');
+        var qtyBox = document.getElementById('tw-qty');
+        if (qtyBox) {
+          qtyBox.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-step]');
+            if (!btn) return;
+            qty = Math.max(1, Math.min(stock > 0 ? stock : 1, qty + Number(btn.getAttribute('data-step'))));
+            qtyValue.textContent = qty;
+          });
+        }
+
+        var pref = document.getElementById('tw-pref');
+        if (pref) {
+          pref.addEventListener('input', function () { TW.setNote(p.id, this.value); });
+        }
+
+        var mainImg = document.getElementById('tw-main-img');
+        var thumbs = document.getElementById('tw-thumbs');
+        if (thumbs) {
+          thumbs.addEventListener('click', function (e) {
+            var t = e.target.closest('[data-src]');
+            if (!t) return;
+            mainImg.src = t.getAttribute('data-src');
+            Array.prototype.forEach.call(thumbs.querySelectorAll('.tw-thumb'), function (el) {
+              el.classList.toggle('is-active', el === t);
+            });
+          });
+        }
+
+        var sw = document.querySelectorAll('[data-finish]');
+        Array.prototype.forEach.call(sw, function (b) {
+          b.addEventListener('click', function () {
+            Array.prototype.forEach.call(sw, function (x) { x.classList.remove('is-active'); });
+            b.classList.add('is-active');
+            var finish = b.getAttribute('data-finish');
+            if (pref) {
+              var base = pref.value.replace(/Finish preference: [^.]*\.\s*/g, '').trim();
+              pref.value = ('Finish preference: ' + finish + '. ' + base).trim();
+              TW.setNote(p.id, pref.value);
+            }
+            TW.toast(finish + ' finish noted');
+          });
+        });
+
+        var add = document.getElementById('tw-add');
+        var buy = document.getElementById('tw-buy');
+        if (add && !sold) add.addEventListener('click', function () { TW.addToCart(p, qty); });
+        if (buy && !sold) buy.addEventListener('click', function () {
+          TW.addToCart(p, qty);
+          setTimeout(function () { window.location.href = '/test-website/checkout'; }, 220);
+        });
+
+        // related
+        TW.products().then(function (list) {
+          var related = list.filter(function (x) { return x.id !== p.id && x.stock > 0; }).slice(0, 4);
+          if (!related.length) return;
+          document.getElementById('tw-related-section').removeAttribute('hidden');
+          TW.renderGrid(document.getElementById('tw-related'), related);
+        });
+      }
+
+      TW.productById(id).then(function (p) {
+        if (!p) { notFound(); return; }
+        product = p;
+        render(p);
+      });
+    });
+  </script>
+</body>
+</html>

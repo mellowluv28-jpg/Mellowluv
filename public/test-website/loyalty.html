@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loyalty Rewards — Mellowluv | Test Website</title>
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/test-website/assets/css/test-site.css">
+</head>
+<body class="tw-body" data-page="loyalty">
+  <div id="tw-header-mount"></div>
+
+  <main class="tw-page-main">
+    <section class="tw-page-head">
+      <div class="tw-container">
+        <span class="tw-deco tw-deco--l" data-tw-deco="sprig" aria-hidden="true"></span>
+        <span class="tw-deco tw-deco--r" data-tw-deco="bloom" aria-hidden="true"></span>
+        <h1>Little Rewards</h1>
+        <p>A preview loyalty account. Points, rewards and history are demonstration data kept in this browser.</p>
+      </div>
+    </section>
+
+    <section class="tw-container">
+      <div class="tw-loyalty-grid">
+        <div>
+          <div class="tw-loyalty-card" id="tw-loyalty-card">
+            <span class="tw-tier">✦ Studio friend</span>
+            <small>Your points</small>
+            <div class="tw-points" id="tw-points">240</div>
+            <div class="tw-progress"><i id="tw-progress-bar" style="width:80%;"></i></div>
+            <div class="tw-loyalty-progress-label">
+              <span id="tw-progress-label">60 points to your next reward</span>
+              <span id="tw-next-label">300</span>
+            </div>
+          </div>
+
+          <div class="tw-panel" style="margin-top:14px;">
+            <h3 style="font-size:22px;">Available rewards</h3>
+            <div class="tw-rewards" id="tw-rewards"></div>
+            <p class="tw-note" style="margin-top:12px;">Redeeming here only changes the demo points in your browser. On the live store, redemptions are handled with your real account.</p>
+          </div>
+        </div>
+
+        <aside>
+          <div class="tw-panel">
+            <h3 style="font-size:22px;">Ways to earn</h3>
+            <div class="tw-earn-grid">
+              <div class="tw-earn"><b>Shop</b><span>1 point per ₹10</span><br>Every preview order earns points.</div>
+              <div class="tw-earn"><b>Write a review</b><span>+20 points</span><br>Tell us how the piece feels.</div>
+              <div class="tw-earn"><b>Refer a friend</b><span>+50 points</span><br>When they place their first order.</div>
+              <div class="tw-earn"><b>Birthday</b><span>+100 points</span><br>A little gift from the studio.</div>
+            </div>
+          </div>
+
+          <div class="tw-panel">
+            <h3 style="font-size:22px;">Points history</h3>
+            <ul class="tw-history">
+              <li><span>Order #TW-SAMPLE-1042<small>Sample order reward</small></span><b>+49</b></li>
+              <li><span>Wrote a review<small>Starfish swirl cord</small></span><b>+20</b></li>
+              <li><span>Birthday bonus<small>Studio treat</small></span><b>+100</b></li>
+              <li><span>Redeemed free shipping<small>Sample redemption</small></span><b>−150</b></li>
+              <li><span>Welcome to Mellowluv<small>Joining bonus</small></span><b>+221</b></li>
+            </ul>
+            <button type="button" class="tw-btn tw-btn--ghost tw-btn--block" id="tw-reset" style="margin-top:12px;">Reset demo points</button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="tw-torn-wrap" aria-hidden="true">
+        <svg viewBox="0 0 1200 30" preserveAspectRatio="none">
+          <path d="M0 30V16c25-8 50-8 75 0s50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 25 4 30 6V30Z"/>
+        </svg>
+      </div>
+    </section>
+  </main>
+
+  <div id="tw-footer-mount"></div>
+
+  <script src="/test-website/assets/js/test-site.js"></script>
+  <script>
+    TW.ready(function () {
+      var REWARDS = [
+        { label: 'Free shipping', cost: 150, note: 'Applied to one order.' },
+        { label: '₹100 off', cost: 300, note: 'On orders above ₹499.' },
+        { label: 'Mystery charm', cost: 450, note: 'A tiny studio surprise.' },
+        { label: '₹250 off', cost: 650, note: 'On orders above ₹999.' }
+      ];
+
+      var pointsEl = document.getElementById('tw-points');
+      var bar = document.getElementById('tw-progress-bar');
+      var label = document.getElementById('tw-progress-label');
+      var nextLabel = document.getElementById('tw-next-label');
+      var wrap = document.getElementById('tw-rewards');
+
+      function render() {
+        var points = TW.getPoints();
+        var next = REWARDS.map(function (r) { return r.cost; }).filter(function (c) { return c > points; })[0];
+        var target = next || REWARDS[REWARDS.length - 1].cost;
+        var pct = Math.min(100, Math.round((points / target) * 100));
+
+        pointsEl.textContent = points.toLocaleString('en-IN');
+        bar.style.width = pct + '%';
+        if (next) {
+          label.textContent = (next - points) + ' points to your next reward';
+          nextLabel.textContent = next;
+        } else {
+          label.textContent = 'Top reward unlocked';
+          nextLabel.textContent = '★';
+        }
+
+        wrap.innerHTML = REWARDS.map(function (r, i) {
+          var can = points >= r.cost;
+          return '<div class="tw-reward' + (can ? '' : ' is-locked') + '">' +
+            '<span class="tw-reward-icon">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9S9.5 4 7 4a2.2 2.2 0 0 0 0 5h5ZM12 9s2.5-5 5-5a2.2 2.2 0 0 1 0 5h-5Z"/></svg>' +
+            '</span>' +
+            '<div class="tw-reward-body"><b>' + TW.esc(r.label) + '</b><small>' + r.cost + ' points · ' + TW.esc(r.note) + '</small></div>' +
+            '<button type="button" class="tw-btn ' + (can ? 'tw-btn--plum' : 'tw-btn--ghost') + '" data-redeem="' + i + '"' + (can ? '' : ' disabled') + '>' + (can ? 'Redeem' : 'Locked') + '</button>' +
+          '</div>';
+        }).join('');
+      }
+
+      wrap.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-redeem]');
+        if (!btn) return;
+        var reward = REWARDS[Number(btn.getAttribute('data-redeem'))];
+        var points = TW.getPoints();
+        if (!reward || points < reward.cost) return;
+        TW.setPoints(points - reward.cost);
+        TW.toast('Redeemed: ' + reward.label + ' (preview)');
+        render();
+      });
+
+      document.getElementById('tw-reset').addEventListener('click', function () {
+        TW.setPoints(240);
+        TW.toast('Demo points reset to 240');
+        render();
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>

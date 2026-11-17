@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track an Order — Mellowluv | Test Website</title>
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/test-website/assets/css/test-site.css">
+</head>
+<body class="tw-body" data-page="tracking">
+  <div id="tw-header-mount"></div>
+
+  <main class="tw-page-main">
+    <section class="tw-page-head">
+      <div class="tw-container">
+        <span class="tw-deco tw-deco--l" data-tw-deco="branch" aria-hidden="true"></span>
+        <span class="tw-deco tw-deco--r" data-tw-deco="wild" aria-hidden="true"></span>
+        <h1>Track an Order</h1>
+        <p>Follow a preview order through each handmade stage. Sample data is provided so you can explore the flow.</p>
+      </div>
+    </section>
+
+    <section class="tw-container">
+      <form class="tw-track-form" id="tw-track-form">
+        <div class="tw-field">
+          <label for="tw-track-input">Order ID</label>
+          <input id="tw-track-input" type="text" placeholder="e.g. TW-SAMPLE-1042" autocomplete="off" required>
+        </div>
+        <button type="submit" class="tw-btn tw-btn--plum" style="align-self:end;height:43px;">Track</button>
+      </form>
+      <div class="tw-sample-line">
+        <button type="button" id="tw-sample">Try the sample order — TW-SAMPLE-1042</button>
+      </div>
+
+      <div class="tw-track-result" id="tw-track-result" aria-live="polite">
+        <div class="tw-track-empty">
+          <span class="tw-deco" data-tw-deco="bloom" aria-hidden="true"></span>
+          <p>Enter an order ID above, or try the sample order.</p>
+        </div>
+      </div>
+
+      <div class="tw-note-card tw-note-card--olive" style="margin-top:22px;">
+        <b>How tracking works on the live store:</b> once payment is verified, the studio updates each stage by hand — processing, dispatch, out for delivery and delivered. This preview uses the same stage design with local/sample data only.
+      </div>
+    </section>
+
+    <div class="tw-torn-wrap" aria-hidden="true">
+      <svg viewBox="0 0 1200 30" preserveAspectRatio="none">
+        <path d="M0 30V16c25-8 50-8 75 0s50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 25 4 30 6V30Z"/>
+      </svg>
+    </div>
+  </main>
+
+  <div id="tw-footer-mount"></div>
+
+  <script src="/test-website/assets/js/test-site.js"></script>
+  <script>
+    TW.ready(function () {
+      var result = document.getElementById('tw-track-result');
+      var input = document.getElementById('tw-track-input');
+
+      var SAMPLE = {
+        id: 'TW-SAMPLE-1042',
+        createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
+        current: 3,
+        sample: true,
+        subtotal: 420,
+        shipping: 70,
+        urgentFee: 0,
+        total: 490,
+        customer: { name: 'Sample Customer', city: 'Mumbai', state: 'Maharashtra' },
+        items: [{
+          id: 20,
+          name: 'Vintage jewellery jar',
+          price: 420,
+          qty: 1,
+          image: 'https://res.cloudinary.com/dupjhvgba/image/upload/v1781205692/mellowluv/zocupx8y2cw2wjmmagg5.jpg'
+        }]
+      };
+
+      function render(order) {
+        var placed = new Date(order.createdAt);
+        var stage = TW.STAGES[Math.min(order.current, TW.STAGES.length - 1)];
+        var items = order.items.map(function (item) {
+          return '<div class="tw-order-mini">' +
+            '<img src="' + TW.cld(item.image, 160) + '" alt="' + TW.esc(item.name) + '">' +
+            '<div><div class="tw-om-name">' + TW.esc(item.name) + ' × ' + item.qty + '</div></div>' +
+            '<span class="tw-om-price">' + TW.money(item.price * item.qty) + '</span>' +
+          '</div>';
+        }).join('');
+
+        result.innerHTML =
+          '<div class="tw-confirm-grid">' +
+            '<div class="tw-order-card">' +
+              '<div class="tw-order-head">' +
+                '<div><div class="tw-order-id">' + TW.esc(order.id) + '</div><div class="tw-order-date">Placed ' + placed.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) + '</div></div>' +
+                '<span class="tw-preview-badge" style="margin:0;">' + (order.sample ? 'Sample order' : 'Preview order') + '</span>' +
+              '</div>' +
+              '<p style="font-size:13px;color:#5b4850;margin-bottom:12px;">Current stage: <strong style="color:var(--tw-plum);">' + stage.t + '</strong></p>' +
+              items +
+              '<div class="tw-summary-list" style="margin-top:12px;">' +
+                '<div class="tw-summary-row"><span>Subtotal</span><span>' + TW.money(order.subtotal) + '</span></div>' +
+                '<div class="tw-summary-row"><span>Shipping</span><span>' + TW.money(order.shipping) + '</span></div>' +
+                (order.urgentFee ? '<div class="tw-summary-row"><span>Urgent making</span><span>' + TW.money(order.urgentFee) + '</span></div>' : '') +
+                '<div class="tw-summary-row tw-total"><span>Total</span><span>' + TW.money(order.total) + '</span></div>' +
+              '</div>' +
+              (order.sample
+                ? '<div class="tw-note-card" style="margin-top:12px;font-size:11px;"><b>Sample data:</b> this order is not real. It exists only to demonstrate the tracking stages.</div>'
+                : '<div class="tw-note-card tw-note-card--olive" style="margin-top:12px;font-size:11px;"><b>Saved in this browser:</b> this is your simulated preview order. No courier is involved.</div>') +
+            '</div>' +
+            '<aside class="tw-panel">' +
+              '<h3 style="font-size:22px;">Order progress</h3>' +
+              TW.timelineHTML(order.current) +
+              '<div style="display:grid;gap:8px;margin-top:16px;">' +
+                '<a class="tw-btn tw-btn--ghost tw-btn--block" href="/test-website/policies">Shipping policy</a>' +
+                '<a class="tw-btn tw-btn--plum tw-btn--block" href="/test-website/collection">Shop again</a>' +
+              '</div>' +
+            '</aside>' +
+          '</div>';
+      }
+
+      function empty(message) {
+        result.innerHTML =
+          '<div class="tw-track-empty">' +
+            '<span class="tw-deco" data-tw-deco="bloom" aria-hidden="true"></span>' +
+            '<p>' + TW.esc(message) + '</p>' +
+          '</div>';
+        TW.mountDecos();
+      }
+
+      function lookup(raw) {
+        var id = String(raw || '').trim();
+        if (!id) { empty('Please enter an order ID.'); return; }
+        if (id.toUpperCase() === SAMPLE.id) { render(SAMPLE); return; }
+        var found = TW.getOrders().filter(function (o) {
+          return o.id.toLowerCase() === id.toLowerCase();
+        })[0];
+        if (found) { render(found); return; }
+        empty('No preview order matches “' + id + '”. Check the ID or try the sample order above.');
+      }
+
+      document.getElementById('tw-track-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        lookup(input.value);
+      });
+
+      document.getElementById('tw-sample').addEventListener('click', function () {
+        input.value = SAMPLE.id;
+        render(SAMPLE);
+      });
+
+      var param = new URLSearchParams(window.location.search).get('order');
+      if (param) { input.value = param; lookup(param); }
+    });
+  </script>
+</body>
+</html>

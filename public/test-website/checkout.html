@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Mellowluv | Test Website</title>
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/test-website/assets/css/test-site.css">
+</head>
+<body class="tw-body" data-page="cart">
+  <div id="tw-header-mount"></div>
+
+  <main class="tw-page-main">
+    <section class="tw-page-head" style="padding-bottom:4px;">
+      <div class="tw-container">
+        <h1>Checkout</h1>
+        <p>A preview checkout. Your details stay in this browser and are never written to the live store.</p>
+      </div>
+    </section>
+
+    <section class="tw-container">
+      <div class="tw-stepper" aria-label="Checkout progress">
+        <div class="tw-step is-done"><span class="tw-step-dot">1</span>Bag</div>
+        <div class="tw-step is-active"><span class="tw-step-dot">2</span>Details</div>
+        <div class="tw-step"><span class="tw-step-dot">3</span>Payment</div>
+      </div>
+
+      <div id="tw-checkout-root">
+        <div class="tw-loading">Preparing checkout…</div>
+      </div>
+    </section>
+
+    <div class="tw-torn-wrap" aria-hidden="true">
+      <svg viewBox="0 0 1200 30" preserveAspectRatio="none">
+        <path d="M0 30V16c25-8 50-8 75 0s50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 25 4 30 6V30Z"/>
+      </svg>
+    </div>
+  </main>
+
+  <div id="tw-footer-mount"></div>
+
+  <script src="/test-website/assets/js/test-site.js"></script>
+  <script>
+    TW.ready(function () {
+      var root = document.getElementById('tw-checkout-root');
+      var cart = TW.getCart();
+
+      if (!cart.items.length) {
+        root.innerHTML =
+          '<div class="tw-panel tw-cart-empty">' +
+            '<span class="tw-deco" data-tw-deco="bloom" aria-hidden="true"></span>' +
+            '<h3>There is nothing to check out yet</h3>' +
+            '<p>Add a piece to your bag first, then come back here.</p>' +
+            '<a class="tw-btn tw-btn--plum" href="/test-website/collection">Explore the collection</a>' +
+          '</div>';
+        TW.mountDecos();
+        return;
+      }
+
+      var base = TW.totals();
+
+      function summaryHTML(urgent) {
+        var urgentFee = urgent ? TW.URGENT_FEE : 0;
+        var total = base.total + urgentFee;
+        return '' +
+          '<h3 style="font-size:22px;">Order summary</h3>' +
+          cart.items.map(function (item) {
+            var note = TW.getNote(item.id);
+            return '<div class="tw-order-mini">' +
+              '<img src="' + TW.cld(item.image, 160) + '" alt="' + TW.esc(item.name) + '">' +
+              '<div><div class="tw-om-name">' + TW.esc(item.name) + ' × ' + item.qty + '</div>' +
+              (note ? '<div class="tw-cart-item-note">Note: ' + TW.esc(note) + '</div>' : '') +
+              '</div>' +
+              '<span class="tw-om-price">' + TW.money(item.price * item.qty) + '</span>' +
+            '</div>';
+          }).join('') +
+          '<div class="tw-summary-list" style="margin-top:12px;">' +
+            '<div class="tw-summary-row"><span>Subtotal</span><span>' + TW.money(base.subtotal) + '</span></div>' +
+            '<div class="tw-summary-row"><span>Shipping</span><span>' + TW.money(base.shipping) + '</span></div>' +
+            (urgent ? '<div class="tw-summary-row"><span>Urgent making</span><span>' + TW.money(urgentFee) + '</span></div>' : '') +
+            '<div class="tw-summary-row tw-total"><span>Total</span><span>' + TW.money(total) + '</span></div>' +
+          '</div>' +
+          '<p class="tw-note" style="text-align:center;">Payment is simulated on the next step. No money is transferred.</p>';
+      }
+
+      root.innerHTML =
+        '<div class="tw-cart-layout">' +
+          '<form class="tw-panel tw-checkout-form" id="tw-checkout-form" novalidate>' +
+            '<h3 style="font-size:24px;margin-bottom:2px;">Your details</h3>' +
+            '<p class="tw-note" style="margin-top:0;">We only use these to demonstrate the flow.</p>' +
+
+            '<div class="tw-form-section-title">Contact</div>' +
+            '<div class="tw-form-grid">' +
+              '<div class="tw-field"><label for="tw-name">Full name *</label><input id="tw-name" name="name" type="text" required minlength="2" autocomplete="name" placeholder="Your full name"></div>' +
+              '<div class="tw-field"><label for="tw-phone">Phone number *</label><input id="tw-phone" name="phone" type="tel" required inputmode="numeric" pattern="[0-9]{10}" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number"></div>' +
+              '<div class="tw-field tw-field--full"><label for="tw-instagram">Instagram handle *</label><input id="tw-instagram" name="instagram" type="text" required placeholder="@yourhandle"></div>' +
+            '</div>' +
+
+            '<div class="tw-form-section-title">Delivery address</div>' +
+            '<div class="tw-form-grid">' +
+              '<div class="tw-field tw-field--full"><label for="tw-house">House / building / apartment *</label><input id="tw-house" name="house" type="text" required minlength="2" autocomplete="address-line1" placeholder="e.g. Flat 4, Sunshine Apartments"></div>' +
+              '<div class="tw-field tw-field--full"><label for="tw-street">Street / area / landmark *</label><input id="tw-street" name="street" type="text" required minlength="2" autocomplete="address-line2" placeholder="e.g. MG Road, near City Mall"></div>' +
+              '<div class="tw-field"><label for="tw-city">City *</label><input id="tw-city" name="city" type="text" required autocomplete="address-level2" placeholder="City"></div>' +
+              '<div class="tw-field"><label for="tw-state">State *</label><input id="tw-state" name="state" type="text" required autocomplete="address-level1" placeholder="State"></div>' +
+              '<div class="tw-field"><label for="tw-pincode">Pincode *</label><input id="tw-pincode" name="pincode" type="text" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="postal-code" placeholder="6-digit pincode"></div>' +
+            '</div>' +
+
+            '<div class="tw-form-section-title">Making preferences</div>' +
+            '<div class="tw-field"><label for="tw-urgency">Delivery speed</label>' +
+              '<select id="tw-urgency" name="urgency">' +
+                '<option value="normal">Normal — 10–15 days making + shipping — no extra charge</option>' +
+                '<option value="urgent">Urgent — priority making — ₹50 extra</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="tw-field"><label for="tw-aesthetics">Aesthetic preferences</label><textarea id="tw-aesthetics" name="aesthetics" rows="3" maxlength="400" placeholder="Colours, vibes, occasion, finish…"></textarea></div>' +
+            '<div class="tw-field"><label for="tw-extra">Extra note</label><textarea id="tw-extra" name="extra" rows="2" maxlength="300" placeholder="Anything else we should know?"></textarea></div>' +
+
+            '<label class="tw-check"><input type="checkbox" id="tw-updates" checked> <span>Send me Instagram DM updates about this preview (demonstration only).</span></label>' +
+
+            '<div class="tw-note-card tw-note-card--plum" style="font-size:11.5px;">' +
+              '<b>No COD.</b> The live store requires full prepayment by UPI. Shipping may be adjusted on Instagram if a large order needs it.' +
+            '</div>' +
+
+            '<button type="submit" class="tw-btn tw-btn--plum tw-btn--block" style="margin-top:2px;">Continue to Payment</button>' +
+          '</form>' +
+          '<aside class="tw-panel" id="tw-summary">' + summaryHTML(false) + '</aside>' +
+        '</div>';
+
+      var urgency = document.getElementById('tw-urgency');
+      urgency.addEventListener('change', function () {
+        document.getElementById('tw-summary').innerHTML = summaryHTML(this.value === 'urgent');
+      });
+
+      var phone = document.getElementById('tw-phone');
+      phone.addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); });
+      var pin = document.getElementById('tw-pincode');
+      pin.addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); });
+
+      document.getElementById('tw-checkout-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!this.checkValidity()) { this.reportValidity(); return; }
+
+        var urgent = urgency.value === 'urgent';
+        var urgentFee = urgent ? TW.URGENT_FEE : 0;
+        var customer = {
+          name: document.getElementById('tw-name').value.trim(),
+          phone: phone.value.trim(),
+          instagram: document.getElementById('tw-instagram').value.trim(),
+          house: document.getElementById('tw-house').value.trim(),
+          street: document.getElementById('tw-street').value.trim(),
+          city: document.getElementById('tw-city').value.trim(),
+          state: document.getElementById('tw-state').value.trim(),
+          pincode: pin.value.trim(),
+          aesthetics: document.getElementById('tw-aesthetics').value.trim(),
+          extra: document.getElementById('tw-extra').value.trim(),
+          updates: document.getElementById('tw-updates').checked
+        };
+        var notes = {};
+        cart.items.forEach(function (item) {
+          var n = TW.getNote(item.id);
+          if (n) notes[item.id] = n;
+        });
+
+        TW.saveDraft({
+          customer: customer,
+          items: cart.items.map(function (i) { return { id: i.id, name: i.name, price: i.price, image: i.image, qty: i.qty }; }),
+          notes: notes,
+          urgent: urgent,
+          urgentFee: urgentFee,
+          subtotal: base.subtotal,
+          shipping: base.shipping,
+          total: base.total + urgentFee,
+          createdAt: new Date().toISOString()
+        });
+
+        window.location.href = '/test-website/payment';
+      });
+    });
+  </script>
+</body>
+</html>

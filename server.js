@@ -24,6 +24,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
+// Isolated design-preview site. Served read-only; no API or DB changes.
+app.use('/test-website', express.static(path.join(__dirname, 'public', 'test-website'), { extensions: ['html'] }));
 
 // --- Helper ---
 async function getSetting(key) {

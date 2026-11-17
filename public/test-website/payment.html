@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Preview — Mellowluv | Test Website</title>
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/test-website/assets/css/test-site.css">
+</head>
+<body class="tw-body" data-page="cart">
+  <div id="tw-header-mount"></div>
+
+  <main class="tw-page-main">
+    <section class="tw-page-head" style="padding-bottom:4px;">
+      <div class="tw-container">
+        <h1>Payment Preview</h1>
+        <p>A safe demonstration of the UPI payment step. No QR is generated and no money can be transferred.</p>
+      </div>
+    </section>
+
+    <section class="tw-container">
+      <div class="tw-stepper" aria-label="Checkout progress">
+        <div class="tw-step is-done"><span class="tw-step-dot">1</span>Bag</div>
+        <div class="tw-step is-done"><span class="tw-step-dot">2</span>Details</div>
+        <div class="tw-step is-active"><span class="tw-step-dot">3</span>Payment</div>
+      </div>
+
+      <div id="tw-payment-root">
+        <div class="tw-loading">Preparing payment preview…</div>
+      </div>
+    </section>
+
+    <div class="tw-torn-wrap" aria-hidden="true">
+      <svg viewBox="0 0 1200 30" preserveAspectRatio="none">
+        <path d="M0 30V16c25-8 50-8 75 0s50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 25 4 30 6V30Z"/>
+      </svg>
+    </div>
+  </main>
+
+  <div id="tw-footer-mount"></div>
+
+  <script src="/test-website/assets/js/test-site.js"></script>
+  <script>
+    TW.ready(function () {
+      var root = document.getElementById('tw-payment-root');
+      var draft = TW.getDraft();
+
+      if (!draft || !draft.items || !draft.items.length) {
+        root.innerHTML =
+          '<div class="tw-panel tw-cart-empty">' +
+            '<span class="tw-deco" data-tw-deco="bloom" aria-hidden="true"></span>' +
+            '<h3>No checkout in progress</h3>' +
+            '<p>Your bag may be empty, or the preview checkout was already completed.</p>' +
+            '<a class="tw-btn tw-btn--plum" href="/test-website/collection">Explore the collection</a>' +
+            '<a class="tw-btn tw-btn--ghost" href="/test-website/tracking" style="margin-top:8px;">Track an order</a>' +
+          '</div>';
+        TW.mountDecos();
+        return;
+      }
+
+      var items = draft.items.map(function (item) {
+        var note = draft.notes && draft.notes[item.id];
+        return '<div class="tw-order-mini">' +
+          '<img src="' + TW.cld(item.image, 160) + '" alt="' + TW.esc(item.name) + '">' +
+          '<div><div class="tw-om-name">' + TW.esc(item.name) + ' × ' + item.qty + '</div>' +
+          (note ? '<div class="tw-cart-item-note">Note: ' + TW.esc(note) + '</div>' : '') +
+          '</div>' +
+          '<span class="tw-om-price">' + TW.money(item.price * item.qty) + '</span>' +
+        '</div>';
+      }).join('');
+
+      root.innerHTML =
+        '<div class="tw-pay-grid">' +
+          '<div class="tw-panel tw-pay-panel">' +
+            '<div class="tw-preview-badge">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true" style="width:12px;height:12px;"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"/></svg>' +
+              'Preview only' +
+            '</div>' +
+            '<div class="tw-pay-sub">Amount due</div>' +
+            '<div class="tw-pay-amount">' + TW.money(draft.total) + '</div>' +
+            '<div class="tw-qr-preview" aria-label="Preview only QR placeholder"></div>' +
+            '<p style="font-size:11.5px;color:#5b4850;max-width:34ch;margin:0 auto 4px;">' +
+              'This is a drawn placeholder, <strong>not</strong> a working QR code. The real UPI ID and QR are shown only on the live Mellowluv store after a real order is placed.' +
+            '</p>' +
+            '<div class="tw-preview-note">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>' +
+              '<span><strong>No payment destination is exposed here.</strong> Nothing in this preview can send money, and no real order is created.</span>' +
+            '</div>' +
+
+            '<label class="tw-upload" for="tw-screenshot">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>' +
+              '<span><strong>Choose a screenshot</strong> to preview it locally</span>' +
+              '<input type="file" id="tw-screenshot" accept="image/*">' +
+            '</label>' +
+            '<div class="tw-file-name" id="tw-file-name"></div>' +
+            '<div class="tw-upload-preview" id="tw-upload-preview"></div>' +
+
+            '<label class="tw-check" style="margin-top:14px;text-align:left;">' +
+              '<input type="checkbox" id="tw-ack">' +
+              '<span>I understand this is a <strong>design preview</strong> and no real payment is being made.</span>' +
+            '</label>' +
+
+            '<div class="tw-confirm-actions">' +
+              '<button type="button" class="tw-btn tw-btn--plum tw-btn--block" id="tw-confirm" disabled>Simulate Payment &amp; Confirm</button>' +
+              '<a class="tw-btn tw-btn--ghost tw-btn--block" href="/test-website/checkout">Back to details</a>' +
+            '</div>' +
+          '</div>' +
+
+          '<aside>' +
+            '<div class="tw-panel">' +
+              '<h3 style="font-size:22px;">Order summary</h3>' +
+              items +
+              '<div class="tw-summary-list" style="margin-top:12px;">' +
+                '<div class="tw-summary-row"><span>Subtotal</span><span>' + TW.money(draft.subtotal) + '</span></div>' +
+                '<div class="tw-summary-row"><span>Shipping</span><span>' + TW.money(draft.shipping) + '</span></div>' +
+                (draft.urgentFee ? '<div class="tw-summary-row"><span>Urgent making</span><span>' + TW.money(draft.urgentFee) + '</span></div>' : '') +
+                '<div class="tw-summary-row tw-total"><span>Total</span><span>' + TW.money(draft.total) + '</span></div>' +
+              '</div>' +
+              '<div class="tw-note-card tw-note-card--olive" style="margin-top:12px;font-size:11px;">' +
+                '<b>Deliver to:</b><br>' + TW.esc(draft.customer.name) + '<br>' +
+                TW.esc(draft.customer.house) + ', ' + TW.esc(draft.customer.street) + '<br>' +
+                TW.esc(draft.customer.city) + ', ' + TW.esc(draft.customer.state) + ' — ' + TW.esc(draft.customer.pincode) +
+              '</div>' +
+            '</div>' +
+            '<div class="tw-panel">' +
+              '<h3 style="font-size:22px;">Order timeline</h3>' +
+              TW.timelineHTML(1) +
+            '</div>' +
+          '</aside>' +
+        '</div>';
+
+      var ack = document.getElementById('tw-ack');
+      var confirm = document.getElementById('tw-confirm');
+      ack.addEventListener('change', function () { confirm.disabled = !this.checked; });
+
+      var fileInput = document.getElementById('tw-screenshot');
+      fileInput.addEventListener('change', function () {
+        var file = this.files && this.files[0];
+        var preview = document.getElementById('tw-upload-preview');
+        var name = document.getElementById('tw-file-name');
+        preview.innerHTML = '';
+        name.textContent = '';
+        if (!file) return;
+        if (!file.type.match(/^image\//)) {
+          TW.toast('Please choose an image file');
+          this.value = '';
+          return;
+        }
+        name.textContent = file.name + ' · ' + Math.round(file.size / 1024) + ' KB';
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          var img = document.createElement('img');
+          img.src = ev.target.result;
+          img.alt = 'Selected payment screenshot preview';
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      confirm.addEventListener('click', function () {
+        var order = {
+          id: TW.newOrderId(),
+          customer: draft.customer,
+          items: draft.items,
+          notes: draft.notes || {},
+          urgent: draft.urgent,
+          urgentFee: draft.urgentFee || 0,
+          subtotal: draft.subtotal,
+          shipping: draft.shipping,
+          total: draft.total,
+          createdAt: new Date().toISOString(),
+          current: 1,
+          simulated: true,
+          screenshotName: (fileInput.files && fileInput.files[0]) ? fileInput.files[0].name : ''
+        };
+        TW.saveOrder(order);
+        TW.clearCart();
+        TW.clearDraft();
+        TW.clearNotes();
+        window.location.href = '/test-website/confirmation?order=' + encodeURIComponent(order.id);
+      });
+    });
+  </script>
+</body>
+</html>

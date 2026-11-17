@@ -9,6 +9,10 @@
     { "src": "/api/(.*)", "dest": "api/index.js" },
     { "src": "/public/(.*)", "dest": "public/$1" },
     { "src": "/admin/(.*)", "dest": "admin/$1" },
+    { "src": "/test-website", "dest": "public/test-website/index.html" },
+    { "src": "/test-website/", "dest": "public/test-website/index.html" },
+    { "src": "/test-website/(collection|product|cart|checkout|payment|confirmation|tracking|loyalty|how-to-shop|policies|custom-orders)", "dest": "public/test-website/$1.html" },
+    { "src": "/test-website/(.*)", "dest": "public/test-website/$1" },
     { "src": "/(.*)", "dest": "api/index.js" }
   ],
   "headers": [

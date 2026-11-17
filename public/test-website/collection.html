@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop the Collection — Mellowluv | Test Website</title>
+  <link rel="icon" href="/public/icons/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/test-website/assets/css/test-site.css">
+</head>
+<body class="tw-body" data-page="collection">
+  <div id="tw-header-mount"></div>
+
+  <main class="tw-page-main">
+    <section class="tw-page-head">
+      <div class="tw-container">
+        <span class="tw-deco tw-deco--l" data-tw-deco="branch" aria-hidden="true"></span>
+        <span class="tw-deco tw-deco--r" data-tw-deco="sprig" aria-hidden="true"></span>
+        <h1>The Collection</h1>
+        <p>Handmade pieces, mystery jars and small-batch favourites. Everything here is read from the live store catalogue.</p>
+      </div>
+    </section>
+
+    <section class="tw-container">
+      <div class="tw-toolbar">
+        <div class="tw-chips" id="tw-chips" role="group" aria-label="Filter products">
+          <button type="button" class="tw-chip is-active" data-chip="all">All</button>
+          <button type="button" class="tw-chip" data-chip="new">New in</button>
+          <button type="button" class="tw-chip" data-chip="under500">Under ₹500</button>
+          <button type="button" class="tw-chip" data-chip="offers">Offers</button>
+          <button type="button" class="tw-chip" data-chip="jars">Jars</button>
+          <button type="button" class="tw-chip" data-chip="instock">In stock</button>
+          <button type="button" class="tw-chip" data-chip="wishlist">Wishlist</button>
+        </div>
+        <div class="tw-toolbar-right">
+          <label class="tw-searchbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
+            <span class="tw-sr">Search products</span>
+            <input id="tw-search" type="search" placeholder="Search pieces…" autocomplete="off">
+          </label>
+          <select class="tw-select" id="tw-sort" aria-label="Sort products">
+            <option value="featured">Featured</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
+        <p class="tw-toolbar-count" id="tw-result-count">Loading pieces…</p>
+        <button type="button" class="tw-chip" id="tw-clear" style="display:none;">Clear filters</button>
+      </div>
+
+      <div class="tw-grid" id="tw-collection-grid" aria-live="polite">
+        <div class="tw-loading" style="grid-column:1/-1;">Gathering pieces…</div>
+      </div>
+
+      <div class="tw-note-card tw-note-card--olive" style="margin-top:22px;">
+        <b>A note on availability:</b> stock counts shown here come from the live catalogue, but this preview never reserves or changes them. Orders placed on this Test Website stay in your browser only.
+      </div>
+    </section>
+
+    <div class="tw-torn-wrap" aria-hidden="true">
+      <svg viewBox="0 0 1200 30" preserveAspectRatio="none">
+        <path d="M0 30V16c25-8 50-8 75 0s50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 50 8 75 0 50-8 75 0 25 4 30 6V30Z"/>
+      </svg>
+    </div>
+  </main>
+
+  <div id="tw-footer-mount"></div>
+
+  <script src="/test-website/assets/js/test-site.js"></script>
+  <script>
+    TW.ready(function () {
+      var params = new URLSearchParams(window.location.search);
+      var state = {
+        chip: params.get('wishlist') === '1' ? 'wishlist' : 'all',
+        q: params.get('q') || '',
+        sort: 'featured'
+      };
+      var grid = document.getElementById('tw-collection-grid');
+      var countEl = document.getElementById('tw-result-count');
+      var search = document.getElementById('tw-search');
+      var sort = document.getElementById('tw-sort');
+      var clear = document.getElementById('tw-clear');
+      var all = [];
+
+      if (state.q) search.value = state.q;
+
+      function effective(p) { return p.offer_price || p.price; }
+
+      function apply() {
+        var list = all.slice();
+        if (state.chip === 'under500') list = list.filter(function (p) { return effective(p) <= 500; });
+        if (state.chip === 'offers') list = list.filter(function (p) { return !!p.offer_price; });
+        if (state.chip === 'jars') list = list.filter(function (p) { return /jar/i.test(p.name); });
+        if (state.chip === 'instock') list = list.filter(function (p) { return p.stock > 0; });
+        if (state.chip === 'new') list = list.filter(function (p) { return p.id >= 60; });
+        if (state.chip === 'wishlist') {
+          var wish = TW.getWish();
+          list = list.filter(function (p) { return wish.indexOf(p.id) > -1; });
+        }
+        if (state.q) {
+          var q = state.q.toLowerCase();
+          list = list.filter(function (p) {
+            return p.name.toLowerCase().indexOf(q) > -1 ||
+              (p.description || '').toLowerCase().indexOf(q) > -1;
+          });
+        }
+        if (state.sort === 'low') list.sort(function (a, b) { return effective(a) - effective(b); });
+        if (state.sort === 'high') list.sort(function (a, b) { return effective(b) - effective(a); });
+        if (state.sort === 'name') list.sort(function (a, b) { return a.name.localeCompare(b.name); });
+
+        countEl.textContent = list.length + (list.length === 1 ? ' piece' : ' pieces') +
+          (state.chip === 'wishlist' ? ' in your wishlist' : '');
+        clear.style.display = (state.q || state.chip !== 'all') ? '' : 'none';
+
+        var emptyText = state.chip === 'wishlist'
+          ? 'Your wishlist is empty. Tap the heart on a piece to save it.'
+          : 'No pieces match these filters. Try clearing them.';
+        TW.renderGrid(grid, list, emptyText);
+      }
+
+      document.getElementById('tw-chips').addEventListener('click', function (e) {
+        var chip = e.target.closest('[data-chip]');
+        if (!chip) return;
+        state.chip = chip.getAttribute('data-chip');
+        Array.prototype.forEach.call(document.querySelectorAll('#tw-chips .tw-chip'), function (c) {
+          c.classList.toggle('is-active', c === chip);
+        });
+        apply();
+      });
+
+      search.addEventListener('input', function () { state.q = this.value.trim(); apply(); });
+      sort.addEventListener('change', function () { state.sort = this.value; apply(); });
+      clear.addEventListener('click', function () {
+        state.q = '';
+        state.chip = 'all';
+        search.value = '';
+        Array.prototype.forEach.call(document.querySelectorAll('#tw-chips .tw-chip'), function (c) {
+          c.classList.toggle('is-active', c.getAttribute('data-chip') === 'all');
+        });
+        apply();
+      });
+
+      TW.products().then(function (list) {
+        all = list;
+        if (state.chip === 'wishlist') {
+          var wc = document.querySelector('[data-chip="wishlist"]');
+          if (wc) wc.classList.add('is-active');
+          var ac = document.querySelector('[data-chip="all"]');
+          if (ac) ac.classList.remove('is-active');
+        }
+        apply();
+        if (params.get('focus') === 'search') {
+          search.focus();
+          search.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
