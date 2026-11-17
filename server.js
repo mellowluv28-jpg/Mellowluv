@@ -66,6 +66,93 @@ function buildUpiLink(upiId, upiName, amount, orderId) {
 // A larger, higher-resolution QR scans far more reliably off a phone screen.
 const QR_OPTIONS = { width: 512, margin: 2, errorCorrectionLevel: 'M' };
 
+// --- Migrations ---
+// Serverless (Vercel) freezes the process as soon as a response is sent, so a
+// fire-and-forget migration can be killed halfway. Migrations must therefore be
+// awaited before API traffic. Each statement is isolated so one failure cannot
+// silently skip the rest (that is how the batches table could go missing).
+const MIGRATION_STATEMENTS = [
+  "ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT DEFAULT ''",
+  "ALTER TABLE orders ADD COLUMN IF NOT EXISTS state TEXT DEFAULT ''",
+  "ALTER TABLE orders ADD COLUMN IF NOT EXISTS whatsapp_optin BOOLEAN DEFAULT false",
+  "ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatched_at TIMESTAMP",
+  "ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_screenshot TEXT DEFAULT ''",
+  "ALTER TABLE orders ADD COLUMN IF NOT EXISTS screenshot_uploaded_at TIMESTAMP",
+  "CREATE TABLE IF NOT EXISTS admin_sessions (token TEXT PRIMARY KEY, username TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)",
+  "CREATE TABLE IF NOT EXISTS batches (id SERIAL PRIMARY KEY, name TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)",
+  "ALTER TABLE orders ADD COLUMN IF NOT EXISTS batch_id INTEGER REFERENCES batches(id) ON DELETE SET NULL",
+  "ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT DEFAULT '[]'",
+  "ALTER TABLE products ADD COLUMN IF NOT EXISTS videos TEXT DEFAULT '[]'",
+  "ALTER TABLE products ADD COLUMN IF NOT EXISTS offer_price REAL",
+  "ALTER TABLE products ADD COLUMN IF NOT EXISTS offer_note TEXT",
+  "ALTER TABLE products ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMPTZ"
+];
+
+const SCHEMA_VERSION = '2026-11-17-batches-v1';
+
+let migrationsPromise = null;
+let batchSchemaReady = false;
+
+async function runMigrations() {
+  // Fast path: a tiny version marker keeps warm/cold starts to one check
+  // instead of re-running every DDL statement on each serverless boot.
+  let alreadyApplied = false;
+  try {
+    await execute('CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+    const applied = await queryOne('SELECT version FROM schema_migrations WHERE version = $1', [SCHEMA_VERSION]);
+    alreadyApplied = !!applied;
+  } catch (e) {
+    console.error('Migration check warning:', e.message);
+  }
+
+  if (!alreadyApplied) {
+    let allOk = true;
+    for (const sql of MIGRATION_STATEMENTS) {
+      try {
+        await execute(sql);
+      } catch (e) {
+        allOk = false;
+        console.error('Migration warning:', e.message, '|', sql.slice(0, 70));
+      }
+    }
+    if (allOk) {
+      try {
+        await execute('INSERT INTO schema_migrations (version) VALUES ($1) ON CONFLICT (version) DO NOTHING', [SCHEMA_VERSION]);
+      } catch (e) {
+        console.error('Migration version warning:', e.message);
+      }
+      batchSchemaReady = true;
+    }
+  } else {
+    batchSchemaReady = true;
+  }
+}
+
+function ensureMigrations() {
+  if (!migrationsPromise) migrationsPromise = runMigrations();
+  return migrationsPromise;
+}
+
+// Batches are the newest feature; self-heal their schema on first use as well.
+async function ensureBatchSchema() {
+  if (batchSchemaReady) return;
+  let ok = true;
+  try {
+    await execute('CREATE TABLE IF NOT EXISTS batches (id SERIAL PRIMARY KEY, name TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+  } catch (e) { ok = false; console.error('Batch table migration warning:', e.message); }
+  try {
+    await execute('ALTER TABLE orders ADD COLUMN IF NOT EXISTS batch_id INTEGER REFERENCES batches(id) ON DELETE SET NULL');
+  } catch (e) { ok = false; console.error('Order batch_id migration warning:', e.message); }
+  if (ok) batchSchemaReady = true;
+}
+
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    try { await ensureMigrations(); } catch (e) { console.error('Migration error:', e.message); }
+  }
+  next();
+});
+
 // --- SSE ---
 app.get('/api/admin/events', async (req, res) => {
   const auth = req.headers.authorization || '';
@@ -548,7 +635,23 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
   if (req.query.dispatch_status === 'new') { sql += " AND (tracking_status IS NULL OR tracking_status != 'dispatched')"; }
   if (req.query.dispatch_status === 'previous') { sql += " AND tracking_status = 'dispatched'"; }
   if (req.query.phone) { sql += ` AND phone = $${pIdx++}`; params.push(req.query.phone); }
-  if (req.query.search) { sql += ` AND (customer_name ILIKE $${pIdx} OR phone ILIKE $${pIdx+1})`; const s = '%' + req.query.search + '%'; params.push(s, s); pIdx += 2; }
+  if (req.query.search && typeof req.query.search === 'string' && req.query.search.trim()) {
+    const term = req.query.search.trim();
+    const s = '%' + term + '%';
+    const clauses = [];
+    for (const col of ['customer_name', 'phone', 'product_name', 'instagram', 'pincode', 'city', 'tracking_id']) {
+      clauses.push(`${col} ILIKE $${pIdx}`);
+      params.push(s);
+      pIdx += 1;
+    }
+    const idPart = term.replace(/^#/, '');
+    if (/^\d+$/.test(idPart)) {
+      clauses.push(`id = $${pIdx}`);
+      params.push(parseInt(idPart, 10));
+      pIdx += 1;
+    }
+    sql += ` AND (${clauses.join(' OR ')})`;
+  }
   if (req.query.category) { sql += ` AND (LOWER(product_category) = LOWER($${pIdx++}) OR product_category = 'mixed')`; params.push(req.query.category); }
   sql += ' ORDER BY created_at DESC';
   const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -583,7 +686,7 @@ app.get('/api/admin/verify', adminAuth, async (req, res) => {
 });
 
 app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
-  const { status, payment_status } = req.body;
+  const { status, payment_status, quantity } = req.body;
   const order = await queryOne('SELECT * FROM orders WHERE id = $1', [req.params.id]);
   if (!order) return res.status(404).json({ error: 'Order not found' });
   const updates = [];
@@ -591,6 +694,17 @@ app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
   let pIdx = 1;
   if (status) { updates.push(`status = $${pIdx++}`); params.push(status); }
   if (payment_status) { updates.push(`payment_status = $${pIdx++}`); params.push(payment_status); }
+  if (quantity !== undefined && quantity !== null && quantity !== '') {
+    const qty = parseInt(quantity, 10);
+    if (!Number.isFinite(qty) || qty < 1 || qty > 10000) {
+      return res.status(400).json({ error: 'Quantity must be between 1 and 10000' });
+    }
+    updates.push(`quantity = $${pIdx++}`);
+    params.push(qty);
+    // Deliberately leave `total` untouched: the stored row does not retain
+    // offer prices, urgency fees or loyalty discounts, so recomputing money
+    // here could charge the customer the wrong amount.
+  }
   if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
   params.push(req.params.id);
   await execute(`UPDATE orders SET ${updates.join(', ')} WHERE id = $${pIdx}`, params);
@@ -843,8 +957,14 @@ app.get('/api/public/shipping', async (req, res) => {
 
 // --- Batches ---
 app.get('/api/admin/batches', adminAuth, async (req, res) => {
-  const batches = await query('SELECT b.*, (SELECT COUNT(*) FROM orders o WHERE o.batch_id = b.id) as order_count FROM batches b ORDER BY b.created_at DESC');
-  res.json(batches);
+  try {
+    await ensureBatchSchema();
+    const batches = await query('SELECT b.*, (SELECT COUNT(*) FROM orders o WHERE o.batch_id = b.id) as order_count FROM batches b ORDER BY b.created_at DESC');
+    res.json(batches);
+  } catch (e) {
+    console.error('Load batches error:', e.message);
+    res.status(500).json({ error: 'Could not load batches', detail: e.message });
+  }
 });
 
 app.post('/api/admin/batches', adminAuth, async (req, res) => {
@@ -901,18 +1021,9 @@ app.use((err, req, res, next) => {
 });
 
 // --- Start ---
-async function runMigrations() {
-  try {
-    await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT DEFAULT ''");
-    await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS state TEXT DEFAULT ''");
-    await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS whatsapp_optin BOOLEAN DEFAULT false");
-    await execute("CREATE TABLE IF NOT EXISTS admin_sessions (token TEXT PRIMARY KEY, username TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-    await execute("CREATE TABLE IF NOT EXISTS batches (id SERIAL PRIMARY KEY, name TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-    await execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS batch_id INTEGER REFERENCES batches(id) ON DELETE SET NULL");
-  } catch (e) { console.error('Migration warning:', e.message); }
-}
-
-runMigrations().catch(e => console.error('Migration failed:', e.message || e));
+// Warm up migrations at boot. On serverless the middleware above awaits the
+// same promise on the first API request, so it always finishes before use.
+ensureMigrations().catch(e => console.error('Migration failed:', e.message || e));
 
 async function start() {
   app.listen(PORT, () => {

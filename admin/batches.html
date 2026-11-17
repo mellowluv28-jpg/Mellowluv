@@ -116,11 +116,13 @@
     let currentPage = 1;
 
     async function loadBatches() {
+      const pills = document.getElementById('batch-pills');
       try {
         const res = await fetch('/api/admin/batches', { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.status === 401) { localStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
-        const batches = await res.json();
-        const pills = document.getElementById('batch-pills');
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error((data && (data.detail || data.error)) || ('Server error ' + res.status));
+        const batches = Array.isArray(data) ? data : [];
         let html = '<button class="btn-batch" onclick="createBatch()">+ New Batch</button>';
         for (const b of batches) {
           const active = selectedBatchId === b.id ? 'active' : '';
@@ -135,8 +137,9 @@
         } else if (batches.length === 0) {
           document.getElementById('batch-orders-area').innerHTML = '<div class="empty-state"><div style="font-size:48px;">📦📦</div><p>Create a batch to start organizing your orders.</p></div>';
         }
-      } catch {
-        document.getElementById('batch-pills').innerHTML = '<span style="color:#c62828;">Failed to load batches</span>';
+      } catch (e) {
+        const msg = String((e && e.message) || e || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        pills.innerHTML = '<span style="color:#c62828;">Failed to load batches' + (msg ? ' — ' + msg : '') + '</span> <button class="btn-batch" onclick="loadBatches()">Retry</button>';
       }
     }
 
@@ -253,7 +256,14 @@
                 <div><strong>🏙️ City:</strong> ${o.city || '-'}</div>
                 <div><strong>🗺️ State:</strong> ${o.state || '-'}</div>
                 <div><strong>📮 Pincode:</strong> ${o.pincode}</div>
-                <div><strong>🔢 Quantity:</strong> ${o.quantity || 1}</div>
+                <div><strong>🔢 Quantity:</strong>
+                  <span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;margin-left:6px;">
+                    <button type="button" onclick="stepBatchOrderQty(${o.id}, -1)" aria-label="Decrease quantity" style="width:30px;height:30px;border:2px solid #f5d6de;border-radius:10px;background:#fff;color:#d4808a;font-size:15px;font-weight:700;cursor:pointer;padding:0;">−</button>
+                    <input type="number" id="batch-order-qty-${o.id}" value="${o.quantity || 1}" min="1" style="width:58px;padding:3px 6px;border:2px solid #f5d6de;border-radius:8px;font-size:13px;text-align:center;">
+                    <button type="button" onclick="stepBatchOrderQty(${o.id}, 1)" aria-label="Increase quantity" style="width:30px;height:30px;border:2px solid #f5d6de;border-radius:10px;background:#fff;color:#d4808a;font-size:15px;font-weight:700;cursor:pointer;padding:0;">+</button>
+                  </span>
+                  <button type="button" onclick="saveBatchOrderQty(${o.id})" title="Updates quantity only; the amount is not recalculated" style="padding:4px 10px;border:none;border-radius:8px;background:#e8a0b4;color:white;font-size:11px;font-weight:600;cursor:pointer;">Save qty</button>
+                </div>
                 <div><strong>⏰ Urgency:</strong> ${o.urgency || 'N/A'}</div>
                 <div><strong>🎨 Aesthetics:</strong> ${o.aesthetics || 'N/A'}</div>
                 <div><strong>💬 Note:</strong> ${o.extra_note || 'N/A'}</div>
@@ -300,6 +310,29 @@
     }
 
     function batchGoPage(p) { currentPage = p; loadBatchOrders(); }
+
+    function stepBatchOrderQty(orderId, delta) {
+      const el = document.getElementById('batch-order-qty-' + orderId);
+      if (!el) return;
+      el.value = Math.max(1, (parseInt(el.value, 10) || 1) + delta);
+    }
+
+    async function saveBatchOrderQty(orderId) {
+      const el = document.getElementById('batch-order-qty-' + orderId);
+      const quantity = parseInt(el.value, 10);
+      if (!quantity || quantity < 1) { alert('Quantity must be at least 1'); return; }
+      const res = await fetch('/api/admin/orders/' + orderId, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        alert((data && data.error) || 'Could not update quantity');
+        return;
+      }
+      loadBatchOrders();
+    }
 
     async function batchUpdateStatus(orderId, field, value) {
       await fetch('/api/admin/orders/' + orderId, {

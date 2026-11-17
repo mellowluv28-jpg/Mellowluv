@@ -56,6 +56,14 @@
     .order-detail.show { display: block; }
     .order-detail strong { color: #5a4a4a; }
     .toggle-detail { cursor: pointer; color: #e8a0b4; font-size: 12px; font-weight: 600; transition: transform 0.3s; display: inline-block; }
+    /* Quantity stepper: explicit +/- so it works on mobile */
+    .qty-stepper { display: flex; align-items: stretch; gap: 8px; }
+    .qty-stepper button { width: 46px; flex: 0 0 46px; border: 2px solid #f5d6de; border-radius: 12px; background: #fff; color: #d4808a; font-size: 20px; font-weight: 700; cursor: pointer; }
+    .qty-stepper button:hover { background: #fce4ec; border-color: #e8a0b4; }
+    .qty-stepper input { flex: 1; text-align: center; }
+    .order-detail .qty-stepper { display: inline-flex; gap: 4px; vertical-align: middle; margin-left: 6px; }
+    .order-detail .qty-stepper button { width: 30px; height: 30px; flex: 0 0 30px; font-size: 15px; padding: 0; }
+    .order-detail .qty-stepper input { width: 58px; flex: 0 0 58px; padding: 3px 6px !important; font-size: 13px !important; }
 
     @media (max-width: 768px) {
       .admin-layout { flex-direction: column; }
@@ -145,7 +153,7 @@
           <option value="paid">Paid</option>
           <option value="verified">Verified</option>
         </select>
-        <input type="text" id="search-input" placeholder="Search name or phone..." style="border:2px solid #ffe4e1; border-radius:10px; padding:8px 12px;">
+        <input type="text" id="search-input" placeholder="Search name, phone, order ID or product..." style="border:2px solid #ffe4e1; border-radius:10px; padding:8px 12px;">
         <button id="delete-selected-btn" onclick="deleteSelected()" style="display:none;padding:8px 16px;border:none;border-radius:10px;background:#c62828;color:white;font-weight:600;font-size:12px;cursor:pointer;">🗑️ Delete Selected</button>
       </div>
       <div class="orders-table-wrap">
@@ -224,7 +232,11 @@
           </div>
           <div class="form-group">
             <label>Quantity</label>
-            <input type="number" id="mo-quantity" value="1" min="1">
+            <div class="qty-stepper">
+              <button type="button" onclick="stepMoQty(-1)" aria-label="Decrease quantity">−</button>
+              <input type="number" id="mo-quantity" value="1" min="1">
+              <button type="button" onclick="stepMoQty(1)" aria-label="Increase quantity">+</button>
+            </div>
           </div>
         </div>
         <div class="form-row">
@@ -278,8 +290,10 @@
     }
 
     let currentPage = 1;
+    let loadSeq = 0;
 
     async function loadOrders() {
+      const seq = ++loadSeq;
       const activeTab = document.querySelector('.dispatch-tab.active');
       const dispatchFilter = activeTab ? activeTab.dataset.dispatch || 'new' : 'new';
       const categoryFilter = document.getElementById('category-filter').value;
@@ -297,6 +311,7 @@
         const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.status === 401) { localStorage.removeItem('admin_token'); window.location.href = '/admin/login.html'; return; }
         const data = await res.json();
+        if (seq !== loadSeq) return; // a newer request (typing) already took over
         if (!res.ok) { tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#c62828;">API error: ' + (data.error || res.status) + '</td></tr>'; paginator.innerHTML = ''; return; }
         const orders = data.orders || [];
         const total = data.total || 0;
@@ -355,7 +370,14 @@
                 <div><strong>🏙️ City:</strong> ${o.city || '-'}</div>
                 <div><strong>🗺️ State:</strong> ${o.state || '-'}</div>
                 <div><strong>📮 Pincode:</strong> ${o.pincode}</div>
-                <div><strong>🔢 Quantity:</strong> ${o.quantity || 1}</div>
+                <div><strong>🔢 Quantity:</strong>
+                  <span class="qty-stepper">
+                    <button type="button" onclick="stepOrderQty(${o.id}, -1)" aria-label="Decrease quantity">−</button>
+                    <input type="number" id="order-qty-${o.id}" value="${o.quantity || 1}" min="1">
+                    <button type="button" onclick="stepOrderQty(${o.id}, 1)" aria-label="Increase quantity">+</button>
+                  </span>
+                  <button type="button" onclick="saveOrderQty(${o.id})" title="Updates quantity only; the amount is not recalculated" style="padding:4px 10px;border:none;border-radius:8px;background:#e8a0b4;color:white;font-size:11px;font-weight:600;cursor:pointer;">Save qty</button>
+                </div>
                 <div><strong>⏰ Urgency:</strong> ${o.urgency || 'N/A'}</div>
                 <div><strong>🎨 Aesthetics:</strong> ${o.aesthetics || 'N/A'}</div>
                 <div><strong>💬 Note:</strong> ${o.extra_note || 'N/A'}</div>
@@ -396,10 +418,46 @@
     }
 
     function goPage(p) { currentPage = p; loadOrders(); }
+
+    function stepMoQty(delta) {
+      const el = document.getElementById('mo-quantity');
+      if (!el) return;
+      el.value = Math.max(1, (parseInt(el.value, 10) || 1) + delta);
+    }
+
+    function stepOrderQty(orderId, delta) {
+      const el = document.getElementById('order-qty-' + orderId);
+      if (!el) return;
+      el.value = Math.max(1, (parseInt(el.value, 10) || 1) + delta);
+    }
+
+    async function saveOrderQty(orderId) {
+      const el = document.getElementById('order-qty-' + orderId);
+      const quantity = parseInt(el.value, 10);
+      if (!quantity || quantity < 1) { adminToast('Quantity must be at least 1', 'error'); return; }
+      const res = await fetch('/api/admin/orders/' + orderId, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity })
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) { adminToast((data && data.error) || 'Could not update quantity', 'error'); return; }
+      adminToast('Quantity updated ✅', 'success');
+      loadOrders();
+    }
+
     document.getElementById('category-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
     document.getElementById('status-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
     document.getElementById('payment-filter').addEventListener('change', () => { currentPage = 1; loadOrders(); });
-    document.getElementById('search-input').addEventListener('input', () => { currentPage = 1; loadOrders(); });
+    let searchTimer = null;
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => { currentPage = 1; loadOrders(); }, 300);
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); clearTimeout(searchTimer); currentPage = 1; loadOrders(); }
+    });
 
     async function updateStatus(orderId, field, value) {
       await fetch('/api/admin/orders/' + orderId, {

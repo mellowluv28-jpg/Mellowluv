@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS products (
   category TEXT NOT NULL CHECK(category IN ('thrift', 'jewelry')),
   stock INTEGER NOT NULL DEFAULT 0,
   image TEXT,
+  images TEXT DEFAULT '[]',
+  videos TEXT DEFAULT '[]',
   offer_price REAL,
   offer_note TEXT,
   scheduled_at TIMESTAMPTZ,
@@ -15,15 +17,34 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- Run these separately on existing databases:
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT DEFAULT '[]';
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS videos TEXT DEFAULT '[]';
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_screenshot TEXT DEFAULT '';
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS screenshot_uploaded_at TIMESTAMPTZ;
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS whatsapp_optin BOOLEAN DEFAULT false;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT DEFAULT '';
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS state TEXT DEFAULT '';
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatched_at TIMESTAMPTZ;
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  token TEXT PRIMARY KEY,
+  username TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS batches (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
   customer_name TEXT NOT NULL,
   address TEXT NOT NULL,
   pincode TEXT NOT NULL,
+  city TEXT DEFAULT '',
+  state TEXT DEFAULT '',
   urgency TEXT DEFAULT '',
   aesthetics TEXT DEFAULT '',
   extra_note TEXT DEFAULT '',
@@ -40,10 +61,12 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_status TEXT DEFAULT 'unpaid' CHECK(payment_status IN ('unpaid', 'paid', 'verified')),
   tracking_status TEXT DEFAULT 'unverified',
   tracking_id TEXT,
+  dispatched_at TIMESTAMPTZ,
   extra_charge INTEGER DEFAULT 0,
   discount_applied INTEGER DEFAULT 0,
   is_prebook INTEGER DEFAULT 0,
   loyalty_award INTEGER DEFAULT 1,
+  batch_id INTEGER REFERENCES batches(id) ON DELETE SET NULL,
   payment_screenshot TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

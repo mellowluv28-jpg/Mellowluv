@@ -49,6 +49,11 @@
     .inv-card .inv-category { font-size: 11px; text-transform: uppercase; color: #d4a0a0; letter-spacing: 1px; }
     .inv-card .inv-stock { font-size: 12px; margin: 6px 0; color: #b0878f; }
     .inv-card .inv-actions { display: flex; gap: 8px; margin-top: 8px; }
+    /* Quantity stepper: explicit +/- so stock can always be raised on mobile */
+    .qty-stepper { display: flex; align-items: stretch; gap: 8px; }
+    .qty-stepper button { width: 48px; flex: 0 0 48px; border: 2px solid #f5d6de; border-radius: 12px; background: #fff; color: #d4808a; font-size: 22px; font-weight: 700; cursor: pointer; }
+    .qty-stepper button:hover { background: #fce4ec; border-color: #e8a0b4; }
+    .qty-stepper input { flex: 1; text-align: center; }
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(90,74,74,0.3); align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
     .modal.show { display: flex; }
     .modal-content {
@@ -129,7 +134,11 @@
         </div>
         <div class="form-group">
           <label>📦 Stock *</label>
-          <input type="number" id="prod-stock" value="1" min="0">
+          <div class="qty-stepper">
+            <button type="button" onclick="stepStock(-1)" aria-label="Decrease stock">−</button>
+            <input type="number" id="prod-stock" value="1" min="0">
+            <button type="button" onclick="stepStock(1)" aria-label="Increase stock">+</button>
+          </div>
         </div>
         <div class="form-group">
           <label>🖼️ Cover Image</label>
@@ -177,6 +186,14 @@
       if (!btn) return;
       btn.disabled = loading;
       btn.textContent = loading ? (btn.dataset.loading || 'Loading...') : btn.dataset.original || btn.textContent;
+    }
+
+    // Explicit +/- controls (mobile number inputs have no usable spinner).
+    function stepStock(delta) {
+      const el = document.getElementById('prod-stock');
+      if (!el) return;
+      const next = Math.max(0, (parseInt(el.value, 10) || 0) + delta);
+      el.value = next;
     }
 
     async function loadInventory() {
@@ -336,6 +353,9 @@
         const existingUrls = [];
         previews.querySelectorAll('img').forEach(img => existingUrls.push(img.src));
         formData.append('existing_images', JSON.stringify(existingUrls));
+        // Preserve already-uploaded videos when editing; the server rebuilds the list
+        // from this field, so omitting it silently wiped videos on every edit.
+        formData.append('existing_videos', document.getElementById('existing-videos-json').value || '[]');
       }
 
       try {
